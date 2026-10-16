@@ -42,7 +42,12 @@ export default defineEventHandler(async (event) => {
 		: undefined
 
 	const readable = viewerId
-		? or(eq(notes.userId, viewerId), ne(notes.visibility, noteVisibility.private))
+		? query.visibility?.length
+			? or(
+					eq(notes.userId, viewerId),
+					and(ne(notes.userId, viewerId), ne(notes.visibility, noteVisibility.private)),
+				)
+			: eq(notes.userId, viewerId)
 		: eq(notes.visibility, noteVisibility.public)
 
 	const statusFilter = query.pinnedOnly

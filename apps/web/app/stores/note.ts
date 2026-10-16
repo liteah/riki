@@ -97,9 +97,14 @@ export const useNoteStore = defineStore('note', () => {
 	const visibleNotes = computed(() => {
 		const q = keyword.value.trim().toLowerCase()
 		const scope = activeFilter.value
+		const viewerId = session.value.data?.user?.id ?? null
 		return notes.value
 			.filter((note) => {
 				if (note.status === noteStatus.archived) return false
+				if (viewerId && note.userId && note.userId !== viewerId) {
+					if (!scope.visibility?.length) return false
+					if (note.visibility === noteVisibility.private) return false
+				}
 				if (q && !note.content.toLowerCase().includes(q)) return false
 				if (scope.spaceId !== undefined && note.spaceId !== scope.spaceId) return false
 				if (scope.tagIds?.length) {
