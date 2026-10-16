@@ -98,7 +98,10 @@ export const useNoteStore = defineStore('note', () => {
 		const q = keyword.value.trim().toLowerCase()
 		const scope = activeFilter.value
 		const viewerId = session.value.data?.user?.id ?? null
-		return notes.value
+		const merged = new Map<string, NoteListItem>()
+		for (const note of notes.value) merged.set(note.id, note)
+		for (const note of foreignNotes.value) merged.set(note.id, note)
+		return [...merged.values()]
 			.filter((note) => {
 				if (note.status === noteStatus.archived) return false
 				if (viewerId && note.userId && note.userId !== viewerId) {
@@ -126,6 +129,7 @@ export const useNoteStore = defineStore('note', () => {
 	}
 
 	const notes = skipHydrate(useLocalStorage<NoteListItem[]>(localKeys.notes, []))
+	const foreignNotes = ref<NoteListItem[]>([])
 	const outbox = skipHydrate(useLocalStorage<OutboxRow[]>(localKeys.outbox, []))
 	const nextCursor = skipHydrate(useLocalStorage<string | null>(localKeys.notesCursor, null))
 	const pending = ref(false)
@@ -159,9 +163,9 @@ export const useNoteStore = defineStore('note', () => {
 			.filter((id): id is string => id !== undefined)
 	}
 
-	function mergeIncoming(incoming: NoteListItem[]) {
-		if (!incoming.length) return
-		const byId = new Map(notes.value.map((note) => [note.id, note]))
+	function mergeRows(rows: NoteListItem[], incoming: NoteListItem[]) {
+		if (!incoming.length) return rows
+		const byId = new Map(rows.map((note) => [note.id, note]))
 		let changed = false
 		for (const note of incoming) {
 			if (note.status === noteStatus.archived) continue
@@ -170,8 +174,21 @@ export const useNoteStore = defineStore('note', () => {
 			byId.set(note.id, note)
 			changed = true
 		}
-		if (!changed) return
-		notes.value = [...byId.values()].sort(compareNotes)
+		if (!changed) return rows
+		return [...byId.values()].sort(compareNotes)
+	}
+
+	function mergeIncoming(incoming: NoteListItem[]) {
+		if (!incoming.length) return
+		const viewerId = session.value.data?.user?.id ?? null
+		const mine: NoteListItem[] = []
+		const foreign: NoteListItem[] = []
+		for (const note of incoming) {
+			if (!viewerId || (note.userId && note.userId !== viewerId)) foreign.push(note)
+			else mine.push(note)
+		}
+		if (mine.length) notes.value = mergeRows(notes.value, mine)
+		if (foreign.length) foreignNotes.value = mergeRows(foreignNotes.value, foreign)
 	}
 
 	// A space rename never bumps the notes' updatedAt, so cached names would go
@@ -340,6 +357,10 @@ export const useNoteStore = defineStore('note', () => {
 			] as const,
 		(key, previous) => {
 			if (import.meta.server || key === previous) return
+			foreignNotes.value = []
+			if (typeof key === 'string' && key !== 'anonymous') {
+				notes.value = notes.value.filter((note) => !note.userId || note.userId === key)
+			}
 			nextCursor.value = null
 			paginationDone.value = false
 			void loadMore()
