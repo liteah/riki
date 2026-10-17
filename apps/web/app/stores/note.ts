@@ -135,6 +135,7 @@ export const useNoteStore = defineStore('note', () => {
 	const pending = ref(false)
 	const syncing = ref(false)
 	const paginationDone = ref(false)
+	const loaded = ref(false)
 	let started = false
 
 	const unsyncedIds = computed(() => {
@@ -347,6 +348,7 @@ export const useNoteStore = defineStore('note', () => {
 			nextCursor.value = data.nextCursor
 			if (data.nextCursor === null) paginationDone.value = true
 		}
+		loaded.value = true
 		pending.value = false
 	}
 
@@ -478,6 +480,7 @@ export const useNoteStore = defineStore('note', () => {
 		pinnedOnly,
 		activeFilter,
 		pending,
+		loaded,
 		syncing,
 		resetFilter,
 		loadMore,

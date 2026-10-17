@@ -72,6 +72,7 @@ export const iconsTheme = {
 	pin: 'ph:push-pin',
 	pinOff: 'ph:push-pin-slash',
 	archive: 'ph:archive',
+	note: 'ph:notebook',
 	settings: 'ph:gear-fine',
 	globe: 'ph:globe-simple',
 	appearance: 'ph:palette',

@@ -30,7 +30,7 @@ watch(() => visibleNotes.value[0]?.id, scrollToTop)
 <template>
 	<NoteSidebar v-model:open="sidebarOpen" />
 	<div class="relative flex min-w-0 flex-1 flex-col items-center overflow-hidden">
-		<div class="flex w-full max-w-3xl items-center gap-1">
+		<div v-if="visibleNotes.length" class="flex w-full items-center gap-1">
 			<UButton
 				class="lg:hidden"
 				:icon="appConfig.ui.icons.menu"
@@ -42,6 +42,7 @@ watch(() => visibleNotes.value[0]?.id, scrollToTop)
 			<NoteSearchInput class="min-w-0 flex-1" />
 		</div>
 		<UScrollArea
+			v-if="visibleNotes.length"
 			ref="scrollArea"
 			v-slot="{ item }"
 			:items="visibleNotes"
@@ -51,6 +52,10 @@ watch(() => visibleNotes.value[0]?.id, scrollToTop)
 		>
 			<NoteListItem :note="item" @select="openComposer" />
 		</UScrollArea>
+		<NoteEmptyState
+			v-else-if="noteStore.loaded"
+			class="flex min-h-0 flex-1 items-center justify-center p-6"
+		/>
 		<div class="absolute bottom-4 left-1/2 z-50 -translate-x-1/2 sm:hidden">
 			<NoteNewButton />
 		</div>

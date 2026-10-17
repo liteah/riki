@@ -40,6 +40,8 @@
 	},
 	"note": {
 		"newNote": "新筆記",
+		"emptyTitle": "仲未有筆記",
+		"emptyDescription": "開第一則筆記，開始記錄你嘅諗法",
 		"editorPlaceholder": "寫啲嘢…",
 		"send": "傳送",
 		"save": "儲存",

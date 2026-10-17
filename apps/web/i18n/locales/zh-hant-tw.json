@@ -40,6 +40,8 @@
 	},
 	"note": {
 		"newNote": "新筆記",
+		"emptyTitle": "還沒有筆記",
+		"emptyDescription": "建立第一則筆記，開始記錄想法",
 		"editorPlaceholder": "寫點什麼…",
 		"send": "傳送",
 		"save": "儲存",

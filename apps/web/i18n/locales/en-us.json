@@ -40,6 +40,8 @@
 	},
 	"note": {
 		"newNote": "New note",
+		"emptyTitle": "No notes yet",
+		"emptyDescription": "Create your first note to start capturing ideas.",
 		"editorPlaceholder": "Write something...",
 		"send": "Send",
 		"save": "Save",
