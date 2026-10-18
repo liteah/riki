@@ -63,8 +63,22 @@
 		"unpin": "取消置顶",
 		"archive": "归档",
 		"unarchive": "取消归档",
+		"addToSpace": "添加到空间",
+		"removeFromSpace": "移出空间",
+		"later": "稍后看",
+		"unlater": "取消稍后",
+		"laterEmptyTitle": "没有稍后看的笔记",
+		"archivedEmptyTitle": "没有已归档的笔记",
+		"exploreEmptyTitle": "暂时没有可探索的公开笔记",
 		"unsynced": "未同步",
 		"draft": "有未保存的修改"
+	},
+	"inbox": {
+		"unassigned": "未归类",
+		"later": "稍后看",
+		"review": "回顾",
+		"archived": "已归档",
+		"explore": "探索"
 	},
 	"space": {
 		"label": "空间",

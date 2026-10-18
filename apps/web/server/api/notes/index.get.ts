@@ -14,6 +14,7 @@ import {
 	like,
 	lt,
 	ne,
+	notExists,
 	or,
 	sql,
 } from 'drizzle-orm'
@@ -41,18 +42,29 @@ export default defineEventHandler(async (event) => {
 			)
 		: undefined
 
-	const readable = viewerId
-		? query.visibility?.length
-			? or(
-					eq(notes.userId, viewerId),
-					and(ne(notes.userId, viewerId), ne(notes.visibility, noteVisibility.private)),
-				)
-			: eq(notes.userId, viewerId)
-		: eq(notes.visibility, noteVisibility.public)
+	const readable = query.explore
+		? viewerId
+			? and(ne(notes.userId, viewerId), eq(notes.visibility, noteVisibility.public))
+			: eq(notes.visibility, noteVisibility.public)
+		: viewerId
+			? query.visibility?.length
+				? or(
+						eq(notes.userId, viewerId),
+						and(ne(notes.userId, viewerId), ne(notes.visibility, noteVisibility.private)),
+					)
+				: eq(notes.userId, viewerId)
+			: eq(notes.visibility, noteVisibility.public)
+
+	// The untagged inbox feed is the triage queue: a deferred note belongs to the later feed.
+	const defaultStatuses = query.noTags
+		? [noteStatus.normal, noteStatus.pinned]
+		: [noteStatus.normal, noteStatus.later, noteStatus.pinned]
 
 	const statusFilter = query.pinnedOnly
 		? eq(notes.status, noteStatus.pinned)
-		: inArray(notes.status, [noteStatus.normal, noteStatus.pinned])
+		: query.status
+			? eq(notes.status, query.status)
+			: inArray(notes.status, defaultStatuses)
 
 	const rows = await db
 		.select({
@@ -71,6 +83,14 @@ export default defineEventHandler(async (event) => {
 				statusFilter,
 				eq(user.banned, false),
 				query.noSpace ? isNull(notes.spaceId) : undefined,
+				query.noTags
+					? notExists(
+							db
+								.select({ one: sql`1` })
+								.from(noteTags)
+								.where(eq(noteTags.noteId, notes.id)),
+						)
+					: undefined,
 				query.spaceId ? eq(notes.spaceId, query.spaceId) : undefined,
 				query.visibility?.length ? inArray(notes.visibility, query.visibility) : undefined,
 				query.q ? like(notes.content, `%${query.q.replace(/[%_]/g, '')}%`) : undefined,

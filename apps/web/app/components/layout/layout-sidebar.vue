@@ -17,7 +17,7 @@ withDefaults(
 	<USidebar rail v-model:open="open" :collapsible="collapsible">
 		<template #title v-if="!isTauri">
 			<UButton
-				v-if="$route.path !== '/'"
+				v-if="$route.path.startsWith('/settings')"
 				:label="$t('header.backToApp')"
 				:icon="appConfig.ui.icons.arrowLeft"
 				to="/"

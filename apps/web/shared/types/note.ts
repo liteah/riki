@@ -40,11 +40,20 @@ export const noteVisibilityValues = Object.values(noteVisibility) as [
 
 export const noteStatus = {
 	normal: 'normal',
+	later: 'later',
 	pinned: 'pinned',
 	archived: 'archived',
 } as const
 export type NoteStatus = (typeof noteStatus)[keyof typeof noteStatus]
 export const noteStatusValues = Object.values(noteStatus) as [NoteStatus, ...NoteStatus[]]
+
+export const noteFeed = {
+	unassigned: 'unassigned',
+	later: 'later',
+	archived: 'archived',
+	explore: 'explore',
+} as const
+export type NoteFeed = (typeof noteFeed)[keyof typeof noteFeed]
 
 export const createNoteBodySchema = z.object({
 	id: z.string().trim().min(1).max(64).optional(),
@@ -102,8 +111,11 @@ const noteCursorSchema = z
 export const listNotesQuerySchema = z.object({
 	limit: z.coerce.number().int().min(1).max(50).default(20),
 	cursor: noteCursorSchema.optional(),
-	spaceId: z.string().trim().min(1).optional(),
+	status: z.enum(noteStatus).optional(),
 	noSpace: z.coerce.boolean().optional(),
+	noTags: z.coerce.boolean().optional(),
+	explore: z.coerce.boolean().optional(),
+	spaceId: z.string().trim().min(1).optional(),
 	tagIds: z.preprocess(
 		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
 		z.array(z.string().trim().min(1)).optional(),

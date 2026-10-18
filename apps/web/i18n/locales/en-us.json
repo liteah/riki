@@ -63,8 +63,22 @@
 		"unpin": "Unpin",
 		"archive": "Archive",
 		"unarchive": "Unarchive",
+		"addToSpace": "Add to space",
+		"removeFromSpace": "Remove from space",
+		"later": "Later",
+		"unlater": "Remove from later",
+		"laterEmptyTitle": "No notes saved for later",
+		"archivedEmptyTitle": "No archived notes",
+		"exploreEmptyTitle": "No public notes to explore yet",
 		"unsynced": "Not synced",
 		"draft": "Unsaved changes"
+	},
+	"inbox": {
+		"unassigned": "Unassigned",
+		"later": "Later",
+		"review": "Review",
+		"archived": "Archived",
+		"explore": "Explore"
 	},
 	"space": {
 		"label": "Spaces",

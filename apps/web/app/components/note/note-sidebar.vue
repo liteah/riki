@@ -213,7 +213,7 @@ function openDeleteTag(tag: TagListItem) {
 const builtinItems = computed<NavigationMenuItem[]>(() => [
 	{
 		label: t('note.library'),
-		icon: appConfig.ui.icons.file,
+		icon: appConfig.ui.icons.note,
 		active: isActive('library', 'library'),
 		'data-item-kind': 'library',
 		'data-item-id': 'library',
@@ -302,6 +302,7 @@ const items = computed<NavigationMenuItem[][]>(() => {
 			<div @contextmenu.capture="onContextMenu">
 				<UNavigationMenu
 					orientation="vertical"
+					color="neutral"
 					:items="items"
 					:ui="{ link: 'overflow-hidden has-data-[state=open]:before:bg-elevated/50' }"
 				>

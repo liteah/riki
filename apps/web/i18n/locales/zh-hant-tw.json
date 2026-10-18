@@ -63,8 +63,22 @@
 		"unpin": "取消置頂",
 		"archive": "封存",
 		"unarchive": "取消封存",
+		"addToSpace": "加入空間",
+		"removeFromSpace": "移出空間",
+		"later": "稍後看",
+		"unlater": "取消稍後看",
+		"laterEmptyTitle": "沒有稍後看的筆記",
+		"archivedEmptyTitle": "沒有已封存的筆記",
+		"exploreEmptyTitle": "暫時沒有可探索的公開筆記",
 		"unsynced": "未同步",
 		"draft": "有未儲存的修改"
+	},
+	"inbox": {
+		"unassigned": "未歸類",
+		"later": "稍後看",
+		"review": "回顧",
+		"archived": "已封存",
+		"explore": "探索"
 	},
 	"space": {
 		"label": "空間",
