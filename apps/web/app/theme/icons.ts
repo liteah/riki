@@ -81,6 +81,7 @@ export const iconsTheme = {
 	language: 'ph:translate',
 	timeZone: 'ph:clock-user',
 	timeFormat: 'ph:clock-countdown',
+	calendar: 'ph:calendar-blank',
 
 	// auth
 	user: 'ph:user-circle',

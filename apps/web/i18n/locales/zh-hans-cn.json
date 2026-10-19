@@ -4,6 +4,7 @@
 		"continue": "继续",
 		"close": "关闭",
 		"cancel": "取消",
+		"back": "返回",
 		"edit": "编辑",
 		"delete": "删除",
 		"save": "保存",
@@ -80,6 +81,14 @@
 		"archived": "已归档",
 		"explore": "探索"
 	},
+	"profile": {
+		"label": "个人资料",
+		"publicNotes": "公开笔记",
+		"joinedAt": "加入于 {date}",
+		"emptyTitle": "还没有公开笔记",
+		"notFoundTitle": "找不到用户",
+		"notFoundDescription": "此账号不存在或已被移除。"
+	},
 	"space": {
 		"label": "空间",
 		"new": "新增空间",
@@ -95,7 +104,7 @@
 	"tag": {
 		"label": "标签",
 		"deleteTitle": "删除标签",
-		"deleteDescription": "删除标签 {name}？笔记内容不受影响,只会移除这个标签。"
+		"deleteDescription": "删除标签 {name}？笔记内容不受影响，仅移除该标签。"
 	},
 	"settings": {
 		"label": "设置",

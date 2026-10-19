@@ -23,6 +23,15 @@ async function handleSignOut() {
 }
 
 const baseItems = computed<DropdownMenuItem[]>(() => [
+	...(user.value?.username
+		? [
+				{
+					label: t('profile.label'),
+					icon: appConfig.ui.icons.user,
+					to: `/user/${user.value.username}`,
+				},
+			]
+		: []),
 	{
 		label: t('settings.label'),
 		icon: appConfig.ui.icons.settings,

@@ -4,6 +4,7 @@
 		"continue": "Continue",
 		"close": "Close",
 		"cancel": "Cancel",
+		"back": "Back",
 		"edit": "Edit",
 		"delete": "Delete",
 		"save": "Save",
@@ -79,6 +80,14 @@
 		"review": "Review",
 		"archived": "Archived",
 		"explore": "Explore"
+	},
+	"profile": {
+		"label": "Profile",
+		"publicNotes": "Public notes",
+		"joinedAt": "Joined {date}",
+		"emptyTitle": "No public notes yet",
+		"notFoundTitle": "User not found",
+		"notFoundDescription": "This account does not exist or has been removed."
 	},
 	"space": {
 		"label": "Spaces",

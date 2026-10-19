@@ -116,6 +116,7 @@ export const listNotesQuerySchema = z.object({
 	noTags: z.coerce.boolean().optional(),
 	explore: z.coerce.boolean().optional(),
 	spaceId: z.string().trim().min(1).optional(),
+	username: z.string().trim().min(1).optional(),
 	tagIds: z.preprocess(
 		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
 		z.array(z.string().trim().min(1)).optional(),

@@ -92,6 +92,7 @@ export default defineEventHandler(async (event) => {
 						)
 					: undefined,
 				query.spaceId ? eq(notes.spaceId, query.spaceId) : undefined,
+				query.username ? eq(user.username, query.username.toLowerCase()) : undefined,
 				query.visibility?.length ? inArray(notes.visibility, query.visibility) : undefined,
 				query.q ? like(notes.content, `%${query.q.replace(/[%_]/g, '')}%`) : undefined,
 				query.tagIds?.length

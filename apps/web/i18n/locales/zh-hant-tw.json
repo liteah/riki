@@ -4,6 +4,7 @@
 		"continue": "繼續",
 		"close": "關閉",
 		"cancel": "取消",
+		"back": "返回",
 		"edit": "編輯",
 		"delete": "刪除",
 		"save": "儲存",
@@ -80,6 +81,14 @@
 		"archived": "已封存",
 		"explore": "探索"
 	},
+	"profile": {
+		"label": "個人檔案",
+		"publicNotes": "公開筆記",
+		"joinedAt": "註冊於 {date}",
+		"emptyTitle": "還沒有公開筆記",
+		"notFoundTitle": "找不到使用者",
+		"notFoundDescription": "此帳號不存在或已被移除。"
+	},
 	"space": {
 		"label": "空間",
 		"new": "新增空間",
@@ -95,7 +104,7 @@
 	"tag": {
 		"label": "標籤",
 		"deleteTitle": "刪除標籤",
-		"deleteDescription": "刪除標籤 {name}？筆記內容不受影響,只會移除這個標籤。"
+		"deleteDescription": "刪除標籤 {name}？筆記內容不受影響，僅移除該標籤。"
 	},
 	"settings": {
 		"label": "設定",
