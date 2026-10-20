@@ -38,6 +38,8 @@
 		"username": "Username",
 		"name": "Name",
 		"password": "Password",
+		"currentPassword": "Current password",
+		"newPassword": "New password",
 		"orContinueWith": "or"
 	},
 	"note": {
@@ -112,7 +114,8 @@
 		"label": "Settings",
 		"followSystem": "Follow system",
 		"account": {
-			"label": "Account"
+			"label": "Account",
+			"security": "Security"
 		},
 		"preferences": {
 			"label": "Preferences",

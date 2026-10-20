@@ -86,6 +86,7 @@ export const iconsTheme = {
 	calendar: 'ph:calendar-blank',
 
 	// auth
+	mail: 'ph:envelope-simple',
 	user: 'ph:user-circle',
 	signIn: 'ph:sign-in',
 	signOut: 'ph:sign-out',

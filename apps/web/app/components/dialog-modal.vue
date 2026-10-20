@@ -12,15 +12,22 @@ const emit = defineEmits<{
 	close: []
 }>()
 
+const open = defineModel<boolean>('open', { default: false })
+
+function close() {
+	open.value = false
+	emit('close')
+}
+
 async function handleConfirm() {
 	const confirmed = await props.onConfirm?.()
 	if (confirmed === false) return
-	emit('close')
+	close()
 }
 </script>
 
 <template>
-	<UModal :close="{ onClick: () => emit('close') }">
+	<UModal v-model:open="open" :close="{ onClick: close }">
 		<template #header>
 			<div class="flex w-full flex-col items-center text-center">
 				<div
@@ -42,13 +49,7 @@ async function handleConfirm() {
 		</template>
 
 		<template #footer>
-			<UButton
-				:label="$t('common.cancel')"
-				color="neutral"
-				variant="subtle"
-				block
-				@click="emit('close')"
-			/>
+			<UButton :label="$t('common.cancel')" color="neutral" variant="subtle" block @click="close" />
 			<UButton
 				:label="confirmLabel ?? $t('common.confirm')"
 				block

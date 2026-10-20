@@ -38,6 +38,8 @@
 		"username": "使用者名稱",
 		"name": "暱稱",
 		"password": "密碼",
+		"currentPassword": "目前密碼",
+		"newPassword": "新密碼",
 		"orContinueWith": "或"
 	},
 	"note": {
@@ -112,7 +114,8 @@
 		"label": "設定",
 		"followSystem": "跟隨系統",
 		"account": {
-			"label": "帳號"
+			"label": "帳號",
+			"security": "安全性"
 		},
 		"preferences": {
 			"label": "偏好設定",

@@ -44,7 +44,7 @@ defineExpose({ edit })
 		v-on="own ? { click: edit } : {}"
 	>
 		<template #icon>
-			<UAvatar :src="user.image ?? undefined" :alt="user.name" />
+			<UAvatar :src="user.image ?? undefined" :alt="user.name" size="xs" />
 		</template>
 	</SettingsItem>
 	<div v-else class="flex flex-col items-center gap-2 py-4 text-center">

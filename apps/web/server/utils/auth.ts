@@ -13,5 +13,11 @@ export const auth = betterAuth({
 		schema: authSchema,
 	}),
 	emailAndPassword: { enabled: true },
+	user: {
+		changeEmail: {
+			enabled: true,
+			updateEmailWithoutVerification: true,
+		},
+	},
 	plugins: [admin(), apiKey(), username()],
 })
