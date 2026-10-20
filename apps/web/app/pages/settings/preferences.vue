@@ -1,4 +1,6 @@
 <script setup lang="ts">
+definePageMeta({ title: 'settings.preferences.label' })
+
 const settingsStore = useSettingsStore()
 const { state } = storeToRefs(settingsStore)
 

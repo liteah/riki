@@ -10,6 +10,7 @@ export default defineAppConfig({
 			signUp: '/auth/sign-up',
 		},
 		settings: {
+			account: '/settings/account',
 			preferences: '/settings/preferences',
 		},
 	},
