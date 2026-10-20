@@ -1,3 +1,5 @@
+import { skipHydrate } from 'pinia'
+import { localKeys } from '~/utils/local-cache'
 import { sidebarKind } from '#shared/types/view'
 import type { SidebarEntry, SidebarKind, SidebarTarget, View, ViewFilter } from '#shared/types/view'
 import type { SpaceListItem } from '#shared/types/space'
@@ -15,6 +17,7 @@ export const useViewStore = defineStore('view', () => {
 	const pinned = ref<SidebarEntry[]>([])
 	const loaded = ref(false)
 	const pending = ref(false)
+	const sidebarOpen = skipHydrate(useLocalStorage(localKeys.sidebarOpen, true))
 
 	const spaceStore = useSpaceStore()
 	const tagStore = useTagStore()
@@ -166,6 +169,7 @@ export const useViewStore = defineStore('view', () => {
 		views,
 		pinned,
 		target,
+		sidebarOpen,
 		loaded,
 		pending,
 		baseFilter,

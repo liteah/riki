@@ -85,7 +85,7 @@ function closeOnEmpty() {
 </script>
 
 <template>
-	<div class="flex items-center gap-1 px-2 py-1">
+	<div class="flex items-center gap-1">
 		<UInput
 			v-if="expanded"
 			:model-value="noteStore.keyword"

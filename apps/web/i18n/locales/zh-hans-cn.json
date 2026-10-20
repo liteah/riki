@@ -20,9 +20,9 @@
 		"noMatch": "未找到匹配项"
 	},
 	"header": {
-		"backToApp": "返回应用",
 		"openAppMenu": "打开应用菜单",
-		"openSidebar": "打开侧边栏"
+		"openSidebar": "打开侧边栏",
+		"closeSidebar": "关闭侧边栏"
 	},
 	"auth": {
 		"signIn": "登录",
@@ -40,9 +40,9 @@
 		"orContinueWith": "或"
 	},
 	"note": {
-		"newNote": "新筆記",
-		"emptyTitle": "還沒有筆記",
-		"emptyDescription": "建立第一則筆記，開始記錄想法",
+		"newNote": "新笔记",
+		"emptyTitle": "暂无笔记",
+		"emptyDescription": "新建第一篇笔记，开始记录想法",
 		"editorPlaceholder": "写点什么…",
 		"send": "发送",
 		"save": "保存",

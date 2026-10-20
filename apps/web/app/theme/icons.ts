@@ -12,6 +12,7 @@ export const iconsTheme = {
 	chevronLeft: 'ph:caret-left',
 	chevronRight: 'ph:caret-right',
 	chevronUp: 'ph:caret-up',
+	chevronUpDown: 'ph:caret-up-down',
 	close: 'ph:x',
 	copy: 'ph:copy',
 	copyCheck: 'ph:check-circle',
@@ -49,7 +50,6 @@ export const iconsTheme = {
 
 	// editor
 	heading: 'ph:text-h',
-	draft: 'ph:note-pencil',
 	bold: 'ph:text-b',
 	italic: 'ph:text-italic',
 	bulletList: 'ph:list-bullets',
@@ -66,7 +66,9 @@ export const iconsTheme = {
 	image: 'ph:image',
 	waveform: 'ph:waveform',
 	mapPin: 'ph:map-pin',
+	notePen: 'ph:note-pencil',
 	inbox: 'ph:tray',
+	sidebar: 'ph:sidebar-simple',
 	link: 'ph:link',
 	trash: 'ph:trash-simple',
 	pin: 'ph:push-pin',

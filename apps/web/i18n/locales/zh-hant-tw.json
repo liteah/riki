@@ -20,9 +20,9 @@
 		"noMatch": "未找到符合項目"
 	},
 	"header": {
-		"backToApp": "返回應用程式",
 		"openAppMenu": "開啟應用程式選單",
-		"openSidebar": "開啟側邊欄"
+		"openSidebar": "開啟側邊欄",
+		"closeSidebar": "關閉側邊欄"
 	},
 	"auth": {
 		"signIn": "登入",

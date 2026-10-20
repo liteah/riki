@@ -69,18 +69,28 @@ export const uiTheme = {
 	sidebar: {
 		slots: {
 			root: '[--sidebar-width-icon:3rem]',
+			container: 'border-0',
+			inner: 'divide-y-0',
 			body: [
-				'p-2 pr-0 gap-2',
+				'p-1.5 pt-0.5 pr-0 gap-2',
 				'group-data-[state=collapsed]/sidebar:overflow-x-hidden',
 				'scrollbar-gutter-stable scrollbar-thumb-transparent hover:scrollbar-thumb-[var(--ui-border)]',
 			],
-			header: 'px-2',
+			header: 'px-1.5 pt-1 gap-0.5',
 			title: 'text-sm font-normal',
 		},
 	},
 	navigationMenu: {
 		slots: {
+			link: 'overflow-hidden has-data-[state=open]:before:bg-elevated/50',
 			separator: 'px-0 hidden',
+		},
+		variants: {
+			orientation: {
+				vertical: {
+					link: 'px-2',
+				},
+			},
 		},
 	},
 	modal: {

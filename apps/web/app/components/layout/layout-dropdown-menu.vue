@@ -71,10 +71,14 @@ const dropdownMenuItems = computed<DropdownMenuItem[][]>(() => {
 			v-if="user"
 			:avatar="{ src: user.image ?? undefined, alt: user.name }"
 			:label="user.name"
+			:trailing-icon="appConfig.ui.icons.chevronUpDown"
 			color="neutral"
 			variant="ghost"
-			class="max-w-36"
-			:ui="{ label: 'truncate' }"
+			class="w-full overflow-hidden px-2"
+			:ui="{
+				label: 'truncate',
+				trailingIcon: 'text-dimmed',
+			}"
 		/>
 		<UTooltip v-else :text="$t('header.openAppMenu')">
 			<UButton :icon="appConfig.ui.icons.menu" color="neutral" variant="ghost" />

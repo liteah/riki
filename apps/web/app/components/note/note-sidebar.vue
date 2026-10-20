@@ -33,7 +33,6 @@ const confirmDialog = overlay.create(LazyDialogModal)
 const signedIn = computed(() => Boolean(session.value.data?.user?.id))
 
 const contextItem = ref<{ kind: SidebarKind; id: string } | null>(null)
-const open = defineModel<boolean>('open', { default: true })
 const contextPinnedId = computed(() =>
 	contextItem.value
 		? (viewStore.pinned.find(
@@ -59,7 +58,10 @@ const targetActions = computed<ContextMenuItem[][]>(() =>
 		: [],
 )
 
+const route = useRoute()
+
 function isActive(kind: SidebarTarget['kind'], id: string) {
+	if (route.path !== '/' && route.path !== '/inbox') return false
 	return target.value?.kind === kind && target.value.id === id
 }
 
@@ -297,15 +299,10 @@ const items = computed<NavigationMenuItem[][]>(() => {
 </script>
 
 <template>
-	<LayoutSidebar v-model:open="open">
+	<LayoutSidebar>
 		<UContextMenu :items="targetActions" :disabled="!contextPinnedId">
 			<div @contextmenu.capture="onContextMenu">
-				<UNavigationMenu
-					orientation="vertical"
-					color="neutral"
-					:items="items"
-					:ui="{ link: 'overflow-hidden has-data-[state=open]:before:bg-elevated/50' }"
-				>
+				<UNavigationMenu orientation="vertical" color="neutral" :items="items">
 					<template
 						v-for="entry in pinnedTargets"
 						:key="entry.entry.id"

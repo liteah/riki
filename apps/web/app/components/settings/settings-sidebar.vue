@@ -13,11 +13,7 @@ const items = computed<NavigationMenuItem[]>(() => [
 </script>
 
 <template>
-	<LayoutSidebar collapsible="icon">
-		<UNavigationMenu
-			:items="items"
-			orientation="vertical"
-			:ui="{ link: 'p-1.5 overflow-hidden' }"
-		/>
+	<LayoutSidebar>
+		<UNavigationMenu :items="items" orientation="vertical" />
 	</LayoutSidebar>
 </template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const appConfig = useAppConfig()
 
-const open = useLocalStorage('sidebar-open', true)
+const { sidebarOpen } = storeToRefs(useViewStore())
 
 defineProps<{
 	title?: string
@@ -14,13 +14,29 @@ defineProps<{
 		class="grid h-(--ui-header-height) w-full shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2 px-2"
 	>
 		<div class="flex min-w-0 items-center gap-1">
-			<UButton
-				:icon="appConfig.ui.icons.sidebar"
-				color="neutral"
-				variant="ghost"
-				:aria-label="$t('header.openSidebar')"
-				@click="open = !open"
-			/>
+			<template v-if="!sidebarOpen">
+				<UTooltip v-if="$route.path.startsWith('/settings')" :text="$t('common.back')">
+					<UButton
+						:icon="appConfig.ui.icons.arrowLeft"
+						color="neutral"
+						variant="ghost"
+						:aria-label="$t('common.back')"
+						to="/"
+					/>
+				</UTooltip>
+				<UTooltip :text="$t('header.openSidebar')">
+					<UButton
+						:icon="appConfig.ui.icons.sidebar"
+						color="neutral"
+						variant="ghost"
+						:aria-label="$t('header.openSidebar')"
+						@click="sidebarOpen = true"
+					/>
+				</UTooltip>
+				<div class="max-lg:hidden">
+					<NoteNewButton variant="ghost" />
+				</div>
+			</template>
 			<slot name="left" />
 		</div>
 		<div class="flex min-w-0 items-center justify-center gap-2">

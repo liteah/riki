@@ -20,9 +20,9 @@
 		"noMatch": "No matches found"
 	},
 	"header": {
-		"backToApp": "Back to app",
 		"openAppMenu": "Open app menu",
-		"openSidebar": "Open sidebar"
+		"openSidebar": "Open sidebar",
+		"closeSidebar": "Close sidebar"
 	},
 	"auth": {
 		"signIn": "Sign in",
