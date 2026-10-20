@@ -115,7 +115,10 @@
 		"followSystem": "跟系統",
 		"account": {
 			"label": "帳號",
-			"security": "安全"
+			"security": "安全",
+			"danger": "危險區域",
+			"deleteAccount": "刪除帳號",
+			"deleteDescription": "呢個會永久刪除帳號同所有筆記，無法復原。"
 		},
 		"preferences": {
 			"label": "偏好設定",

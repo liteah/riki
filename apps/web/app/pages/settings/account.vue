@@ -13,9 +13,11 @@ const user = computed(() => session.value.data?.user ?? null)
 
 const emailOpen = ref(false)
 const passwordOpen = ref(false)
+const deleteOpen = ref(false)
 const email = ref('')
 const currentPassword = ref('')
 const newPassword = ref('')
+const confirmPassword = ref('')
 const saving = ref(false)
 
 const emailSchema = z.email(t('common.invalid', { label: t('auth.email') }))
@@ -37,6 +39,10 @@ watch(passwordOpen, (open) => {
 	if (!open) return
 	currentPassword.value = ''
 	newPassword.value = ''
+})
+
+watch(deleteOpen, (open) => {
+	if (open) confirmPassword.value = ''
 })
 
 async function saveEmail() {
@@ -94,6 +100,33 @@ async function savePassword() {
 			return false
 		}
 		toast.add({ title: t('common.saved'), color: 'success' })
+	} finally {
+		saving.value = false
+	}
+}
+
+async function deleteAccount() {
+	if (saving.value) return false
+	if (!confirmPassword.value) {
+		toast.add({
+			title: t('common.actionFailed', { action: t('common.delete') }),
+			description: t('common.required', { label: t('auth.password') }),
+			color: 'error',
+		})
+		return false
+	}
+	saving.value = true
+	try {
+		const { error } = await authClient.deleteUser({ password: confirmPassword.value })
+		if (error) {
+			toast.add({
+				title: t('common.actionFailed', { action: t('common.delete') }),
+				description: error.message,
+				color: 'error',
+			})
+			return false
+		}
+		await navigateTo(appConfig.routes.auth.signIn)
 	} finally {
 		saving.value = false
 	}
@@ -162,6 +195,32 @@ async function savePassword() {
 					/>
 				</UFormField>
 			</div>
+		</DialogModal>
+		<SettingsItemGroup :label="$t('settings.account.danger')">
+			<SettingsItem
+				:icon="appConfig.ui.icons.trash"
+				:label="$t('settings.account.deleteAccount')"
+				@click="deleteOpen = true"
+			/>
+		</SettingsItemGroup>
+		<DialogModal
+			v-model:open="deleteOpen"
+			destructive
+			:title="$t('settings.account.deleteAccount')"
+			:description="$t('settings.account.deleteDescription')"
+			:icon="appConfig.ui.icons.caution"
+			:confirm-label="$t('common.delete')"
+			:on-confirm="deleteAccount"
+		>
+			<UFormField :label="$t('auth.password')">
+				<UInput
+					v-model="confirmPassword"
+					type="password"
+					:placeholder="$t('common.placeholder', { label: $t('auth.password') })"
+					autocomplete="current-password"
+					class="w-full"
+				/>
+			</UFormField>
 		</DialogModal>
 	</template>
 </template>

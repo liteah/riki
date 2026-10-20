@@ -18,6 +18,7 @@ export const auth = betterAuth({
 			enabled: true,
 			updateEmailWithoutVerification: true,
 		},
+		deleteUser: { enabled: true },
 	},
 	plugins: [admin(), apiKey(), username()],
 })

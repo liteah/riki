@@ -30,7 +30,7 @@
 		"signOut": "登出",
 		"signUp": "註冊",
 		"signInTitle": "歡迎回來",
-		"signInDescription": "請登入你的帳號以繼續",
+		"signInDescription": "請登入帳號以繼續",
 		"signUpTitle": "建立帳號",
 		"signUpDescription": "建立新帳號以開始使用",
 		"identifier": "電子郵件或使用者名稱",
@@ -115,7 +115,10 @@
 		"followSystem": "跟隨系統",
 		"account": {
 			"label": "帳號",
-			"security": "安全性"
+			"security": "安全性",
+			"danger": "危險區域",
+			"deleteAccount": "刪除帳號",
+			"deleteDescription": "這將永久刪除該帳號及所有筆記，無法復原。"
 		},
 		"preferences": {
 			"label": "偏好設定",

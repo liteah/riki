@@ -115,7 +115,10 @@
 		"followSystem": "Follow system",
 		"account": {
 			"label": "Account",
-			"security": "Security"
+			"security": "Security",
+			"danger": "Danger zone",
+			"deleteAccount": "Delete account",
+			"deleteDescription": "This permanently deletes your account and all notes. This cannot be undone."
 		},
 		"preferences": {
 			"label": "Preferences",

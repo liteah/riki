@@ -30,7 +30,7 @@
 		"signOut": "退出登录",
 		"signUp": "注册",
 		"signInTitle": "欢迎回来",
-		"signInDescription": "请登录你的账号以继续",
+		"signInDescription": "请登录账号以继续",
 		"signUpTitle": "创建账号",
 		"signUpDescription": "创建新账号以开始使用",
 		"identifier": "邮箱或用户名",
@@ -115,7 +115,10 @@
 		"followSystem": "跟随系统",
 		"account": {
 			"label": "账号",
-			"security": "安全"
+			"security": "安全",
+			"danger": "危险区域",
+			"deleteAccount": "删除账号",
+			"deleteDescription": "这将永久删除该账号及所有笔记，无法恢复。"
 		},
 		"preferences": {
 			"label": "偏好设置",
