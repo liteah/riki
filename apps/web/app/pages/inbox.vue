@@ -11,8 +11,6 @@ const { visibleNotes } = storeToRefs(noteStore)
 const appConfig = useAppConfig()
 const { t } = useI18n()
 
-const sidebarOpen = ref(true)
-
 const scrollArea = useTemplateRef<{
 	$el: HTMLElement
 	virtualizer?: { scrollToIndex: (index: number, options?: Record<string, unknown>) => void }
@@ -151,26 +149,17 @@ onMounted(() => {
 </script>
 
 <template>
-	<NoteSidebar v-model:open="sidebarOpen" />
+	<NoteSidebar />
 	<div class="relative flex min-w-0 flex-1 flex-col items-center overflow-hidden">
-		<div class="flex min-h-(--ui-header-height) w-full max-w-2xl items-center gap-1 px-2">
-			<UButton
-				class="lg:hidden"
-				:icon="appConfig.ui.icons.menu"
-				color="neutral"
-				variant="ghost"
-				:aria-label="$t('header.openSidebar')"
-				@click="sidebarOpen = !sidebarOpen"
-			/>
+		<LayoutPageHeader>
 			<UNavigationMenu
-				class="min-w-0 flex-1"
 				:ui="{ root: 'justify-center', item: 'py-0', link: 'py-1' }"
 				orientation="horizontal"
 				color="neutral"
 				variant="link"
 				:items="tabs"
 			/>
-		</div>
+		</LayoutPageHeader>
 		<UScrollArea
 			v-if="visibleNotes.length"
 			ref="scrollArea"

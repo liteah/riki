@@ -5,6 +5,7 @@ import { getSessionUser } from '#server/utils/session'
 import { readQueryZod } from '#server/utils/validation'
 import {
 	and,
+	count,
 	desc,
 	eq,
 	exists,
@@ -66,51 +67,57 @@ export default defineEventHandler(async (event) => {
 			? eq(notes.status, query.status)
 			: inArray(notes.status, defaultStatuses)
 
-	const rows = await db
-		.select({
-			...getColumns(notes),
-			spaceName: spaces.name,
-			authorName: user.name,
-			authorImage: user.image,
-		})
-		.from(notes)
-		.leftJoin(spaces, eq(spaces.id, notes.spaceId))
-		.innerJoin(user, eq(user.id, notes.userId))
-		.where(
-			and(
-				cursorFilter,
-				readable,
-				statusFilter,
-				eq(user.banned, false),
-				query.noSpace ? isNull(notes.spaceId) : undefined,
-				query.noTags
-					? notExists(
+	const where = and(
+		readable,
+		statusFilter,
+		eq(user.banned, false),
+		query.noSpace ? isNull(notes.spaceId) : undefined,
+		query.noTags
+			? notExists(
+					db
+						.select({ one: sql`1` })
+						.from(noteTags)
+						.where(eq(noteTags.noteId, notes.id)),
+				)
+			: undefined,
+		query.spaceId ? eq(notes.spaceId, query.spaceId) : undefined,
+		query.username ? eq(user.username, query.username.toLowerCase()) : undefined,
+		query.visibility?.length ? inArray(notes.visibility, query.visibility) : undefined,
+		query.q ? like(notes.content, `%${query.q.replace(/[%_]/g, '')}%`) : undefined,
+		query.tagIds?.length
+			? and(
+					...query.tagIds.map((tagId) =>
+						exists(
 							db
 								.select({ one: sql`1` })
 								.from(noteTags)
-								.where(eq(noteTags.noteId, notes.id)),
-						)
-					: undefined,
-				query.spaceId ? eq(notes.spaceId, query.spaceId) : undefined,
-				query.username ? eq(user.username, query.username.toLowerCase()) : undefined,
-				query.visibility?.length ? inArray(notes.visibility, query.visibility) : undefined,
-				query.q ? like(notes.content, `%${query.q.replace(/[%_]/g, '')}%`) : undefined,
-				query.tagIds?.length
-					? and(
-							...query.tagIds.map((tagId) =>
-								exists(
-									db
-										.select({ one: sql`1` })
-										.from(noteTags)
-										.where(and(eq(noteTags.noteId, notes.id), eq(noteTags.tagId, tagId))),
-								),
-							),
-						)
-					: undefined,
-			),
-		)
-		.orderBy(desc(pinnedFlag), desc(notes.createdAt), desc(notes.id))
-		.limit(query.limit + 1)
+								.where(and(eq(noteTags.noteId, notes.id), eq(noteTags.tagId, tagId))),
+						),
+					),
+				)
+			: undefined,
+	)
+
+	const [rows, [totalRow]] = await Promise.all([
+		db
+			.select({
+				...getColumns(notes),
+				spaceName: spaces.name,
+				authorName: user.name,
+				authorImage: user.image,
+			})
+			.from(notes)
+			.leftJoin(spaces, eq(spaces.id, notes.spaceId))
+			.innerJoin(user, eq(user.id, notes.userId))
+			.where(and(cursorFilter, where))
+			.orderBy(desc(pinnedFlag), desc(notes.createdAt), desc(notes.id))
+			.limit(query.limit + 1),
+		db
+			.select({ count: count() })
+			.from(notes)
+			.innerJoin(user, eq(user.id, notes.userId))
+			.where(where),
+	])
 
 	const page = rows.slice(0, query.limit)
 	const tagRows = page.length
@@ -142,5 +149,6 @@ export default defineEventHandler(async (event) => {
 			rows.length > query.limit && last
 				? encodeNoteCursor(last.createdAt, last.id, last.status === noteStatus.pinned)
 				: null,
+		total: totalRow?.count ?? 0,
 	}
 })

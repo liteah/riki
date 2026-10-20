@@ -9,8 +9,6 @@ const appConfig = useAppConfig()
 const { t, locale } = useI18n()
 const session = useAuth().useSession()
 
-const sidebarOpen = ref(true)
-
 const scrollArea = useTemplateRef<{ $el: HTMLElement }>('scrollArea')
 
 const username = computed(() => String(route.params.username ?? '').toLowerCase())
@@ -103,21 +101,9 @@ onMounted(() => {
 </script>
 
 <template>
-	<NoteSidebar v-model:open="sidebarOpen" />
+	<NoteSidebar />
 	<div class="relative flex min-w-0 flex-1 flex-col items-center overflow-hidden">
-		<div
-			class="relative flex min-h-(--ui-header-height) w-full max-w-2xl items-center justify-center px-2"
-		>
-			<UButton
-				class="absolute top-1/2 left-2 -translate-y-1/2 lg:hidden"
-				:icon="appConfig.ui.icons.menu"
-				color="neutral"
-				variant="ghost"
-				:aria-label="$t('header.openSidebar')"
-				@click="sidebarOpen = !sidebarOpen"
-			/>
-			<span class="truncate text-sm font-medium">{{ $t('profile.label') }}</span>
-		</div>
+		<LayoutPageHeader :title="$t('profile.label')" />
 		<UScrollArea v-if="profile" ref="scrollArea" shadow class="size-full p-2">
 			<div class="mx-auto flex w-full max-w-2xl flex-col gap-2">
 				<section class="flex flex-col gap-3 px-2 pt-2 pb-4">

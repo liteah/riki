@@ -186,6 +186,7 @@ export const useNoteStore = defineStore('note', () => {
 	const syncing = ref(false)
 	const paginationDone = ref(false)
 	const loaded = ref(false)
+	const total = ref(0)
 	let started = false
 
 	const unsyncedIds = computed(() => {
@@ -401,6 +402,7 @@ export const useNoteStore = defineStore('note', () => {
 		if (data) {
 			mergeIncoming(data.items)
 			nextCursor.value = data.nextCursor
+			total.value = data.total
 			if (data.nextCursor === null) paginationDone.value = true
 		}
 		loaded.value = true
@@ -544,6 +546,7 @@ export const useNoteStore = defineStore('note', () => {
 		feed,
 		pending,
 		loaded,
+		total,
 		syncing,
 		resetFilter,
 		loadMore,

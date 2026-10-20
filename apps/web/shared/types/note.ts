@@ -140,4 +140,4 @@ export type NoteListItem = Note & {
 
 export type NoteWithTags = Note & { tagIds: string[] }
 
-export type ListNotesResponse = { items: NoteListItem[]; nextCursor: string | null }
+export type ListNotesResponse = { items: NoteListItem[]; nextCursor: string | null; total: number }

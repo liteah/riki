@@ -1,9 +1,30 @@
 <script setup lang="ts">
+import { builtinView, sidebarKind } from '#shared/types/view'
+
+const { t } = useI18n()
 const noteStore = useNoteStore()
 const { visibleNotes } = storeToRefs(noteStore)
-const appConfig = useAppConfig()
+const viewStore = useViewStore()
+const spaceStore = useSpaceStore()
+const tagStore = useTagStore()
 
-const sidebarOpen = ref(true)
+const title = computed(() => {
+	const target = viewStore.target
+	if (target.kind === sidebarKind.view) {
+		return viewStore.views.find((view) => view.id === target.id)?.name ?? t('note.library')
+	}
+	if (target.kind === sidebarKind.space) {
+		return spaceStore.spaces.find((space) => space.id === target.id)?.name ?? t('note.library')
+	}
+	if (target.kind === sidebarKind.tag) {
+		return tagStore.tags.find((tag) => tag.id === target.id)?.name ?? t('note.library')
+	}
+	return t('note.library')
+})
+
+const label = computed(() =>
+	viewStore.target.kind === builtinView.library && noteStore.loaded ? noteStore.total : undefined,
+)
 
 const scrollArea = useTemplateRef<{
 	$el: HTMLElement
@@ -28,19 +49,13 @@ watch(() => visibleNotes.value[0]?.id, scrollToTop)
 </script>
 
 <template>
-	<NoteSidebar v-model:open="sidebarOpen" />
+	<NoteSidebar />
 	<div class="relative flex min-w-0 flex-1 flex-col items-center overflow-hidden">
-		<div v-if="visibleNotes.length" class="flex w-full items-center gap-1">
-			<UButton
-				class="lg:hidden"
-				:icon="appConfig.ui.icons.menu"
-				color="neutral"
-				variant="ghost"
-				:aria-label="$t('header.openSidebar')"
-				@click="sidebarOpen = !sidebarOpen"
-			/>
-			<NoteSearchInput class="min-w-0 flex-1" />
-		</div>
+		<LayoutPageHeader :title="title" :label="label">
+			<template #right>
+				<NoteSearchInput />
+			</template>
+		</LayoutPageHeader>
 		<UScrollArea
 			v-if="visibleNotes.length"
 			ref="scrollArea"
