@@ -8,6 +8,7 @@
 		"edit": "編輯",
 		"delete": "刪除",
 		"save": "儲存",
+		"saved": "已儲存",
 		"toggle": "切換",
 		"searchPlaceholder": "搵…",
 		"searchLabelPlaceholder": "搵{label}…",
@@ -83,6 +84,7 @@
 	},
 	"profile": {
 		"label": "個人檔案",
+		"edit": "編輯個人檔案",
 		"publicNotes": "公開筆記",
 		"joinedAt": "{date}註冊",
 		"emptyTitle": "仲未有公開筆記",
@@ -109,6 +111,9 @@
 	"settings": {
 		"label": "設定",
 		"followSystem": "跟系統",
+		"account": {
+			"label": "帳號"
+		},
 		"preferences": {
 			"label": "偏好設定",
 			"general": "一般",

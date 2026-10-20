@@ -8,6 +8,7 @@
 		"edit": "编辑",
 		"delete": "删除",
 		"save": "保存",
+		"saved": "已保存",
 		"toggle": "切换",
 		"searchPlaceholder": "搜索…",
 		"searchLabelPlaceholder": "搜索{label}…",
@@ -83,6 +84,7 @@
 	},
 	"profile": {
 		"label": "个人资料",
+		"edit": "编辑资料",
 		"publicNotes": "公开笔记",
 		"joinedAt": "加入于 {date}",
 		"emptyTitle": "还没有公开笔记",
@@ -109,6 +111,9 @@
 	"settings": {
 		"label": "设置",
 		"followSystem": "跟随系统",
+		"account": {
+			"label": "账号"
+		},
 		"preferences": {
 			"label": "偏好设置",
 			"general": "通用",

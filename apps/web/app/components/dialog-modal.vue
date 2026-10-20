@@ -4,7 +4,8 @@ const props = defineProps<{
 	description?: string
 	icon?: string
 	destructive?: boolean
-	onConfirm?: () => void | Promise<void>
+	confirmLabel?: string
+	onConfirm?: () => void | boolean | Promise<void | boolean>
 }>()
 
 const emit = defineEmits<{
@@ -12,7 +13,8 @@ const emit = defineEmits<{
 }>()
 
 async function handleConfirm() {
-	await props.onConfirm?.()
+	const confirmed = await props.onConfirm?.()
+	if (confirmed === false) return
 	emit('close')
 }
 </script>
@@ -48,7 +50,7 @@ async function handleConfirm() {
 				@click="emit('close')"
 			/>
 			<UButton
-				:label="$t('common.confirm')"
+				:label="confirmLabel ?? $t('common.confirm')"
 				block
 				:color="destructive ? 'error' : 'primary'"
 				@click="handleConfirm"

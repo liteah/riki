@@ -8,6 +8,7 @@
 		"edit": "Edit",
 		"delete": "Delete",
 		"save": "Save",
+		"saved": "Saved",
 		"toggle": "Toggle",
 		"searchPlaceholder": "Search...",
 		"searchLabelPlaceholder": "Search {label}...",
@@ -83,6 +84,7 @@
 	},
 	"profile": {
 		"label": "Profile",
+		"edit": "Edit profile",
 		"publicNotes": "Public notes",
 		"joinedAt": "Joined {date}",
 		"emptyTitle": "No public notes yet",
@@ -109,6 +111,9 @@
 	"settings": {
 		"label": "Settings",
 		"followSystem": "Follow system",
+		"account": {
+			"label": "Account"
+		},
 		"preferences": {
 			"label": "Preferences",
 			"general": "General",

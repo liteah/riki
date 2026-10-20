@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { AccordionItem } from '@nuxt/ui'
+import { LazyProfileModal } from '#components'
 import { noteVisibility } from '#shared/types/note'
 import type { ListNotesResponse, NoteListItem } from '#shared/types/note'
 import type { UserProfile } from '#shared/types/user'
@@ -8,6 +9,9 @@ const route = useRoute()
 const appConfig = useAppConfig()
 const { t, locale } = useI18n()
 const session = useAuth().useSession()
+const overlay = useOverlay()
+
+const profileModal = overlay.create(LazyProfileModal)
 
 const scrollArea = useTemplateRef<{ $el: HTMLElement }>('scrollArea')
 
@@ -23,6 +27,9 @@ const openNotes = ref<string>()
 
 const signedIn = computed(() => Boolean(session.value.data?.user))
 const sessionReady = computed(() => !session.value.isPending)
+const ownProfile = computed(
+	() => Boolean(profile.value) && session.value.data?.user?.id === profile.value?.id,
+)
 
 const publicNotesItems = computed<AccordionItem[]>(() => [
 	{ label: t('profile.publicNotes'), value: 'notes', icon: appConfig.ui.icons.globe },
@@ -78,6 +85,18 @@ async function load() {
 
 watch(username, () => void load())
 
+function editProfile() {
+	profileModal.open({
+		onSaved: (next) => {
+			if (next.toLowerCase() === username.value) {
+				void load()
+				return
+			}
+			void navigateTo(`/user/${next.toLowerCase()}`, { replace: true })
+		},
+	})
+}
+
 watch(openNotes, (open) => {
 	if (open && !notes.value.length) void loadNotes()
 })
@@ -107,13 +126,24 @@ onMounted(() => {
 		<UScrollArea v-if="profile" ref="scrollArea" shadow class="size-full p-2">
 			<div class="mx-auto flex w-full max-w-2xl flex-col gap-2">
 				<section class="flex flex-col gap-3 px-2 pt-2 pb-4">
-					<UUser
-						:avatar="{ src: profile.image ?? undefined, alt: profile.name }"
-						:name="profile.name"
-						:description="`@${handle}`"
-						size="3xl"
-						:ui="{ name: 'truncate text-xl font-bold' }"
-					/>
+					<div class="flex items-center justify-between gap-2">
+						<UUser
+							:avatar="{ src: profile.image ?? undefined, alt: profile.name }"
+							:name="profile.name"
+							:description="`@${handle}`"
+							size="3xl"
+							class="min-w-0"
+							:ui="{ name: 'truncate text-xl font-bold' }"
+						/>
+						<UButton
+							v-if="ownProfile"
+							:icon="appConfig.ui.icons.edit"
+							:label="$t('profile.edit')"
+							color="neutral"
+							variant="subtle"
+							@click="editProfile"
+						/>
+					</div>
 					<p class="flex items-center gap-1.5 text-sm text-muted">
 						<UIcon :name="appConfig.ui.icons.calendar" class="size-4 shrink-0" />
 						{{ $t('profile.joinedAt', { date: joinedAt }) }}
