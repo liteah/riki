@@ -1,12 +1,15 @@
 {
 	"common": {
 		"confirm": "確認",
+		"create": "建立",
 		"continue": "繼續",
 		"close": "關閉",
 		"cancel": "取消",
 		"back": "返回",
 		"edit": "編輯",
 		"delete": "刪除",
+		"copy": "複製",
+		"copied": "已複製",
 		"save": "儲存",
 		"saved": "已儲存",
 		"toggle": "切換",
@@ -118,7 +121,28 @@
 			"security": "安全性",
 			"danger": "危險區域",
 			"deleteAccount": "刪除帳號",
-			"deleteDescription": "這將永久刪除該帳號及所有筆記，無法復原。"
+			"deleteDescription": "此操作將永久刪除該帳號及所有筆記，且無法復原"
+		},
+		"apiKeys": {
+			"label": "API 金鑰",
+			"create": "建立 API 金鑰",
+			"edit": "編輯 API 金鑰",
+			"delete": "刪除 API 金鑰",
+			"name": "名稱",
+			"key": "金鑰",
+			"empty": "尚無 API 金鑰",
+			"description": "API 金鑰用於驗證外部工具，使其可以存取該帳號的資料",
+			"neverExpires": "永不過期",
+			"expiresAt": "將過期於 {date}",
+			"createdAt": "建立於 {date}",
+			"lastUsedAt": "最後使用於 {date}",
+			"requestCount": "請求次數 {count}",
+			"days": "天數",
+			"show": "顯示金鑰",
+			"hide": "隱藏金鑰",
+			"created": "API 金鑰已建立",
+			"createdDescription": "該金鑰只會顯示這一次，請立即複製並妥善保存",
+			"deleteDescription": "此 API 金鑰將立即失效"
 		},
 		"preferences": {
 			"label": "偏好設定",

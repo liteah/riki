@@ -1,12 +1,15 @@
 {
 	"common": {
 		"confirm": "Confirm",
+		"create": "Create",
 		"continue": "Continue",
 		"close": "Close",
 		"cancel": "Cancel",
 		"back": "Back",
 		"edit": "Edit",
 		"delete": "Delete",
+		"copy": "Copy",
+		"copied": "Copied",
 		"save": "Save",
 		"saved": "Saved",
 		"toggle": "Toggle",
@@ -119,6 +122,27 @@
 			"danger": "Danger zone",
 			"deleteAccount": "Delete account",
 			"deleteDescription": "This permanently deletes your account and all notes. This cannot be undone."
+		},
+		"apiKeys": {
+			"label": "API keys",
+			"create": "Create API key",
+			"edit": "Edit API key",
+			"delete": "Delete API key",
+			"name": "Name",
+			"key": "API key",
+			"empty": "No API keys",
+			"description": "API keys authenticate external tools so they can access this account's data.",
+			"neverExpires": "Never expires",
+			"expiresAt": "Expires on {date}",
+			"createdAt": "Created {date}",
+			"lastUsedAt": "Last used {date}",
+			"requestCount": "Requests {count}",
+			"days": "Days",
+			"show": "Show key",
+			"hide": "Hide key",
+			"created": "API key created",
+			"createdDescription": "This is the only time this key will be shown. Copy it now and store it securely.",
+			"deleteDescription": "This API key will stop working immediately."
 		},
 		"preferences": {
 			"label": "Preferences",

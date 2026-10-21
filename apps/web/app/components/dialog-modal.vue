@@ -5,6 +5,7 @@ const props = defineProps<{
 	icon?: string
 	destructive?: boolean
 	confirmLabel?: string
+	cancelLabel?: string
 	onConfirm?: () => void | boolean | Promise<void | boolean>
 }>()
 
@@ -49,7 +50,13 @@ async function handleConfirm() {
 		</template>
 
 		<template #footer>
-			<UButton :label="$t('common.cancel')" color="neutral" variant="subtle" block @click="close" />
+			<UButton
+				:label="cancelLabel ?? $t('common.cancel')"
+				color="neutral"
+				variant="subtle"
+				block
+				@click="close"
+			/>
 			<UButton
 				:label="confirmLabel ?? $t('common.confirm')"
 				block

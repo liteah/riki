@@ -20,5 +20,11 @@ export const auth = betterAuth({
 		},
 		deleteUser: { enabled: true },
 	},
-	plugins: [admin(), apiKey(), username()],
+	plugins: [
+		admin(),
+		apiKey({
+			enableSessionForAPIKeys: true,
+		}),
+		username(),
+	],
 })

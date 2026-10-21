@@ -11,6 +11,7 @@ export default defineAppConfig({
 		},
 		settings: {
 			account: '/settings/account',
+			apiKeys: '/settings/api-keys',
 			preferences: '/settings/preferences',
 		},
 	},

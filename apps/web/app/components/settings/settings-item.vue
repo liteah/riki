@@ -31,7 +31,9 @@ const interactive = computed(() => Boolean(props.to || attrs.onClick))
 		</slot>
 		<div class="flex min-w-0 flex-1 flex-col">
 			<span class="truncate text-sm font-medium">{{ label }}</span>
-			<span v-if="description" class="truncate text-xs text-muted">{{ description }}</span>
+			<slot name="description">
+				<span v-if="description" class="truncate text-xs text-muted">{{ description }}</span>
+			</slot>
 		</div>
 		<slot />
 		<span v-if="hint" class="shrink-0 text-sm text-dimmed">{{ hint }}</span>

@@ -14,6 +14,11 @@ const items = computed<NavigationMenuItem[]>(() => [
 		icon: appConfig.ui.icons.user,
 		to: appConfig.routes.settings.account,
 	},
+	{
+		label: $t('settings.apiKeys.label'),
+		icon: appConfig.ui.icons.key,
+		to: appConfig.routes.settings.apiKeys,
+	},
 ])
 </script>
 

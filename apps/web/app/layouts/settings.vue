@@ -11,7 +11,11 @@ const title = computed(() =>
 	<div class="flex flex-1">
 		<SettingsSidebar />
 		<div class="flex min-w-0 flex-1 flex-col items-center overflow-hidden">
-			<LayoutPageHeader :title="title" />
+			<LayoutPageHeader :title="title">
+				<template #right>
+					<slot name="header-actions" />
+				</template>
+			</LayoutPageHeader>
 			<div class="mx-auto min-h-0 w-full max-w-3xl flex-1 overflow-y-auto p-4">
 				<slot />
 			</div>

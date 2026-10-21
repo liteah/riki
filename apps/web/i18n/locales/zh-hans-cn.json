@@ -1,12 +1,15 @@
 {
 	"common": {
 		"confirm": "确认",
+		"create": "创建",
 		"continue": "继续",
 		"close": "关闭",
 		"cancel": "取消",
 		"back": "返回",
 		"edit": "编辑",
 		"delete": "删除",
+		"copy": "复制",
+		"copied": "已复制",
 		"save": "保存",
 		"saved": "已保存",
 		"toggle": "切换",
@@ -118,7 +121,28 @@
 			"security": "安全",
 			"danger": "危险区域",
 			"deleteAccount": "删除账号",
-			"deleteDescription": "这将永久删除该账号及所有笔记，无法恢复。"
+			"deleteDescription": "此操作将永久删除该账号及所有笔记，且无法恢复"
+		},
+		"apiKeys": {
+			"label": "API 密钥",
+			"create": "创建 API 密钥",
+			"edit": "编辑 API 密钥",
+			"delete": "删除 API 密钥",
+			"name": "名称",
+			"key": "密钥",
+			"empty": "暂无 API 密钥",
+			"description": "API 密钥用于验证外部工具，使其可以访问该账号的数据",
+			"neverExpires": "永不过期",
+			"expiresAt": "将过期于 {date}",
+			"createdAt": "创建于 {date}",
+			"lastUsedAt": "最后使用于 {date}",
+			"requestCount": "请求次数 {count}",
+			"days": "天数",
+			"show": "显示密钥",
+			"hide": "隐藏密钥",
+			"created": "API 密钥已创建",
+			"createdDescription": "该密钥只会显示这一次，请立即复制并妥善保存",
+			"deleteDescription": "此 API 密钥将立即失效"
 		},
 		"preferences": {
 			"label": "偏好设置",

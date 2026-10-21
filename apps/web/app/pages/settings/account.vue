@@ -164,7 +164,6 @@ async function deleteAccount() {
 					type="email"
 					:placeholder="$t('common.placeholder', { label: $t('auth.email') })"
 					autocomplete="email"
-					class="w-full"
 				/>
 			</UFormField>
 		</DialogModal>
@@ -182,7 +181,6 @@ async function deleteAccount() {
 						type="password"
 						:placeholder="$t('common.placeholder', { label: $t('auth.currentPassword') })"
 						autocomplete="current-password"
-						class="w-full"
 					/>
 				</UFormField>
 				<UFormField :label="$t('auth.newPassword')">
@@ -191,7 +189,6 @@ async function deleteAccount() {
 						type="password"
 						:placeholder="$t('common.placeholder', { label: $t('auth.newPassword') })"
 						autocomplete="new-password"
-						class="w-full"
 					/>
 				</UFormField>
 			</div>
@@ -218,7 +215,6 @@ async function deleteAccount() {
 					type="password"
 					:placeholder="$t('common.placeholder', { label: $t('auth.password') })"
 					autocomplete="current-password"
-					class="w-full"
 				/>
 			</UFormField>
 		</DialogModal>
