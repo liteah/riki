@@ -43,7 +43,6 @@ const fields = computed<AuthFormField[]>(() => [
 		type: 'text',
 		label: t('auth.identifier'),
 		placeholder: t('common.placeholder', { label: t('auth.identifier') }),
-		required: true,
 		autocomplete: 'username',
 	},
 	{
@@ -51,7 +50,6 @@ const fields = computed<AuthFormField[]>(() => [
 		type: 'password',
 		label: t('auth.password'),
 		placeholder: t('common.placeholder', { label: t('auth.password') }),
-		required: true,
 	},
 ])
 

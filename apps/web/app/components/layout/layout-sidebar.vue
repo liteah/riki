@@ -32,15 +32,18 @@ withDefaults(
 			<div v-else class="flex w-full flex-col gap-0.5">
 				<div class="flex items-center justify-between">
 					<LayoutDropdownMenu />
-					<UTooltip :text="$t('header.closeSidebar')">
-						<UButton
-							class="shrink-0 max-lg:hidden"
-							:icon="appConfig.ui.icons.sidebar"
-							color="neutral"
-							variant="ghost"
-							@click="sidebarOpen = false"
-						/>
-					</UTooltip>
+					<div class="flex shrink-0 items-center gap-0.5">
+						<LayoutCommandPaletteButton />
+						<UTooltip :text="$t('header.closeSidebar')">
+							<UButton
+								class="shrink-0 max-lg:hidden"
+								:icon="appConfig.ui.icons.sidebar"
+								color="neutral"
+								variant="ghost"
+								@click="sidebarOpen = false"
+							/>
+						</UTooltip>
+					</div>
 				</div>
 				<NoteNewButton variant="menu" />
 			</div>

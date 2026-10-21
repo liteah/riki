@@ -243,6 +243,10 @@ export const useNoteStore = defineStore('note', () => {
 		if (foreign.length) foreignNotes.value = mergeRows(foreignNotes.value, foreign)
 	}
 
+	function remember(note: NoteListItem) {
+		mergeIncoming([note])
+	}
+
 	// A space rename never bumps the notes' updatedAt, so cached names would go
 	// stale. Skipped while spaces are empty so offline use keeps them.
 	watch(
@@ -554,6 +558,7 @@ export const useNoteStore = defineStore('note', () => {
 		flush,
 		retryNote,
 		isPending,
+		remember,
 		create,
 		update,
 		setStatus,

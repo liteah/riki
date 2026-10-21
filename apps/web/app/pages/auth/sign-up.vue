@@ -39,7 +39,6 @@ const fields = computed<AuthFormField[]>(() => [
 		type: 'text',
 		label: t('auth.name'),
 		placeholder: t('common.placeholder', { label: t('auth.name') }),
-		required: true,
 		autocomplete: 'name',
 	},
 	{
@@ -47,7 +46,6 @@ const fields = computed<AuthFormField[]>(() => [
 		type: 'text',
 		label: t('auth.username'),
 		placeholder: t('common.placeholder', { label: t('auth.username') }),
-		required: true,
 		autocomplete: 'username',
 	},
 	{
@@ -55,7 +53,6 @@ const fields = computed<AuthFormField[]>(() => [
 		type: 'email',
 		label: t('auth.email'),
 		placeholder: t('common.placeholder', { label: t('auth.email') }),
-		required: true,
 		autocomplete: 'email',
 	},
 	{
@@ -63,7 +60,6 @@ const fields = computed<AuthFormField[]>(() => [
 		type: 'password',
 		label: t('auth.password'),
 		placeholder: t('common.placeholder', { label: t('auth.password') }),
-		required: true,
 		autocomplete: 'new-password',
 	},
 ])

@@ -13,6 +13,7 @@
 		"save": "Save",
 		"saved": "Saved",
 		"toggle": "Toggle",
+		"search": "Search",
 		"searchPlaceholder": "Search...",
 		"searchLabelPlaceholder": "Search {label}...",
 		"required": "{label} is required",
@@ -27,6 +28,14 @@
 		"openAppMenu": "Open app menu",
 		"openSidebar": "Open sidebar",
 		"closeSidebar": "Close sidebar"
+	},
+	"commandPalette": {
+		"label": "Command palette",
+		"placeholder": "Type a command or search...",
+		"commands": "Commands",
+		"notes": "Notes",
+		"recentNotes": "Recent notes",
+		"goTo": "Go to"
 	},
 	"auth": {
 		"signIn": "Sign in",
@@ -175,7 +184,6 @@
 		"unpin": "Unpin",
 		"editDescription": "Change the name and the notes this view matches.",
 		"createDescription": "Pick the notes this view matches.",
-		"search": "Search",
 		"filter": "Filter"
 	}
 }

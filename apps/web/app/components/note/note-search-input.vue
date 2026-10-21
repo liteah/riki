@@ -99,12 +99,12 @@ function closeOnEmpty() {
 			@blur="closeOnEmpty"
 		/>
 		<div class="ms-auto flex items-center gap-1">
-			<UTooltip :text="t('view.search')">
+			<UTooltip :text="t('common.search')">
 				<UButton
 					:icon="appConfig.ui.icons.search"
 					color="neutral"
 					variant="ghost"
-					:aria-label="t('view.search')"
+					:aria-label="t('common.search')"
 					@click="expanded = !expanded"
 				/>
 			</UTooltip>

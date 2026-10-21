@@ -13,6 +13,7 @@
 		"save": "儲存",
 		"saved": "已儲存",
 		"toggle": "切換",
+		"search": "搜尋",
 		"searchPlaceholder": "搵…",
 		"searchLabelPlaceholder": "搵{label}…",
 		"required": "{label}唔可以留空",
@@ -27,6 +28,14 @@
 		"openAppMenu": "打開應用程式選單",
 		"openSidebar": "打開側邊欄",
 		"closeSidebar": "關閉側邊欄"
+	},
+	"commandPalette": {
+		"label": "命令面板",
+		"placeholder": "輸入命令或搜尋…",
+		"commands": "命令",
+		"notes": "筆記",
+		"recentNotes": "最近筆記",
+		"goTo": "前往"
 	},
 	"auth": {
 		"signIn": "登入",
@@ -175,7 +184,6 @@
 		"unpin": "取消置頂",
 		"editDescription": "修改名稱同呢個檢視符合嘅筆記。",
 		"createDescription": "揀呢個檢視要符合嘅筆記。",
-		"search": "搜尋",
 		"filter": "篩選"
 	}
 }

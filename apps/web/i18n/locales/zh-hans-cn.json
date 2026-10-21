@@ -13,6 +13,7 @@
 		"save": "保存",
 		"saved": "已保存",
 		"toggle": "切换",
+		"search": "搜索",
 		"searchPlaceholder": "搜索…",
 		"searchLabelPlaceholder": "搜索{label}…",
 		"required": "{label}不能为空",
@@ -27,6 +28,14 @@
 		"openAppMenu": "打开应用菜单",
 		"openSidebar": "打开侧边栏",
 		"closeSidebar": "关闭侧边栏"
+	},
+	"commandPalette": {
+		"label": "命令面板",
+		"placeholder": "输入命令或搜索…",
+		"commands": "命令",
+		"notes": "笔记",
+		"recentNotes": "最近笔记",
+		"goTo": "前往"
 	},
 	"auth": {
 		"signIn": "登录",
@@ -175,7 +184,6 @@
 		"unpin": "取消置顶",
 		"editDescription": "修改名称与该视图匹配的笔记。",
 		"createDescription": "选择该视图要匹配的笔记。",
-		"search": "搜索",
 		"filter": "筛选"
 	}
 }

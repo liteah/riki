@@ -28,7 +28,6 @@ const filtered = computed(
 				variant="soft"
 				@click="noteStore.resetFilter()"
 			/>
-			<NoteNewButton v-else />
 		</template>
 	</UEmpty>
 </template>

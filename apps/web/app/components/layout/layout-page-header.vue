@@ -33,10 +33,12 @@ defineProps<{
 						@click="sidebarOpen = true"
 					/>
 				</UTooltip>
+				<LayoutCommandPaletteButton />
 				<div class="max-lg:hidden">
 					<NoteNewButton variant="ghost" />
 				</div>
 			</template>
+			<LayoutCommandPaletteButton v-if="isTauri && sidebarOpen" />
 			<slot name="left" />
 		</div>
 		<div class="flex min-w-0 items-center justify-center gap-2">
