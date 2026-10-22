@@ -1,21 +1,12 @@
 <script setup lang="ts">
-import { LazyLayoutCommandPalette } from '#components'
+import { openCommandPalette } from '~/utils/command-palette'
 
 const appConfig = useAppConfig()
-// One palette instance across every trigger.
-let openCommandPaletteModal: (() => void) | undefined
-
-function openCommandPalette() {
-	if (!openCommandPaletteModal) {
-		const commandPalette = useOverlay().create(LazyLayoutCommandPalette)
-		openCommandPaletteModal = () => commandPalette.open()
-	}
-	openCommandPaletteModal()
-}
+const shortcutStore = useShortcutStore()
 </script>
 
 <template>
-	<UTooltip :text="$t('common.search')">
+	<UTooltip :text="$t('common.search')" :kbds="shortcutStore.kbds('commandPalette')">
 		<UButton
 			:icon="appConfig.ui.icons.search"
 			color="neutral"

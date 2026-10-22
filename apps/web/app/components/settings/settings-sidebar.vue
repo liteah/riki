@@ -10,6 +10,11 @@ const items = computed<NavigationMenuItem[]>(() => [
 		to: appConfig.routes.settings.preferences,
 	},
 	{
+		label: $t('settings.shortcuts.label'),
+		icon: appConfig.ui.icons.keyboard,
+		to: appConfig.routes.settings.shortcuts,
+	},
+	{
 		label: $t('settings.account.label'),
 		icon: appConfig.ui.icons.user,
 		to: appConfig.routes.settings.account,

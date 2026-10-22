@@ -166,6 +166,20 @@
 			"timeFormat": "時間格式",
 			"timeFormatRelative": "相對時間",
 			"timeFormatAbsolute": "絕對時間"
+		},
+		"shortcuts": {
+			"label": "快捷鍵",
+			"toggleSidebar": "切換側邊欄",
+			"openCommandPalette": "開啟搜尋與指令面板",
+			"openSettings": "開啟設定",
+			"change": "變更快捷鍵",
+			"recording": "請按下按鍵…",
+			"resetAll": "全部重設",
+			"resetDone": "快捷鍵已重設",
+			"invalid": "快捷鍵無效",
+			"invalidDescription": "請搭配 Ctrl、Command 或 Alt 等修飾鍵。",
+			"conflictTitle": "快捷鍵未變更",
+			"conflict": "已被「{action}」使用。"
 		}
 	},
 	"view": {

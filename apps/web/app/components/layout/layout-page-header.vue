@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const appConfig = useAppConfig()
+const shortcutStore = useShortcutStore()
 
 const { sidebarOpen } = storeToRefs(useViewStore())
 
@@ -24,7 +25,7 @@ defineProps<{
 						to="/"
 					/>
 				</UTooltip>
-				<UTooltip :text="$t('header.openSidebar')">
+				<UTooltip :text="$t('header.openSidebar')" :kbds="shortcutStore.kbds('toggleSidebar')">
 					<UButton
 						:icon="appConfig.ui.icons.sidebar"
 						color="neutral"

@@ -237,6 +237,11 @@ const groups = computed<CommandPaletteGroup[]>(() => {
 				appConfig.routes.settings.preferences,
 			),
 			navItem(
+				t('settings.shortcuts.label'),
+				appConfig.ui.icons.keyboard,
+				appConfig.routes.settings.shortcuts,
+			),
+			navItem(
 				t('settings.account.label'),
 				appConfig.ui.icons.user,
 				appConfig.routes.settings.account,

@@ -1,3 +1,7 @@
+<script setup lang="ts">
+useGlobalShortcuts()
+</script>
+
 <template>
 	<AppTheme>
 		<LayoutHeader v-if="isTauri" />

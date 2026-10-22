@@ -13,6 +13,7 @@ export default defineAppConfig({
 			account: '/settings/account',
 			apiKeys: '/settings/api-keys',
 			preferences: '/settings/preferences',
+			shortcuts: '/settings/shortcuts',
 		},
 	},
 	ui: {

@@ -2,6 +2,7 @@
 import type { SidebarProps } from '@nuxt/ui'
 
 const appConfig = useAppConfig()
+const shortcutStore = useShortcutStore()
 
 const { sidebarOpen } = storeToRefs(useViewStore())
 
@@ -34,7 +35,7 @@ withDefaults(
 					<LayoutDropdownMenu />
 					<div class="flex shrink-0 items-center gap-0.5">
 						<LayoutCommandPaletteButton />
-						<UTooltip :text="$t('header.closeSidebar')">
+						<UTooltip :text="$t('header.closeSidebar')" :kbds="shortcutStore.kbds('toggleSidebar')">
 							<UButton
 								class="shrink-0 max-lg:hidden"
 								:icon="appConfig.ui.icons.sidebar"

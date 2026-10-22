@@ -77,6 +77,7 @@ export const iconsTheme = {
 	later: 'ph:clock',
 	note: 'ph:notebook',
 	settings: 'ph:gear-fine',
+	keyboard: 'ph:keyboard',
 	globe: 'ph:globe-simple',
 	appearance: 'ph:palette',
 	colorMode: 'ph:circle-half',

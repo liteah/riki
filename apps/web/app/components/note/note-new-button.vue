@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const appConfig = useAppConfig()
 const session = useAuth().useSession()
+const shortcutStore = useShortcutStore()
 
 const signedIn = computed(() => Boolean(session.value.data?.user?.id))
 
@@ -39,7 +40,7 @@ withDefaults(
 			}"
 			@click="() => openComposer()"
 		/>
-		<UTooltip v-else :text="$t('note.newNote')">
+		<UTooltip v-else :text="$t('note.newNote')" :kbds="shortcutStore.kbds('newNote')">
 			<UButton
 				:icon="appConfig.ui.icons.notePen"
 				color="neutral"

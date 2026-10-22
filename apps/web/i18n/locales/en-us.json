@@ -166,6 +166,20 @@
 			"timeFormat": "Time format",
 			"timeFormatRelative": "Relative",
 			"timeFormatAbsolute": "Absolute"
+		},
+		"shortcuts": {
+			"label": "Shortcuts",
+			"toggleSidebar": "Toggle sidebar",
+			"openCommandPalette": "Open search and command palette",
+			"openSettings": "Open settings",
+			"change": "Change shortcut",
+			"recording": "Press keys...",
+			"resetAll": "Reset all",
+			"resetDone": "Shortcuts reset",
+			"invalid": "Invalid shortcut",
+			"invalidDescription": "Use a modifier such as Ctrl, Cmd, or Alt.",
+			"conflictTitle": "Shortcut not changed",
+			"conflict": "Already used by {action}."
 		}
 	},
 	"view": {
