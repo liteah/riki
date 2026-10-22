@@ -169,15 +169,22 @@
 		},
 		"shortcuts": {
 			"label": "快捷键",
+			"global": "全局",
+			"noteView": "笔记视图与收件箱",
 			"toggleSidebar": "切换侧边栏",
 			"openCommandPalette": "打开搜索与命令面板",
 			"openSettings": "打开设置",
+			"previousNote": "上一条笔记",
+			"nextNote": "下一条笔记",
+			"openNote": "打开笔记",
 			"change": "更改快捷键",
 			"recording": "请按下按键…",
 			"resetAll": "全部重置",
 			"resetDone": "快捷键已重置",
 			"invalid": "快捷键无效",
-			"invalidDescription": "请搭配 Ctrl、Command 或 Alt 等修饰键。",
+			"invalidDescription": "请按下有效的按键组合。",
+			"globalInvalid": "全局快捷键无效",
+			"globalInvalidDescription": "请搭配 Ctrl、Command 或 Alt 等修饰键。",
 			"conflictTitle": "快捷键未更改",
 			"conflict": "已被“{action}”使用。"
 		}

@@ -35,6 +35,12 @@ function scrollToTop() {
 	scrollArea.value?.virtualizer?.scrollToIndex(0, { align: 'start' })
 }
 
+function scrollToIndex(index: number) {
+	scrollArea.value?.virtualizer?.scrollToIndex(index, { align: 'auto' })
+}
+
+const { selectedId } = useNoteListShortcuts(visibleNotes, scrollToIndex, openComposer)
+
 noteStore.start()
 
 onMounted(() => {
@@ -65,7 +71,13 @@ watch(() => visibleNotes.value[0]?.id, scrollToTop)
 			:virtualize="{ gap: 8, lanes: 3, estimateSize: 200 }"
 			class="size-full p-2"
 		>
-			<NoteListItem :note="item" @select="openComposer" />
+			<NoteListItem
+				:note="item"
+				give-actions
+				actions-menu
+				:selected="selectedId === item.id"
+				@select="openComposer"
+			/>
 		</UScrollArea>
 		<NoteEmptyState
 			v-else-if="noteStore.loaded"

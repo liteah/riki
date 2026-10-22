@@ -1,4 +1,4 @@
-export const shortcutActions = [
+export const globalShortcutActions = [
 	{
 		id: 'toggleSidebar',
 		defaultKey: 'meta_b',
@@ -25,6 +25,53 @@ export const shortcutActions = [
 	},
 ] as const
 
+export const noteViewShortcutActions = [
+	{
+		id: 'previousNote',
+		defaultKey: 'k',
+		labelKey: 'settings.shortcuts.previousNote',
+	},
+	{
+		id: 'nextNote',
+		defaultKey: 'j',
+		labelKey: 'settings.shortcuts.nextNote',
+	},
+	{
+		id: 'openNote',
+		defaultKey: 'enter',
+		labelKey: 'settings.shortcuts.openNote',
+	},
+	{
+		id: 'addToSpace',
+		defaultKey: 's',
+		labelKey: 'note.addToSpace',
+	},
+	{
+		id: 'toggleLater',
+		defaultKey: 'l',
+		labelKey: 'note.later',
+	},
+	{
+		id: 'archiveNote',
+		defaultKey: 'e',
+		labelKey: 'note.archive',
+	},
+	{
+		id: 'unarchiveNote',
+		defaultKey: 'u',
+		labelKey: 'note.unarchive',
+	},
+	{
+		id: 'destroyNote',
+		defaultKey: 'd',
+		labelKey: 'common.delete',
+	},
+] as const
+
+export const shortcutActions = [...globalShortcutActions, ...noteViewShortcutActions] as const
+
+export type GlobalShortcutId = (typeof globalShortcutActions)[number]['id']
+export type NoteViewShortcutId = (typeof noteViewShortcutActions)[number]['id']
 export type ShortcutId = (typeof shortcutActions)[number]['id']
 export type ShortcutBindings = Record<ShortcutId, string>
 
@@ -66,22 +113,26 @@ export function isModifierKey(key: string) {
 	return modifierKeys.has(key)
 }
 
-function keyFromEvent(event: KeyboardEvent) {
+function keyFromEvent(event: KeyboardEvent, allowBare: boolean) {
 	if (event.altKey) {
 		if (/^Key[A-Z]$/.test(event.code)) return event.code.slice(3).toLowerCase()
 		if (/^Digit\d$/.test(event.code)) return event.code.slice(5)
 		if (/^F\d{1,2}$/.test(event.code)) return event.code.toLowerCase()
 		return altCodeKeys[event.code] ?? null
 	}
-	if (event.key.length === 0 || event.key === ' ' || event.key === '_') return null
+	if (event.key === ' ') {
+		return allowBare || event.ctrlKey || event.metaKey ? 'space' : null
+	}
+	if (event.key.length === 0 || event.key === '_') return null
 	const key = event.key.toLowerCase()
 	if (key.length > 1 && !namedKeys.has(key) && !/^f\d{1,2}$/.test(key)) return null
 	return key
 }
 
-export function eventToShortcut(event: KeyboardEvent): string | null {
-	if (!event.ctrlKey && !event.metaKey && !event.altKey) return null
-	const key = keyFromEvent(event)
+export function eventToShortcut(event: KeyboardEvent, allowBare = false): string | null {
+	const hasModifier = event.ctrlKey || event.metaKey || event.altKey
+	if (!hasModifier && !allowBare) return null
+	const key = keyFromEvent(event, allowBare)
 	if (!key) return null
 	const parts: string[] = []
 	if (event.ctrlKey || event.metaKey) parts.push('meta')

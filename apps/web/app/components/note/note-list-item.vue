@@ -3,10 +3,13 @@ import type { ContextMenuItem, DropdownMenuItem } from '@nuxt/ui'
 import { LazyDialogModal, LazyNoteSpaceFormModal, NoteLink, NoteTag } from '#components'
 import { noteStatus } from '#shared/types/note'
 import type { NoteListItem, NoteStatus } from '#shared/types/note'
+import { eventToShortcut } from '~/utils/shortcuts'
+import type { NoteViewShortcutId } from '~/utils/shortcuts'
 
 const props = defineProps<{
 	note: NoteListItem
 	giveActions?: boolean
+	actionsMenu?: boolean
 	selected?: boolean
 }>()
 
@@ -20,6 +23,7 @@ const overlay = useOverlay()
 const appConfig = useAppConfig()
 const noteStore = useNoteStore()
 const draftStore = useDraftStore()
+const shortcutStore = useShortcutStore()
 const session = useAuth().useSession()
 
 const confirmDialog = overlay.create(LazyDialogModal)
@@ -62,10 +66,21 @@ function openNewSpace() {
 }
 
 const spaceTrigger = useTemplateRef<{ $el?: HTMLElement }[]>('spaceTrigger')
+const libraryTrigger = useTemplateRef<{ $el?: HTMLElement }>('libraryTrigger')
+const librarySpaceMenu = ref(false)
 
 function openSpaceMenu() {
 	void spaceStore.load()
+	if (props.actionsMenu) {
+		librarySpaceMenu.value = true
+		void nextTick(() => libraryTrigger.value?.$el?.click())
+		return
+	}
 	spaceTrigger.value?.[0]?.$el?.click()
+}
+
+function onLibraryMenuOpen(open: boolean) {
+	if (!open) librarySpaceMenu.value = false
 }
 
 async function attempt(action: string, run: () => Promise<unknown>) {
@@ -121,29 +136,29 @@ function handleDelete() {
 
 type NoteAction = {
 	id: 'space' | 'later' | 'archive' | 'unarchive' | 'destroy'
+	shortcut: NoteViewShortcutId
 	label: string
 	icon: string
-	kbd: string
 	menu?: DropdownMenuItem[][]
 	onSelect: () => void
 }
 
 const actions = computed<NoteAction[]>(() => {
-	if (!props.giveActions || !isOwn.value) return []
+	if (!isOwn.value) return []
 	if (isArchived.value) {
 		return [
 			{
 				id: 'unarchive',
+				shortcut: 'unarchiveNote',
 				label: t('note.unarchive'),
 				icon: appConfig.ui.icons.archive,
-				kbd: 'U',
 				onSelect: () => void toggleStatus(noteStatus.normal, t('note.unarchive')),
 			},
 			{
 				id: 'destroy',
+				shortcut: 'destroyNote',
 				label: t('common.delete'),
 				icon: appConfig.ui.icons.trash,
-				kbd: 'D',
 				onSelect: () => confirmDestructive(handleDestroy),
 			},
 		]
@@ -151,24 +166,24 @@ const actions = computed<NoteAction[]>(() => {
 	return [
 		{
 			id: 'space',
+			shortcut: 'addToSpace',
 			label: t('note.addToSpace'),
 			icon: appConfig.ui.icons.folderOpen,
-			kbd: 'S',
 			menu: spaceItems.value,
 			onSelect: openSpaceMenu,
 		},
 		{
 			id: 'later',
+			shortcut: 'toggleLater',
 			label: isLater.value ? t('note.unlater') : t('note.later'),
 			icon: appConfig.ui.icons.later,
-			kbd: 'L',
 			onSelect: toggleLater,
 		},
 		{
 			id: 'archive',
+			shortcut: 'archiveNote',
 			label: t('note.archive'),
 			icon: appConfig.ui.icons.archive,
-			kbd: 'E',
 			onSelect: () => void toggleStatus(noteStatus.archived, t('note.archive')),
 		},
 	]
@@ -176,31 +191,40 @@ const actions = computed<NoteAction[]>(() => {
 
 const cardEl = useTemplateRef<HTMLElement>('card')
 
+const showActions = computed(() => props.giveActions && actions.value.length > 0)
+
+const actionBarClass = computed(() =>
+	props.actionsMenu && !props.selected
+		? 'pointer-events-none opacity-0 transition-opacity group-hover/note-item-card:pointer-events-auto group-hover/note-item-card:opacity-100 has-data-[state=open]:pointer-events-auto has-data-[state=open]:opacity-100'
+		: '',
+)
+
 const shortcuts = computed(
-	() => new Map(actions.value.map((action) => [action.kbd.toLowerCase(), action.onSelect])),
+	() =>
+		new Map(
+			actions.value.map((action) => [shortcutStore.bindings[action.shortcut], action.onSelect]),
+		),
 )
 
 onKeyStroke(
-	(event) =>
-		props.selected === true &&
-		!event.ctrlKey &&
-		!event.metaKey &&
-		!event.altKey &&
-		shortcuts.value.has(event.key.toLowerCase()),
 	(event) => {
+		if (props.selected !== true || event.repeat) return false
+		const shortcut = eventToShortcut(event, true)
+		return shortcut !== null && shortcuts.value.has(shortcut)
+	},
+	(event) => {
+		const shortcut = eventToShortcut(event, true)
+		if (!shortcut) return
 		event.preventDefault()
-		shortcuts.value.get(event.key.toLowerCase())?.()
+		shortcuts.value.get(shortcut)?.()
 	},
 	{ target: cardEl },
 )
 
 // Keys reach only a focused card, so the selected card takes focus.
-watch(
-	() => props.selected,
-	(selected) => {
-		if (selected) cardEl.value?.focus()
-	},
-)
+watchEffect(() => {
+	if (props.selected && cardEl.value) cardEl.value.focus()
+})
 
 const menuItems = computed<ContextMenuItem[][]>(() =>
 	isOwn.value
@@ -235,6 +259,10 @@ const menuItems = computed<ContextMenuItem[][]>(() =>
 				],
 			]
 		: [],
+)
+
+const libraryMenuItems = computed(() =>
+	librarySpaceMenu.value ? spaceItems.value : menuItems.value,
 )
 
 const markdownComponents = { a: NoteLink, tag: NoteTag }
@@ -320,35 +348,54 @@ const absoluteHint = computed(() => {
 						<span class="max-w-24 truncate">{{ props.note.spaceName }}</span>
 					</div>
 				</div>
-				<div v-if="actions.length" class="ms-auto flex shrink-0 items-center gap-1">
-					<template v-for="action in actions" :key="action.id">
-						<UDropdownMenu v-if="action.menu" :items="action.menu" :content="{ align: 'end' }">
-							<UTooltip :text="action.label" :kbds="[action.kbd]">
+				<div
+					v-if="showActions"
+					class="ms-auto flex shrink-0 items-center gap-1"
+					:class="actionBarClass"
+				>
+					<UDropdownMenu
+						v-if="actionsMenu"
+						:items="libraryMenuItems"
+						:content="{ align: 'end' }"
+						:modal="false"
+						@update:open="onLibraryMenuOpen"
+					>
+						<UButton
+							ref="libraryTrigger"
+							:icon="appConfig.ui.icons.ellipsis"
+							color="neutral"
+							variant="ghost"
+							size="xs"
+							:tabindex="selected ? undefined : -1"
+							@click.stop
+						/>
+					</UDropdownMenu>
+					<template v-else>
+						<template v-for="action in actions" :key="action.id">
+							<UDropdownMenu v-if="action.menu" :items="action.menu" :content="{ align: 'end' }">
+								<UTooltip :text="action.label" :kbds="shortcutStore.kbds(action.shortcut)">
+									<UButton
+										ref="spaceTrigger"
+										:icon="action.icon"
+										:aria-label="action.label"
+										color="neutral"
+										variant="ghost"
+										size="xs"
+										@click.stop
+									/>
+								</UTooltip>
+							</UDropdownMenu>
+							<UTooltip v-else :text="action.label" :kbds="shortcutStore.kbds(action.shortcut)">
 								<UButton
-									ref="spaceTrigger"
-									:label="action.label"
 									:icon="action.icon"
+									:aria-label="action.label"
 									color="neutral"
 									variant="ghost"
 									size="xs"
-									@click.stop
-								>
-									<UKbd :value="action.kbd" size="sm" variant="subtle" />
-								</UButton>
+									@click.stop="action.onSelect()"
+								/>
 							</UTooltip>
-						</UDropdownMenu>
-						<UTooltip v-else :text="action.label" :kbds="[action.kbd]">
-							<UButton
-								:label="action.label"
-								:icon="action.icon"
-								color="neutral"
-								variant="ghost"
-								size="xs"
-								@click.stop="action.onSelect()"
-							>
-								<UKbd :value="action.kbd" size="sm" variant="subtle" />
-							</UButton>
-						</UTooltip>
+						</template>
 					</template>
 				</div>
 			</div>

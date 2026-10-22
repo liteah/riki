@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shortcutActions } from '~/utils/shortcuts'
+import { globalShortcutActions, noteViewShortcutActions, shortcutActions } from '~/utils/shortcuts'
 import type { ShortcutId } from '~/utils/shortcuts'
 
 definePageMeta({ layout: false, title: 'settings.shortcuts.label' })
@@ -14,17 +14,43 @@ const icons: Record<ShortcutId, string> = {
 	commandPalette: appConfig.ui.icons.search,
 	preferences: appConfig.ui.icons.settings,
 	newNote: appConfig.ui.icons.notePen,
+	previousNote: appConfig.ui.icons.arrowUp,
+	nextNote: appConfig.ui.icons.arrowDown,
+	openNote: appConfig.ui.icons.file,
+	addToSpace: appConfig.ui.icons.folderOpen,
+	toggleLater: appConfig.ui.icons.later,
+	archiveNote: appConfig.ui.icons.archive,
+	unarchiveNote: appConfig.ui.icons.reload,
+	destroyNote: appConfig.ui.icons.trash,
 }
+
+const groups = computed(() => [
+	{
+		label: t('settings.shortcuts.global'),
+		actions: globalShortcutActions,
+		allowBare: false,
+	},
+	{
+		label: t('settings.shortcuts.noteView'),
+		actions: noteViewShortcutActions,
+		allowBare: true,
+	},
+])
 
 function actionLabel(id: ShortcutId) {
 	const action = shortcutActions.find((item) => item.id === id)
 	return action ? t(action.labelKey) : ''
 }
 
-function notifyInvalid() {
+function notifyInvalid(id: ShortcutId) {
+	const global = globalShortcutActions.some((action) => action.id === id)
 	toast.add({
-		title: t('settings.shortcuts.invalid'),
-		description: t('settings.shortcuts.invalidDescription'),
+		title: t(global ? 'settings.shortcuts.globalInvalid' : 'settings.shortcuts.invalid'),
+		description: t(
+			global
+				? 'settings.shortcuts.globalInvalidDescription'
+				: 'settings.shortcuts.invalidDescription',
+		),
 		color: 'error',
 	})
 }
@@ -57,17 +83,18 @@ function resetAll() {
 				@click="resetAll"
 			/>
 		</template>
-		<SettingsItemGroup>
+		<SettingsItemGroup v-for="group in groups" :key="group.label" :label="group.label">
 			<SettingsItem
-				v-for="action in shortcutActions"
+				v-for="action in group.actions"
 				:key="action.id"
 				:label="$t(action.labelKey)"
 				:icon="icons[action.id]"
 			>
 				<SettingsShortcutInput
 					:model-value="shortcutStore.bindings[action.id]"
+					:allow-bare="group.allowBare"
 					@capture="(combo) => setShortcut(action.id, combo)"
-					@invalid="notifyInvalid"
+					@invalid="notifyInvalid(action.id)"
 				/>
 			</SettingsItem>
 		</SettingsItemGroup>

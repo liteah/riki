@@ -169,15 +169,22 @@
 		},
 		"shortcuts": {
 			"label": "Shortcuts",
+			"global": "Global",
+			"noteView": "Note views and inbox",
 			"toggleSidebar": "Toggle sidebar",
 			"openCommandPalette": "Open search and command palette",
 			"openSettings": "Open settings",
+			"previousNote": "Previous note",
+			"nextNote": "Next note",
+			"openNote": "Open note",
 			"change": "Change shortcut",
 			"recording": "Press keys...",
 			"resetAll": "Reset all",
 			"resetDone": "Shortcuts reset",
 			"invalid": "Invalid shortcut",
-			"invalidDescription": "Use a modifier such as Ctrl, Cmd, or Alt.",
+			"invalidDescription": "Press a valid key combination.",
+			"globalInvalid": "Invalid global shortcut",
+			"globalInvalidDescription": "Use a modifier such as Ctrl, Cmd, or Alt.",
 			"conflictTitle": "Shortcut not changed",
 			"conflict": "Already used by {action}."
 		}

@@ -16,6 +16,12 @@ const scrollArea = useTemplateRef<{
 	virtualizer?: { scrollToIndex: (index: number, options?: Record<string, unknown>) => void }
 }>('scrollArea')
 
+function scrollToIndex(index: number) {
+	scrollArea.value?.virtualizer?.scrollToIndex(index, { align: 'auto' })
+}
+
+const { selectedId } = useNoteListShortcuts(visibleNotes, scrollToIndex, openComposer)
+
 noteStore.start()
 
 function isFeed(value: unknown): value is NoteFeed {
@@ -23,8 +29,6 @@ function isFeed(value: unknown): value is NoteFeed {
 }
 
 const feed = ref<NoteFeed>(isFeed(route.query.tab) ? route.query.tab : noteFeed.unassigned)
-
-const selectedId = ref<string | null>(null)
 
 const tabs = computed<NavigationMenuItem[]>(() => {
 	const items: NavigationMenuItem[] = [
@@ -77,65 +81,6 @@ watch(
 	() => route.query.tab,
 	(value) => {
 		if (isFeed(value) && value !== feed.value) feed.value = value
-	},
-)
-
-watch(visibleNotes, (notes, previous) => {
-	if (!selectedId.value) return
-	if (notes.some((note) => note.id === selectedId.value)) return
-	const index = previous?.findIndex((note) => note.id === selectedId.value) ?? -1
-	selectedId.value = null
-	if (index === -1 || !notes.length) return
-	void nextTick(() => selectAt(Math.min(index, notes.length - 1)))
-})
-
-function currentIndex() {
-	return selectedId.value
-		? visibleNotes.value.findIndex((note) => note.id === selectedId.value)
-		: -1
-}
-
-function selectAt(index: number) {
-	const note = visibleNotes.value[index]
-	if (!note) return
-	selectedId.value = note.id
-	scrollArea.value?.virtualizer?.scrollToIndex(index, { align: 'auto' })
-}
-
-onKeyStroke(
-	(event) =>
-		!event.ctrlKey &&
-		!event.metaKey &&
-		!event.altKey &&
-		['j', 'k', 'enter', 'escape'].includes(event.key.toLowerCase()),
-	(event) => {
-		const target = event.target
-		const el = target instanceof HTMLElement ? target : undefined
-		if (
-			(el &&
-				(el.closest('input, textarea, select, [contenteditable="true"]') ||
-					el.isContentEditable)) ||
-			document.querySelector('[role="dialog"]') ||
-			!visibleNotes.value.length
-		) {
-			return
-		}
-		const key = event.key.toLowerCase()
-		if (key === 'j') {
-			event.preventDefault()
-			selectAt(Math.min(currentIndex() + 1, visibleNotes.value.length - 1))
-		} else if (key === 'k') {
-			event.preventDefault()
-			selectAt(Math.max(currentIndex() - 1, 0))
-		} else if (key === 'enter' && selectedId.value) {
-			const note = visibleNotes.value[currentIndex()]
-			if (note) {
-				event.preventDefault()
-				openComposer(note)
-			}
-		} else if (key === 'escape') {
-			selectedId.value = null
-		}
 	},
 )
 

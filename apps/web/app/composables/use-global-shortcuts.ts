@@ -1,7 +1,7 @@
 import { openCommandPalette } from '~/utils/command-palette'
 import { openComposer } from '~/utils/open-composer'
-import { shortcutActions } from '~/utils/shortcuts'
-import type { ShortcutId } from '~/utils/shortcuts'
+import { globalShortcutActions } from '~/utils/shortcuts'
+import type { GlobalShortcutId } from '~/utils/shortcuts'
 
 export function useGlobalShortcuts() {
 	const appConfig = useAppConfig()
@@ -14,7 +14,7 @@ export function useGlobalShortcuts() {
 		return overlay.overlays.some((item) => item.isOpen)
 	}
 
-	const handlers: Record<ShortcutId, () => void> = {
+	const handlers: Record<GlobalShortcutId, () => void> = {
 		toggleSidebar: () => {
 			viewStore.sidebarOpen = !viewStore.sidebarOpen
 		},
@@ -31,7 +31,7 @@ export function useGlobalShortcuts() {
 
 	const config = computed(() =>
 		Object.fromEntries(
-			shortcutActions.map((action) => [
+			globalShortcutActions.map((action) => [
 				shortcutStore.bindings[action.id],
 				{
 					usingInput: action.usingInput,

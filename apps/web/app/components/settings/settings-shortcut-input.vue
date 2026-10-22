@@ -3,6 +3,7 @@ import { eventToShortcut, isModifierKey, shortcutParts } from '~/utils/shortcuts
 
 const props = defineProps<{
 	modelValue: string
+	allowBare?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -31,7 +32,7 @@ function onKeydown(event: KeyboardEvent) {
 		return
 	}
 	if (isModifierKey(event.key)) return
-	const shortcut = eventToShortcut(event)
+	const shortcut = eventToShortcut(event, props.allowBare)
 	recording.value = false
 	if (!shortcut) {
 		emit('invalid')
