@@ -74,11 +74,7 @@ const processedTimeZones = computed(() => {
 		label-key="name"
 		value-key="code"
 		description-key="description"
-		:search-input="{
-			placeholder: $t('common.searchLabelPlaceholder', {
-				label: $t('settings.preferences.timeZone'),
-			}),
-		}"
+		:search-input="{ placeholder: $t('settings.preferences.timeZoneSearchPlaceholder') }"
 		:ui="{ itemLabel: 'text-sm', itemDescription: 'text-xs' }"
 	/>
 </template>

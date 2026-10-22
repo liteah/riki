@@ -27,9 +27,9 @@ const visibility = ref<NoteVisibility[]>([])
 const pinnedOnly = ref(false)
 
 const isEditing = computed(() => Boolean(props.view))
-const title = computed(() => (isEditing.value ? t('view.editTitle') : t('view.createTitle')))
+const title = computed(() => (isEditing.value ? t('view.editTitle') : t('view.new')))
 const description = computed(() =>
-	isEditing.value ? t('view.editDescription') : t('view.createDescription'),
+	isEditing.value ? t('view.editDescription') : t('view.newDescription'),
 )
 
 watch(

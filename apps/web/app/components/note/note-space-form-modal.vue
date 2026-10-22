@@ -23,9 +23,9 @@ watch(
 	{ immediate: true },
 )
 
-const title = computed(() => (props.space ? t('space.editTitle') : t('space.createTitle')))
+const title = computed(() => (props.space ? t('space.editTitle') : t('space.new')))
 const description = computed(() =>
-	props.space ? t('space.editDescription') : t('space.createDescription'),
+	props.space ? t('space.editDescription') : t('space.newDescription'),
 )
 
 async function handleConfirm() {
@@ -45,7 +45,7 @@ async function handleConfirm() {
 		}
 	} catch (error) {
 		toast.add({
-			title: t('common.actionFailed', { action: t('space.create') }),
+			title: t('common.actionFailed', { action: t('common.create') }),
 			description: error instanceof Error ? error.message : undefined,
 			color: 'error',
 		})

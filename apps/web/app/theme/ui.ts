@@ -16,7 +16,7 @@ export const tagChip = tv({
 const selectSlots = {
 	slots: {
 		content: 'min-w-fit',
-		trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
+		trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform',
 	},
 }
 

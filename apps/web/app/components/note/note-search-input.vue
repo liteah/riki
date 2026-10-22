@@ -42,7 +42,7 @@ const filterItems = computed<DropdownMenuItem[][]>(() => [
 			label: t('view.tags'),
 			icon: appConfig.ui.icons.hash,
 			filter: {
-				placeholder: t('common.searchLabelPlaceholder', { label: t('view.tags') }),
+				placeholder: t('view.tagsSearchPlaceholder'),
 			},
 			children: [
 				tagStore.tags.map((tag) => ({
@@ -90,7 +90,7 @@ function closeOnEmpty() {
 			v-if="expanded"
 			:model-value="noteStore.keyword"
 			:icon="appConfig.ui.icons.search"
-			:placeholder="$t('common.searchPlaceholder')"
+			:placeholder="$t('note.searchPlaceholder')"
 			color="neutral"
 			variant="soft"
 			class="max-w-xs flex-1"

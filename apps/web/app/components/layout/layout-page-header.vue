@@ -12,7 +12,7 @@ defineProps<{
 
 <template>
 	<div
-		class="grid h-(--ui-header-height) w-full shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2 px-2"
+		class="sticky top-0 z-40 grid h-(--ui-header-height) w-full shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2 bg-default px-2"
 	>
 		<div class="flex min-w-0 items-center gap-1">
 			<template v-if="!sidebarOpen">

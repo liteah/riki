@@ -10,9 +10,6 @@
 		@apply border-default select-none selection:bg-primary/50;
 		@apply scrollbar-thin scrollbar-thumb-[var(--ui-border)];
 	}
-	html {
-		@apply scrollbar-none;
-	}
 	html,
 	body {
 		text-autospace: normal;

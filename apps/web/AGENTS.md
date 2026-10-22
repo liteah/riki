@@ -62,6 +62,10 @@
 ## i18n
 
 - Every user-facing string goes in `i18n/locales/*.json`.
+- Scope search placeholders to the domain they filter; do not add a generic `common` search placeholder.
+- Define state and action labels separately.
+- Use one term per concept.
+- Remove scope-local keys whose meaning is already covered elsewhere. If a scope has a `new` label, do not also add a `create` label for the same action; collapse fully duplicated labels into one shared key and keep redundancy to a minimum.
 
 ## Server and shared
 

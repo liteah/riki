@@ -46,7 +46,7 @@ function keyExpiry(key: ApiKeyItem) {
 }
 
 function keyMeta(key: ApiKeyItem) {
-	const lines = [t('settings.apiKeys.createdAt', { date: formatDateTime(key.createdAt) })]
+	const lines = [t('common.createdAt', { time: formatDateTime(key.createdAt) })]
 	if (key.lastRequest)
 		lines.push(t('settings.apiKeys.lastUsedAt', { date: formatDateTime(key.lastRequest) }))
 	if (key.requestCount > 0)
@@ -139,7 +139,7 @@ function readExpiry(action: string): { expiresIn: number | null } | null {
 
 async function create() {
 	if (busy.value) return false
-	const action = t('settings.apiKeys.create')
+	const action = t('common.create')
 	const trimmed = readName(action)
 	if (!trimmed) return false
 	const expiry = readExpiry(action)
@@ -293,14 +293,14 @@ async function copyCreated() {
 			<template #actions>
 				<UButton
 					:icon="appConfig.ui.icons.plus"
-					:label="$t('settings.apiKeys.create')"
+					:label="$t('settings.apiKeys.new')"
 					@click="openCreate"
 				/>
 			</template>
 		</UEmpty>
 		<DialogModal
 			v-model:open="createOpen"
-			:title="$t('settings.apiKeys.create')"
+			:title="$t('settings.apiKeys.new')"
 			:icon="appConfig.ui.icons.key"
 			:confirm-label="$t('common.create')"
 			:on-confirm="create"

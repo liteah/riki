@@ -36,11 +36,7 @@ const selectedIcon = computed(() => {
 		:content="{ align: 'start', side: 'top' }"
 		:icon="selectedIcon"
 		:clear-icon="appConfig.ui.icons.close"
-		:search-input="{
-			placeholder: $t('common.searchLabelPlaceholder', {
-				label: $t('space.label'),
-			}),
-		}"
+		:search-input="{ placeholder: $t('space.searchPlaceholder') }"
 		color="neutral"
 		variant="ghost"
 		clear

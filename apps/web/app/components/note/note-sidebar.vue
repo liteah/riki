@@ -47,7 +47,7 @@ const targetActions = computed<ContextMenuItem[][]>(() =>
 		? [
 				[
 					{
-						label: t('view.unpin'),
+						label: t('common.unpin'),
 						icon: appConfig.ui.icons.pinOff,
 						onSelect: () => {
 							if (contextPinnedId.value) void viewStore.unpin(contextPinnedId.value)
@@ -167,12 +167,12 @@ function unpin(kind: SidebarKind, id: string) {
 function pinAction(kind: SidebarKind, id: string): DropdownMenuItem {
 	return viewStore.isPinned(kind, id)
 		? {
-				label: t('view.unpin'),
+				label: t('common.unpin'),
 				icon: appConfig.ui.icons.pinOff,
 				onSelect: () => unpin(kind, id),
 			}
 		: {
-				label: t('view.pin'),
+				label: t('common.pin'),
 				icon: appConfig.ui.icons.pin,
 				onSelect: () => void viewStore.pin(kind, id),
 			}
