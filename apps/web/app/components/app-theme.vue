@@ -37,22 +37,29 @@ const locale = defineLocale<Messages>({
 			close: $t('common.close'),
 		},
 		calendar: {
+			label: '',
+			monthPicker: '',
 			nextMonth: '',
 			nextYear: '',
 			prevMonth: '',
 			prevYear: '',
+			yearPicker: '',
 		},
 		carousel: {
 			dots: '',
 			goto: '',
 			next: '',
 			prev: '',
+			roledescription: '',
+			slide: '',
 		},
 		chatPrompt: {
 			placeholder: '',
 		},
 		chatPromptSubmit: {
 			label: '',
+			reload: '',
+			stop: '',
 		},
 		colorMode: {
 			dark: $t('settings.preferences.colorMode.dark'),
@@ -67,6 +74,7 @@ const locale = defineLocale<Messages>({
 			noData: $t('common.noData'),
 			noMatch: $t('common.noMatch'),
 			placeholder: '',
+			results: '',
 		},
 		contentSearch: {
 			links: '',
@@ -114,10 +122,12 @@ const locale = defineLocale<Messages>({
 			create: '',
 			noData: $t('common.noData'),
 			noMatch: $t('common.noMatch'),
+			trigger: '',
 		},
 		inputNumber: {
 			decrement: '',
 			increment: '',
+			roledescription: '',
 		},
 		listbox: {
 			noData: $t('common.noData'),
@@ -169,6 +179,59 @@ const locale = defineLocale<Messages>({
 		},
 		table: {
 			noData: $t('common.noData'),
+		},
+		breadcrumb: {
+			label: '',
+		},
+		chatMessages: {
+			autoScroll: '',
+		},
+		inputDate: {
+			day: '',
+			dayPeriod: '',
+			era: '',
+			hour: '',
+			minute: '',
+			month: '',
+			second: '',
+			timeZoneName: '',
+			year: '',
+		},
+		inputRating: {
+			rate: '',
+		},
+		inputTime: {
+			dayPeriod: '',
+			hour: '',
+			minute: '',
+			second: '',
+			timeZoneName: '',
+		},
+		pagination: {
+			first: '',
+			last: '',
+			next: '',
+			page: '',
+			prev: '',
+		},
+		pinInput: {
+			input: '',
+		},
+		skeleton: {
+			label: '',
+		},
+		slider: {
+			max: '',
+			min: '',
+			thumb: '',
+			value: '',
+		},
+		stepper: {
+			label: '',
+		},
+		toaster: {
+			label: '',
+			viewport: '',
 		},
 		toast: {
 			close: $t('common.close'),
