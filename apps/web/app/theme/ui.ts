@@ -3,7 +3,7 @@ import type * as ui from '#build/ui'
 import { tv } from 'tailwind-variants'
 
 export const tagChip = tv({
-	base: 'mention mx-0.5 inline-flex items-center rounded-md px-1.5 py-0.5 align-baseline text-xs font-medium whitespace-nowrap',
+	base: 'mention mx-0.5 inline-flex items-center rounded-md px-1.5 py-0.5 align-baseline text-xs font-normal whitespace-nowrap',
 	variants: {
 		state: {
 			active: 'bg-primary/10 text-primary',
@@ -84,6 +84,7 @@ export const uiTheme = {
 		slots: {
 			link: 'overflow-hidden has-data-[state=open]:before:bg-elevated/50',
 			separator: 'px-0 hidden',
+			label: 'font-normal text-muted py-1',
 		},
 		variants: {
 			orientation: {
@@ -104,6 +105,18 @@ export const uiTheme = {
 					overlay: 'bg-black/10 dark:bg-black/20',
 				},
 			},
+		},
+	},
+	commandPalette: {
+		slots: {
+			root: 'divide-none',
+			label: 'font-normal text-muted',
+			input: '[&>input]:h-10',
+		},
+	},
+	dropdownMenu: {
+		slots: {
+			label: 'font-normal',
 		},
 	},
 	calendar: {

@@ -27,6 +27,14 @@ export function useGlobalShortcuts() {
 			if (!session.value.data?.user || hasOpenOverlay()) return
 			openComposer()
 		},
+		inbox: () => {
+			if (hasOpenOverlay()) return
+			void navigateTo('/inbox')
+		},
+		library: () => {
+			if (hasOpenOverlay()) return
+			void navigateTo('/')
+		},
 	}
 
 	const config = computed(() =>

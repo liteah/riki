@@ -177,6 +177,8 @@
 			"toggleSidebar": "切換側邊欄",
 			"openCommandPalette": "打開搜尋同指令面板",
 			"openSettings": "打開設定",
+			"inbox": "打開收件箱",
+			"library": "打開筆記庫",
 			"previousNote": "上一則筆記",
 			"nextNote": "下一則筆記",
 			"openNote": "打開筆記",

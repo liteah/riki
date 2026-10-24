@@ -177,6 +177,8 @@
 			"toggleSidebar": "Toggle sidebar",
 			"openCommandPalette": "Open search and command palette",
 			"openSettings": "Open settings",
+			"inbox": "Open inbox",
+			"library": "Open library",
 			"previousNote": "Previous note",
 			"nextNote": "Next note",
 			"openNote": "Open note",

@@ -154,7 +154,6 @@ async function deleteAccount() {
 		<DialogModal
 			v-model:open="emailOpen"
 			:title="$t('auth.email')"
-			:icon="appConfig.ui.icons.mail"
 			:confirm-label="$t('common.save')"
 			:on-confirm="saveEmail"
 		>
@@ -170,7 +169,6 @@ async function deleteAccount() {
 		<DialogModal
 			v-model:open="passwordOpen"
 			:title="$t('auth.password')"
-			:icon="appConfig.ui.icons.lock"
 			:confirm-label="$t('common.save')"
 			:on-confirm="savePassword"
 		>
@@ -205,7 +203,6 @@ async function deleteAccount() {
 			destructive
 			:title="$t('settings.account.deleteAccount')"
 			:description="$t('settings.account.deleteDescription')"
-			:icon="appConfig.ui.icons.caution"
 			:confirm-label="$t('common.delete')"
 			:on-confirm="deleteAccount"
 		>

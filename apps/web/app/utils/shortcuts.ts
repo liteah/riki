@@ -1,5 +1,11 @@
 export const globalShortcutActions = [
 	{
+		id: 'newNote',
+		defaultKey: 'meta_e',
+		labelKey: 'note.newNote',
+		usingInput: false,
+	},
+	{
 		id: 'toggleSidebar',
 		defaultKey: 'meta_b',
 		labelKey: 'settings.shortcuts.toggleSidebar',
@@ -12,16 +18,22 @@ export const globalShortcutActions = [
 		usingInput: true,
 	},
 	{
+		id: 'library',
+		defaultKey: 'meta_l',
+		labelKey: 'settings.shortcuts.library',
+		usingInput: false,
+	},
+	{
+		id: 'inbox',
+		defaultKey: 'meta_i',
+		labelKey: 'settings.shortcuts.inbox',
+		usingInput: false,
+	},
+	{
 		id: 'preferences',
 		defaultKey: 'meta_,',
 		labelKey: 'settings.shortcuts.openSettings',
 		usingInput: true,
-	},
-	{
-		id: 'newNote',
-		defaultKey: 'meta_e',
-		labelKey: 'note.newNote',
-		usingInput: false,
 	},
 ] as const
 
@@ -55,11 +67,6 @@ export const noteViewShortcutActions = [
 		id: 'archiveNote',
 		defaultKey: 'e',
 		labelKey: 'note.archive',
-	},
-	{
-		id: 'unarchiveNote',
-		defaultKey: 'u',
-		labelKey: 'note.unarchive',
 	},
 	{
 		id: 'destroyNote',

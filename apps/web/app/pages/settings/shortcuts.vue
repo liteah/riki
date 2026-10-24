@@ -10,17 +10,18 @@ const appConfig = useAppConfig()
 const shortcutStore = useShortcutStore()
 
 const icons: Record<ShortcutId, string> = {
+	newNote: appConfig.ui.icons.notePen,
 	toggleSidebar: appConfig.ui.icons.sidebar,
 	commandPalette: appConfig.ui.icons.search,
 	preferences: appConfig.ui.icons.settings,
-	newNote: appConfig.ui.icons.notePen,
+	inbox: appConfig.ui.icons.inbox,
+	library: appConfig.ui.icons.note,
 	previousNote: appConfig.ui.icons.arrowUp,
 	nextNote: appConfig.ui.icons.arrowDown,
-	openNote: appConfig.ui.icons.file,
-	addToSpace: appConfig.ui.icons.folderOpen,
+	openNote: appConfig.ui.icons.notePen,
+	addToSpace: appConfig.ui.icons.space,
 	toggleLater: appConfig.ui.icons.later,
 	archiveNote: appConfig.ui.icons.archive,
-	unarchiveNote: appConfig.ui.icons.reload,
 	destroyNote: appConfig.ui.icons.trash,
 }
 

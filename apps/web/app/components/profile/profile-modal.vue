@@ -9,7 +9,6 @@ const open = defineModel<boolean>('open', { default: false })
 
 const { t } = useI18n()
 const toast = useToast()
-const appConfig = useAppConfig()
 const authClient = useAuth()
 
 const session = authClient.useSession()
@@ -91,7 +90,6 @@ async function handleSave() {
 	<DialogModal
 		v-model:open="open"
 		:title="$t('profile.edit')"
-		:icon="appConfig.ui.icons.user"
 		:confirm-label="$t('common.save')"
 		:on-confirm="handleSave"
 		@close="open = false"

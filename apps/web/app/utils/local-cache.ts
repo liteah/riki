@@ -1,4 +1,4 @@
-const PREFIX = 'rikki'
+const PREFIX = 'riki'
 
 export const localKeys = {
 	notes: `${PREFIX}.notes`,

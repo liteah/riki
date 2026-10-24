@@ -301,7 +301,6 @@ async function copyCreated() {
 		<DialogModal
 			v-model:open="createOpen"
 			:title="$t('settings.apiKeys.new')"
-			:icon="appConfig.ui.icons.key"
 			:confirm-label="$t('common.create')"
 			:on-confirm="create"
 			@close="openCreated"
@@ -312,7 +311,6 @@ async function copyCreated() {
 			v-model:open="createdOpen"
 			:title="$t('settings.apiKeys.created')"
 			:description="$t('settings.apiKeys.createdDescription')"
-			:icon="appConfig.ui.icons.key"
 			:confirm-label="$t('common.copy')"
 			:cancel-label="$t('common.close')"
 			:on-confirm="copyCreated"
@@ -342,7 +340,6 @@ async function copyCreated() {
 		<DialogModal
 			v-model:open="editOpen"
 			:title="$t('settings.apiKeys.edit')"
-			:icon="appConfig.ui.icons.key"
 			:confirm-label="$t('common.save')"
 			:on-confirm="updateKey"
 		>
@@ -353,7 +350,6 @@ async function copyCreated() {
 			destructive
 			:title="$t('settings.apiKeys.delete')"
 			:description="$t('settings.apiKeys.deleteDescription')"
-			:icon="appConfig.ui.icons.caution"
 			:confirm-label="$t('common.delete')"
 			:on-confirm="remove"
 		/>

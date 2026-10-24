@@ -2,7 +2,6 @@
 const props = defineProps<{
 	title?: string
 	description?: string
-	icon?: string
 	destructive?: boolean
 	confirmLabel?: string
 	cancelLabel?: string
@@ -30,16 +29,9 @@ async function handleConfirm() {
 <template>
 	<UModal v-model:open="open" :close="{ onClick: close }">
 		<template #header>
-			<div class="flex w-full flex-col items-center text-center">
-				<div
-					v-if="icon"
-					class="mb-2 inline-flex size-10 items-center justify-center rounded-full"
-					:class="destructive ? 'bg-error/10 text-error dark:bg-error/25' : 'bg-muted'"
-				>
-					<UIcon :name="icon" class="size-6" />
-				</div>
+			<div class="flex w-full flex-col items-start text-left">
 				<span v-if="title" class="font-semibold">{{ title }}</span>
-				<span v-if="description" class="mt-1 text-sm text-balance text-muted md:text-pretty">
+				<span v-if="description" class="mt-1 text-sm text-pretty text-muted">
 					{{ description }}
 				</span>
 			</div>
@@ -50,19 +42,21 @@ async function handleConfirm() {
 		</template>
 
 		<template #footer>
-			<UButton
-				:label="cancelLabel ?? $t('common.cancel')"
-				color="neutral"
-				variant="subtle"
-				block
-				@click="close"
-			/>
-			<UButton
-				:label="confirmLabel ?? $t('common.confirm')"
-				block
-				:color="destructive ? 'error' : 'primary'"
-				@click="handleConfirm"
-			/>
+			<div class="flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
+				<UButton
+					:label="cancelLabel ?? $t('common.cancel')"
+					color="neutral"
+					variant="subtle"
+					class="w-full justify-center sm:w-auto"
+					@click="close"
+				/>
+				<UButton
+					:label="confirmLabel ?? $t('common.confirm')"
+					:color="destructive ? 'error' : 'primary'"
+					class="w-full justify-center sm:w-auto"
+					@click="handleConfirm"
+				/>
+			</div>
 		</template>
 	</UModal>
 </template>

@@ -107,7 +107,6 @@ function deleteCurrent() {
 		confirmDialog.open({
 			title: t('view.deleteTitle'),
 			description: t('view.deleteDescription', { name: view.name }),
-			icon: appConfig.ui.icons.trash,
 			destructive: true,
 			onConfirm: () => void attempt(t('common.delete'), () => viewStore.deleteView(view.id)),
 		})
@@ -118,7 +117,6 @@ function deleteCurrent() {
 		confirmDialog.open({
 			title: t('space.deleteTitle'),
 			description: t('space.deleteDescription'),
-			icon: appConfig.ui.icons.trash,
 			destructive: true,
 			onConfirm: () => void spaceStore.deleteSpace(space.id),
 		})
@@ -129,7 +127,6 @@ function deleteCurrent() {
 		confirmDialog.open({
 			title: t('tag.deleteTitle'),
 			description: t('tag.deleteDescription', { name: tag.name }),
-			icon: appConfig.ui.icons.trash,
 			destructive: true,
 			onConfirm: () => void tagStore.deleteTag(tag.id),
 		})
