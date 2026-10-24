@@ -35,7 +35,7 @@ const tabs = computed<NavigationMenuItem[]>(() => {
 		{ label: t('inbox.unassigned'), value: noteFeed.unassigned },
 		{ label: t('inbox.later'), value: noteFeed.later },
 		{ label: t('inbox.review'), value: 'review', disabled: true },
-		{ label: t('inbox.archived'), value: noteFeed.archived },
+		{ label: t('note.statusArchived'), value: noteFeed.archived },
 		{ label: t('inbox.explore'), value: noteFeed.explore },
 	]
 	return items.map((tab) => ({

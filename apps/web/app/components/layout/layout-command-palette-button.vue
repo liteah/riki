@@ -12,7 +12,7 @@ const shortcutStore = useShortcutStore()
 			color="neutral"
 			variant="ghost"
 			:aria-label="$t('common.search')"
-			@click="openCommandPalette"
+			@click="openCommandPalette()"
 		/>
 	</UTooltip>
 </template>

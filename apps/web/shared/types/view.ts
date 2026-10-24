@@ -1,5 +1,5 @@
 import * as z from 'zod'
-import { noteVisibility } from './note'
+import { noteStatus, noteVisibility } from './note'
 
 export interface View {
 	id: string
@@ -39,9 +39,37 @@ export type SidebarTarget = { kind: BuiltinView | SidebarKind; id: string }
 
 export const viewFilterSchema = z.object({
 	spaceId: z.string().trim().min(1).nullable().optional(),
+	spaceIds: z.preprocess(
+		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
+		z.array(z.string().trim().min(1)).optional(),
+	),
+	notSpaceIds: z.preprocess(
+		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
+		z.array(z.string().trim().min(1)).optional(),
+	),
+	viewIds: z.preprocess(
+		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
+		z.array(z.string().trim().min(1)).optional(),
+	),
+	notViewIds: z.preprocess(
+		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
+		z.array(z.string().trim().min(1)).optional(),
+	),
 	tagIds: z.array(z.string().trim().min(1)).optional(),
+	notTagIds: z.array(z.string().trim().min(1)).optional(),
 	visibility: z.array(z.enum(noteVisibility)).optional(),
-	pinnedOnly: z.boolean().optional(),
+	notVisibility: z.preprocess(
+		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
+		z.array(z.enum(noteVisibility)).optional(),
+	),
+	status: z.preprocess(
+		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
+		z.array(z.enum(noteStatus)).optional(),
+	),
+	notStatus: z.preprocess(
+		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
+		z.array(z.enum(noteStatus)).optional(),
+	),
 	q: z.string().trim().min(1).optional(),
 })
 export type ViewFilter = z.infer<typeof viewFilterSchema>

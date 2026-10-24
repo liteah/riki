@@ -3,9 +3,16 @@ import type { CommandPaletteGroup, CommandPaletteItem } from '@nuxt/ui'
 import { LazyNoteSpaceFormModal, LazyNoteViewFormModal } from '#components'
 import { noteStatus } from '#shared/types/note'
 import type { ListNotesResponse, NoteListItem } from '#shared/types/note'
+import type { CommandPaletteScope } from '~/utils/command-palette'
+import { noteQueryFromFilter } from '~/utils/note-query'
 
 // Keep this modal mounted after close so its child form overlays are created once.
 defineOptions({ inheritAttrs: false })
+
+const props = defineProps<{
+	scope?: CommandPaletteScope
+	query?: string
+}>()
 
 const open = defineModel<boolean>('open', { default: false })
 
@@ -17,14 +24,8 @@ const { t } = useI18n()
 const appConfig = useAppConfig()
 const overlay = useOverlay()
 const session = useAuth().useSession()
-const spaceStore = useSpaceStore()
-const tagStore = useTagStore()
-const viewStore = useViewStore()
 const noteStore = useNoteStore()
-const { spaces } = storeToRefs(spaceStore)
-const { tags } = storeToRefs(tagStore)
-const { views } = storeToRefs(viewStore)
-const { notes } = storeToRefs(noteStore)
+const { notes, explicitFilter } = storeToRefs(noteStore)
 
 const viewerId = computed(() => session.value.data?.user?.id)
 const signedIn = computed(() => Boolean(viewerId.value))
@@ -50,11 +51,8 @@ watch(
 		searchId++
 		searching.value = false
 		noteResults.value = []
-		searchTerm.value = ''
-		if (!isOpen) return
-		void spaceStore.load()
-		void tagStore.load()
-		void viewStore.load()
+		if (isOpen && props.scope) applyScope(props.scope)
+		searchTerm.value = props.query ?? ''
 	},
 	{ immediate: true },
 )
@@ -105,36 +103,21 @@ function noteItem(note: NoteListItem): CommandPaletteItem {
 	}
 }
 
-const recentNotes = computed(() => {
-	if (!viewerId.value) return []
-	return notes.value
-		.filter(
-			(note) =>
-				(!note.userId || note.userId === viewerId.value) && note.status !== noteStatus.archived,
-		)
-		.slice(0, 5)
+const noteGroup = computed<CommandPaletteGroup | null>(() => {
+	if (!signedIn.value || !searchTerm.value.trim() || !noteResults.value.length) return null
+	return {
+		id: 'notes',
+		label: t('commandPalette.notes'),
+		ignoreFilter: true,
+		items: noteResults.value.map(noteItem),
+	}
 })
 
-const noteGroup = computed<CommandPaletteGroup | null>(() => {
-	if (!signedIn.value) return null
-	const term = searchTerm.value.trim()
-	if (term) {
-		if (!noteResults.value.length) return null
-		return {
-			id: 'notes',
-			label: t('commandPalette.notes'),
-			ignoreFilter: true,
-			items: noteResults.value.map(noteItem),
-		}
-	}
-	if (!recentNotes.value.length) return null
-	return {
-		id: 'recent-notes',
-		label: t('commandPalette.recentNotes'),
-		ignoreFilter: true,
-		items: recentNotes.value.map(noteItem),
-	}
-})
+function applyScope(scope: CommandPaletteScope) {
+	if (scope.kind === 'space') noteStore.explicitFilter = { spaceIds: [scope.id] }
+	else if (scope.kind === 'tag') noteStore.explicitFilter = { tagIds: [scope.id] }
+	else noteStore.explicitFilter = { viewIds: [scope.id] }
+}
 
 function createNote() {
 	close()
@@ -146,10 +129,10 @@ function createSpace() {
 	spaceFormModal.open({ space: null })
 }
 
-function createView() {
+function saveView() {
 	const filter = { ...noteStore.activeFilter }
 	close()
-	viewFormModal.open({ view: null, filter })
+	viewFormModal.open({ view: null, filter, nameOnly: true })
 }
 
 const commands = computed<CommandPaletteItem[]>(() => {
@@ -162,13 +145,8 @@ const commands = computed<CommandPaletteItem[]>(() => {
 		},
 		{
 			label: t('space.new'),
-			icon: appConfig.ui.icons.plus,
+			icon: appConfig.ui.icons.folder,
 			onSelect: createSpace,
-		},
-		{
-			label: t('view.new'),
-			icon: appConfig.ui.icons.plus,
-			onSelect: createView,
 		},
 	]
 })
@@ -183,50 +161,15 @@ const groups = computed<CommandPaletteGroup[]>(() => {
 		})
 	}
 	if (noteGroup.value) rows.push(noteGroup.value)
+	const navigation: CommandPaletteItem[] = [
+		navItem(t('note.library'), appConfig.ui.icons.note, '/'),
+		navItem(t('note.inbox'), appConfig.ui.icons.inbox, '/inbox'),
+	]
 	rows.push({
-		id: 'go-to',
-		label: t('commandPalette.goTo'),
-		items: [
-			navItem(t('note.library'), appConfig.ui.icons.note, '/'),
-			navItem(t('note.inbox'), appConfig.ui.icons.inbox, '/inbox'),
-		],
+		id: 'navigate',
+		label: t('commandPalette.navigate'),
+		items: navigation,
 	})
-	if (views.value.length) {
-		rows.push({
-			id: 'views',
-			label: t('view.label'),
-			items: views.value.map((view) =>
-				navItem(view.name, appConfig.ui.icons.file, {
-					path: '/',
-					query: { view: view.id },
-				}),
-			),
-		})
-	}
-	if (spaces.value.length) {
-		rows.push({
-			id: 'spaces',
-			label: t('space.label'),
-			items: spaces.value.map((space) =>
-				navItem(space.name, spaceStore.iconForSpace(space), {
-					path: '/',
-					query: { space: space.id },
-				}),
-			),
-		})
-	}
-	if (tags.value.length) {
-		rows.push({
-			id: 'tags',
-			label: t('tag.label'),
-			items: tags.value.map((tag) =>
-				navItem(tag.name, appConfig.ui.icons.hash, {
-					path: '/',
-					query: { tag: tag.id },
-				}),
-			),
-		})
-	}
 	rows.push({
 		id: 'settings',
 		label: t('settings.label'),
@@ -263,7 +206,7 @@ watch(searchTerm, (value) => {
 	searching.value = Boolean(term && signedIn.value)
 })
 
-watch([debouncedSearchTerm, viewerId], async ([value]) => {
+watch([debouncedSearchTerm, viewerId, explicitFilter], async ([value]) => {
 	const term = value.trim()
 	const id = ++searchId
 	if (!term || !signedIn.value) {
@@ -273,7 +216,7 @@ watch([debouncedSearchTerm, viewerId], async ([value]) => {
 	searching.value = true
 	try {
 		const data = await $fetch<ListNotesResponse>('/api/notes', {
-			query: { q: term, limit: 8 },
+			query: { limit: 8, ...noteQueryFromFilter({ ...explicitFilter.value, q: term }) },
 		})
 		if (id !== searchId) return
 		noteResults.value = data.items.filter((note) => note.userId === viewerId.value)
@@ -299,11 +242,29 @@ watch([debouncedSearchTerm, viewerId], async ([value]) => {
 				:loading="searching"
 				:placeholder="t('commandPalette.placeholder')"
 				:close="true"
-				:back="false"
 				preserve-group-order
 				class="h-96 max-h-[calc(100dvh-4rem)]"
 				@update:open="onOpenChange"
 			>
+				<template #close>
+					<div class="flex items-center gap-1">
+						<NoteFilterMenu
+							v-if="signedIn"
+							:model-value="explicitFilter"
+							@update:model-value="noteStore.explicitFilter = $event"
+							@create-space="createSpace"
+							@save-view="saveView"
+						/>
+						<UButton
+							:icon="appConfig.ui.icons.close"
+							color="neutral"
+							variant="ghost"
+							size="sm"
+							:aria-label="t('common.close')"
+							@click="close"
+						/>
+					</div>
+				</template>
 				<template #empty>
 					{{ t('common.noMatch') }}
 				</template>

@@ -17,6 +17,7 @@
 		"save": "保存",
 		"saved": "已保存",
 		"toggle": "切换",
+		"more": "更多",
 		"search": "搜索",
 		"required": "{label}不能为空",
 		"placeholder": "请输入{label}",
@@ -36,8 +37,7 @@
 		"placeholder": "输入命令或搜索…",
 		"commands": "命令",
 		"notes": "笔记",
-		"recentNotes": "最近笔记",
-		"goTo": "前往"
+		"navigate": "导航"
 	},
 	"auth": {
 		"signIn": "登录",
@@ -76,12 +76,13 @@
 		"updatedAt": "更新于 {time}",
 		"deleteTitle": "删除笔记",
 		"deleteDescription": "确定要删除这条笔记吗？此操作无法撤销。",
-		"searchPlaceholder": "搜索笔记…",
 		"archive": "归档",
 		"unarchive": "取消归档",
 		"addToSpace": "添加到空间",
 		"removeFromSpace": "移出空间",
 		"later": "稍后看",
+		"statusNormal": "常规",
+		"statusArchived": "已归档",
 		"unlater": "取消稍后",
 		"laterEmptyTitle": "没有稍后看的笔记",
 		"archivedEmptyTitle": "没有已归档的笔记",
@@ -93,7 +94,6 @@
 		"unassigned": "未归类",
 		"later": "稍后看",
 		"review": "回顾",
-		"archived": "已归档",
 		"explore": "探索"
 	},
 	"profile": {
@@ -118,6 +118,7 @@
 	},
 	"tag": {
 		"label": "标签",
+		"searchPlaceholder": "搜索标签…",
 		"deleteTitle": "删除标签",
 		"deleteDescription": "删除标签 {name}？笔记内容不受影响，仅移除该标签。"
 	},
@@ -193,9 +194,14 @@
 		"label": "视图",
 		"name": "名称",
 		"new": "新增视图",
-		"tags": "标签",
-		"tagsSearchPlaceholder": "搜索标签…",
-		"pinnedOnly": "仅看已置顶",
+		"saveFilter": "将当前筛选保存为视图",
+		"saveFilterDescription": "为视图命名，当前筛选会一并保存。",
+		"searchPlaceholder": "搜索视图…",
+		"status": "状态",
+		"filterIs": "是",
+		"filterIsNot": "不是",
+		"filterContains": "包含",
+		"filterNotContains": "不包含",
 		"clearFilter": "清除筛选",
 		"editTitle": "重命名视图",
 		"deleteTitle": "删除视图",

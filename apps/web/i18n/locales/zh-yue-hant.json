@@ -17,6 +17,7 @@
 		"save": "儲存",
 		"saved": "已儲存",
 		"toggle": "切換",
+		"more": "更多",
 		"search": "搜尋",
 		"required": "{label}唔可以留空",
 		"placeholder": "請輸入{label}",
@@ -36,8 +37,7 @@
 		"placeholder": "輸入命令或搜尋…",
 		"commands": "命令",
 		"notes": "筆記",
-		"recentNotes": "最近筆記",
-		"goTo": "前往"
+		"navigate": "導覽"
 	},
 	"auth": {
 		"signIn": "登入",
@@ -76,12 +76,13 @@
 		"updatedAt": "更新於 {time}",
 		"deleteTitle": "刪除筆記",
 		"deleteDescription": "確定要刪除呢條筆記嗎？呢個動作冇得還原。",
-		"searchPlaceholder": "搵筆記…",
 		"archive": "封存",
 		"unarchive": "取消封存",
 		"addToSpace": "加入空間",
 		"removeFromSpace": "移出空間",
 		"later": "遲啲睇",
+		"statusNormal": "常規",
+		"statusArchived": "已封存",
 		"unlater": "取消遲啲睇",
 		"laterEmptyTitle": "冇遲啲睇嘅筆記",
 		"archivedEmptyTitle": "冇已封存嘅筆記",
@@ -93,7 +94,6 @@
 		"unassigned": "未歸類",
 		"later": "遲啲睇",
 		"review": "回顧",
-		"archived": "已封存",
 		"explore": "探索"
 	},
 	"profile": {
@@ -118,6 +118,7 @@
 	},
 	"tag": {
 		"label": "標籤",
+		"searchPlaceholder": "搵標籤…",
 		"deleteTitle": "刪除標籤",
 		"deleteDescription": "刪除標籤 {name}？筆記冇事，只會攞走呢個標籤。"
 	},
@@ -193,9 +194,14 @@
 		"label": "檢視",
 		"name": "名稱",
 		"new": "新增檢視",
-		"tags": "標籤",
-		"tagsSearchPlaceholder": "搵標籤…",
-		"pinnedOnly": "淨睇已置頂",
+		"saveFilter": "將目前篩選儲存為檢視",
+		"saveFilterDescription": "為檢視命名，目前篩選會一併儲存。",
+		"searchPlaceholder": "搵檢視…",
+		"status": "狀態",
+		"filterIs": "係",
+		"filterIsNot": "唔係",
+		"filterContains": "包含",
+		"filterNotContains": "唔包含",
 		"clearFilter": "清除篩選",
 		"editTitle": "重新命名檢視",
 		"deleteTitle": "刪除檢視",

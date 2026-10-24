@@ -59,7 +59,7 @@ watch(() => visibleNotes.value[0]?.id, scrollToTop)
 	<div class="relative flex min-w-0 flex-1 flex-col items-center overflow-hidden">
 		<LayoutPageHeader :title="title" :label="label">
 			<template #right>
-				<NoteSearchInput />
+				<NoteLibraryMenu />
 			</template>
 		</LayoutPageHeader>
 		<UScrollArea

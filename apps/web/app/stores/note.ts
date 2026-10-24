@@ -1,6 +1,8 @@
 import { skipHydrate } from 'pinia'
 import { noteFeed, noteStatus, noteVisibility } from '#shared/types/note'
 import { localKeys } from '~/utils/local-cache'
+import { mergeFilters } from '~/utils/note-filter'
+import { noteQueryFromFilter } from '~/utils/note-query'
 import { toEpoch } from '~/utils/time'
 import type {
 	CreateNoteInput,
@@ -18,7 +20,6 @@ type NoteVisibilityValue = (typeof noteVisibility)[keyof typeof noteVisibility]
 type NoteStatusValue = (typeof noteStatus)[keyof typeof noteStatus]
 
 interface FeedScope extends ViewFilter {
-	status?: NoteStatusValue
 	archived?: boolean
 	noTags?: boolean
 	explore?: boolean
@@ -82,25 +83,11 @@ export const useNoteStore = defineStore('note', () => {
 
 	const viewStore = useViewStore()
 
-	const keyword = ref('')
-	const debouncedKeyword = refDebounced(keyword, 400)
-	const visibilityFilter = ref<NoteVisibilityValue[]>([])
-	const tagFilter = ref<string[]>([])
-	const pinnedOnly = ref(false)
+	const explicitFilter = ref<ViewFilter>({})
 
-	const activeFilter = computed<ViewFilter>(() => {
-		const base = viewStore.baseFilter
-		const q = debouncedKeyword.value.trim()
-		return {
-			...base,
-			...(q && { q }),
-			...(visibilityFilter.value.length && { visibility: visibilityFilter.value }),
-			...(tagFilter.value.length && {
-				tagIds: [...new Set([...(base.tagIds ?? []), ...tagFilter.value])],
-			}),
-			...(pinnedOnly.value && { pinnedOnly: true }),
-		}
-	})
+	const activeFilter = computed<ViewFilter>(() =>
+		mergeFilters(viewStore.baseFilter, explicitFilter.value),
+	)
 
 	const feed = ref<NoteFeed>(noteFeed.unassigned)
 
@@ -109,17 +96,48 @@ export const useNoteStore = defineStore('note', () => {
 	const feedFilter = computed<FeedScope>(() => {
 		switch (feed.value) {
 			case noteFeed.archived:
-				return { archived: true, spaceId: undefined, tagIds: undefined }
+				// The archive feed owns the status; a library status filter must not empty it.
+				return {
+					archived: true,
+					status: [noteStatus.archived],
+					spaceId: undefined,
+					spaceIds: undefined,
+					notSpaceIds: undefined,
+					viewIds: undefined,
+					notViewIds: undefined,
+					tagIds: undefined,
+					notTagIds: undefined,
+					notStatus: undefined,
+					notVisibility: undefined,
+				}
 			case noteFeed.explore:
 				return {
 					explore: true,
 					visibility: [noteVisibility.public],
 					spaceId: undefined,
+					spaceIds: undefined,
+					notSpaceIds: undefined,
+					viewIds: undefined,
+					notViewIds: undefined,
 					tagIds: undefined,
+					notTagIds: undefined,
+					notStatus: undefined,
+					notVisibility: undefined,
 				}
 			// A deferred note stays in the later feed after it is filed into a space.
 			case noteFeed.later:
-				return { status: noteStatus.later, spaceId: undefined }
+				return {
+					status: [noteStatus.later],
+					spaceId: undefined,
+					spaceIds: undefined,
+					notSpaceIds: undefined,
+					viewIds: undefined,
+					notViewIds: undefined,
+					tagIds: undefined,
+					notTagIds: undefined,
+					notStatus: undefined,
+					notVisibility: undefined,
+				}
 			default:
 				// The inbox triage queue: nothing assigned anywhere. Tags count as
 				// assignment too, so an untagged note held in a space is not pending.
@@ -132,21 +150,69 @@ export const useNoteStore = defineStore('note', () => {
 		inInbox.value ? { ...activeFilter.value, ...feedFilter.value } : activeFilter.value,
 	)
 
+	function matchesViewFilter(note: NoteListItem, filter: ViewFilter, depth = 0): boolean {
+		const statuses = filter.status?.length
+			? filter.status
+			: [noteStatus.normal, noteStatus.later, noteStatus.pinned]
+		if (!statuses.includes(note.status)) return false
+		if (filter.notStatus?.includes(note.status)) return false
+		if (filter.spaceIds?.length || filter.spaceId !== undefined) {
+			const inIds = Boolean(note.spaceId && filter.spaceIds?.includes(note.spaceId))
+			const matchesSpaceId = filter.spaceId !== undefined && note.spaceId === filter.spaceId
+			if (!inIds && !matchesSpaceId) return false
+		}
+		if (
+			filter.notSpaceIds?.length &&
+			(!note.spaceId || filter.notSpaceIds.includes(note.spaceId))
+		) {
+			return false
+		}
+		const tags = note.tagIds ?? []
+		if (filter.tagIds?.length && !filter.tagIds.every((id) => tags.includes(id))) return false
+		if (filter.notTagIds?.length && filter.notTagIds.some((id) => tags.includes(id))) return false
+		if (filter.visibility?.length && !filter.visibility.includes(note.visibility)) return false
+		if (filter.notVisibility?.includes(note.visibility)) return false
+		if (filter.q && !note.content.toLowerCase().includes(filter.q.toLowerCase())) return false
+		if (filter.viewIds?.length && depth < 3) {
+			const nested = filter.viewIds
+				.map((id) => viewStore.views.find((view) => view.id === id)?.filter)
+				.filter((item): item is ViewFilter => Boolean(item))
+			if (!nested.length || !nested.some((item) => matchesViewFilter(note, item, depth + 1))) {
+				return false
+			}
+		}
+		if (filter.notViewIds?.length && depth < 3) {
+			const nested = filter.notViewIds
+				.map((id) => viewStore.views.find((view) => view.id === id)?.filter)
+				.filter((item): item is ViewFilter => Boolean(item))
+			if (nested.some((item) => matchesViewFilter(note, item, depth + 1))) return false
+		}
+		return true
+	}
+
 	const visibleNotes = computed(() => {
-		const q = keyword.value.trim().toLowerCase()
 		const scope = feedScope.value
+		const q = scope.q?.toLowerCase()
 		const viewerId = session.value.data?.user?.id ?? null
+		const statuses: NoteStatus[] | null = scope.archived
+			? [noteStatus.archived]
+			: scope.status?.length
+				? scope.status
+				: null
+		const excludeArchived = !scope.viewIds?.length || Boolean(scope.noTags)
+		const viewFilters = scope.viewIds
+			?.map((id) => viewStore.views.find((view) => view.id === id)?.filter)
+			.filter((item): item is ViewFilter => Boolean(item))
 		const merged = new Map<string, NoteListItem>()
 		for (const note of notes.value) merged.set(note.id, note)
 		for (const note of foreignNotes.value) merged.set(note.id, note)
 		return [...merged.values()]
 			.filter((note) => {
-				if (scope.archived) {
-					if (note.status !== noteStatus.archived) return false
-				} else if (note.status === noteStatus.archived) {
+				if (statuses) {
+					if (!statuses.includes(note.status)) return false
+				} else if (excludeArchived && note.status === noteStatus.archived) {
 					return false
 				}
-				if (scope.status && note.status !== scope.status) return false
 				if (scope.noTags && ((note.tagIds?.length ?? 0) > 0 || note.status === noteStatus.later)) {
 					return false
 				}
@@ -159,23 +225,63 @@ export const useNoteStore = defineStore('note', () => {
 					if (note.visibility === noteVisibility.private) return false
 				}
 				if (q && !note.content.toLowerCase().includes(q)) return false
-				if (scope.spaceId !== undefined && note.spaceId !== scope.spaceId) return false
-				if (scope.tagIds?.length) {
-					const tags = note.tagIds ?? []
-					if (!scope.tagIds.every((id) => tags.includes(id))) return false
+				if (scope.notStatus?.includes(note.status)) return false
+				if (scope.spaceIds?.length || scope.spaceId !== undefined) {
+					const inIds = Boolean(note.spaceId && scope.spaceIds?.includes(note.spaceId))
+					const matchesSpaceId = scope.spaceId !== undefined && note.spaceId === scope.spaceId
+					if (!inIds && !matchesSpaceId) return false
+				}
+				if (
+					scope.notSpaceIds?.length &&
+					(!note.spaceId || scope.notSpaceIds.includes(note.spaceId))
+				) {
+					return false
+				}
+				if (scope.viewIds?.length) {
+					if (
+						!viewFilters?.length ||
+						!viewFilters.some((filter) => matchesViewFilter(note, filter))
+					) {
+						return false
+					}
+				}
+				if (scope.notViewIds?.length) {
+					const excluded = scope.notViewIds
+						.map((id) => viewStore.views.find((view) => view.id === id)?.filter)
+						.filter((item): item is ViewFilter => Boolean(item))
+					if (excluded.some((filter) => matchesViewFilter(note, filter))) return false
+				}
+				const tags = note.tagIds ?? []
+				if (scope.tagIds?.length && !scope.tagIds.every((id) => tags.includes(id))) return false
+				if (scope.notTagIds?.length && scope.notTagIds.some((id) => tags.includes(id))) {
+					return false
 				}
 				if (scope.visibility?.length && !scope.visibility.includes(note.visibility)) return false
-				if (scope.pinnedOnly && note.status !== noteStatus.pinned) return false
+				if (scope.notVisibility?.includes(note.visibility)) return false
 				return true
 			})
 			.sort(compareNotes)
 	})
 
 	function resetFilter() {
-		keyword.value = ''
-		visibilityFilter.value = []
-		tagFilter.value = []
-		pinnedOnly.value = false
+		explicitFilter.value = {}
+	}
+
+	function removeTagFromFilter(tagId: string) {
+		const current = explicitFilter.value
+		const tagIds = current.tagIds?.filter((id) => id !== tagId)
+		const notTagIds = current.notTagIds?.filter((id) => id !== tagId)
+		if (
+			tagIds?.length === current.tagIds?.length &&
+			notTagIds?.length === current.notTagIds?.length
+		) {
+			return
+		}
+		explicitFilter.value = {
+			...current,
+			tagIds: tagIds?.length ? tagIds : undefined,
+			notTagIds: notTagIds?.length ? notTagIds : undefined,
+		}
 	}
 
 	const notes = skipHydrate(useLocalStorage<NoteListItem[]>(localKeys.notes, []))
@@ -385,22 +491,12 @@ export const useNoteStore = defineStore('note', () => {
 		if (pending.value || !online.value) return
 		if (paginationDone.value) return
 		const filter = feedScope.value
-		const spaceId = filter.spaceId === undefined ? undefined : (filter.spaceId ?? null)
 		pending.value = true
 		const data = await $fetch<ListNotesResponse>('/api/notes', {
 			query: {
 				limit: PAGE_SIZE,
 				...(nextCursor.value ? { cursor: nextCursor.value } : {}),
-				...(filter.archived || filter.status
-					? { status: filter.archived ? noteStatus.archived : filter.status }
-					: {}),
-				...(spaceId === null ? { noSpace: true } : spaceId ? { spaceId } : {}),
-				...(filter.noTags ? { noTags: true } : {}),
-				...(filter.explore ? { explore: true } : {}),
-				...(filter.tagIds?.length ? { tagIds: filter.tagIds } : {}),
-				...(filter.visibility?.length ? { visibility: filter.visibility } : {}),
-				...(filter.pinnedOnly ? { pinnedOnly: true } : {}),
-				...(filter.q ? { q: filter.q } : {}),
+				...noteQueryFromFilter(filter),
 			},
 		}).catch(() => null)
 		if (data) {
@@ -542,10 +638,7 @@ export const useNoteStore = defineStore('note', () => {
 	return {
 		notes,
 		visibleNotes,
-		keyword,
-		visibilityFilter,
-		tagFilter,
-		pinnedOnly,
+		explicitFilter,
 		activeFilter,
 		feed,
 		pending,
@@ -553,6 +646,7 @@ export const useNoteStore = defineStore('note', () => {
 		total,
 		syncing,
 		resetFilter,
+		removeTagFromFilter,
 		loadMore,
 		start,
 		flush,

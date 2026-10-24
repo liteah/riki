@@ -1,8 +1,12 @@
 <script setup lang="ts">
-const props = defineProps<{
-	spaceId?: string | null
-	align?: 'start' | 'center' | 'end'
-}>()
+const props = withDefaults(
+	defineProps<{
+		spaceId?: string | null
+		modal?: boolean
+		align?: 'start' | 'center' | 'end'
+	}>(),
+	{ modal: false },
+)
 
 const emit = defineEmits<{
 	select: [spaceId: string | null]
@@ -36,7 +40,7 @@ function onOpen(open: boolean) {
 		:filter="filter"
 		:filter-fields="['label']"
 		:content="{ align: props.align ?? 'end' }"
-		:modal="false"
+		:modal="props.modal"
 		@update:open="onOpen"
 	>
 		<slot />

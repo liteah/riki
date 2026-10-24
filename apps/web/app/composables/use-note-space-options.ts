@@ -1,5 +1,37 @@
 import type { DropdownMenuItem } from '@nuxt/ui'
 
+export function useNoteSpaceFilterOptions(
+	selectedIds: () => string[],
+	onToggle: (spaceId: string) => void,
+	onCreate: () => void,
+) {
+	const { t } = useI18n()
+	const appConfig = useAppConfig()
+	const spaceStore = useSpaceStore()
+
+	const items = computed<DropdownMenuItem[][]>(() => {
+		const groups: DropdownMenuItem[][] = []
+		if (spaceStore.spaces.length) {
+			groups.push(
+				spaceStore.spaces.map((space) => ({
+					type: 'checkbox' as const,
+					label: space.name,
+					icon: spaceStore.iconForSpace(space),
+					checked: selectedIds().includes(space.id),
+					onSelect: (event: Event) => {
+						event.preventDefault()
+						onToggle(space.id)
+					},
+				})),
+			)
+		}
+		groups.push([{ label: t('space.new'), icon: appConfig.ui.icons.plus, onSelect: onCreate }])
+		return groups
+	})
+
+	return { items }
+}
+
 export function useNoteSpaceOptions(
 	spaceId: () => string | null,
 	onSelect: (spaceId: string | null) => void,
@@ -20,8 +52,6 @@ export function useNoteSpaceOptions(
 					onSelect: () => onSelect(space.id),
 				})),
 			)
-		} else {
-			groups.push([{ label: t('space.new'), icon: appConfig.ui.icons.plus, onSelect: onCreate }])
 		}
 
 		if (spaceId()) {
@@ -33,6 +63,8 @@ export function useNoteSpaceOptions(
 				},
 			])
 		}
+
+		groups.push([{ label: t('space.new'), icon: appConfig.ui.icons.plus, onSelect: onCreate }])
 
 		return groups
 	})

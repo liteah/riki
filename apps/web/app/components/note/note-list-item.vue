@@ -41,9 +41,10 @@ function openNewSpace() {
 	spaceForm.open()
 }
 
-const menuTrigger = useTemplateRef<{ $el?: HTMLElement }>('menuTrigger')
+const menuOpen = ref(false)
 const menuSpaceMode = ref(false)
 const menuSearch = ref('')
+const pendingSpaceMenu = ref(false)
 
 const spaceSearchFilter = computed(() => ({
 	placeholder: t('space.searchPlaceholder'),
@@ -51,18 +52,44 @@ const spaceSearchFilter = computed(() => ({
 
 const spaceFilter = computed(() => (menuSpaceMode.value ? spaceSearchFilter.value : false))
 
-function openSpaceMenu(event?: Event) {
-	event?.preventDefault()
+function prepareSpaceMenu() {
 	void spaceStore.load()
 	menuSpaceMode.value = true
+}
+
+function openSpaceMenu(event?: Event) {
+	event?.preventDefault()
+	prepareSpaceMenu()
 	if (event) return
-	void nextTick(() => menuTrigger.value?.$el?.click())
+	menuOpen.value = true
 }
 
 function onMenuOpen(open: boolean) {
+	menuOpen.value = open
 	if (open) return
 	menuSpaceMode.value = false
 	menuSearch.value = ''
+}
+
+function openPendingSpaceMenu() {
+	if (!pendingSpaceMenu.value) return
+	pendingSpaceMenu.value = false
+	menuOpen.value = true
+}
+
+function onContextOpen(open: boolean) {
+	if (open) {
+		pendingSpaceMenu.value = false
+		return
+	}
+	if (!pendingSpaceMenu.value) return
+	setTimeout(openPendingSpaceMenu, 250)
+}
+
+function onContextCloseAutoFocus(event: Event) {
+	if (!pendingSpaceMenu.value) return
+	event.preventDefault()
+	openPendingSpaceMenu()
 }
 
 async function attempt(action: string, run: () => Promise<unknown>) {
@@ -158,7 +185,7 @@ const laterAction = computed<NoteAction>(() => ({
 
 const archiveAction = computed<NoteAction>(() => ({
 	id: isArchived.value ? 'unarchive' : 'archive',
-	shortcut: isArchived.value ? 'unarchiveNote' : 'archiveNote',
+	shortcut: 'archiveNote',
 	label: isArchived.value ? t('note.unarchive') : t('note.archive'),
 	icon: appConfig.ui.icons.archive,
 	onSelect: toggleArchive,
@@ -185,9 +212,7 @@ const showInlineSpace = computed(
 
 const shortcutActions = computed<NoteAction[]>(() =>
 	isOwn.value
-		? isArchived.value
-			? [laterAction.value, archiveAction.value, destroyAction.value]
-			: [spaceAction.value, laterAction.value, archiveAction.value]
+		? [spaceAction.value, laterAction.value, archiveAction.value, destroyAction.value]
 		: [],
 )
 
@@ -231,32 +256,19 @@ watchEffect(() => {
 	if (props.selected && cardEl.value) cardEl.value.focus()
 })
 
-const spaceContextSearch = ref('')
-const spaceSubmenuItems = computed(() => {
-	const items = spaceMenu.items.value.flat()
-	const query = spaceContextSearch.value.trim().toLowerCase()
-	if (!query) return items
-	return items.filter(
-		(item) => item.type !== 'separator' && item.label?.toLowerCase().includes(query),
-	)
-})
-
-const spaceSubmenuItem = computed<ContextMenuItem>(() => ({
-	label: t('note.addToSpace'),
-	icon: appConfig.ui.icons.folderOpen,
-	kbds: shortcutStore.kbds('addToSpace'),
-	children: spaceSubmenuItems.value,
-}))
-
-function onContextOpen(open: boolean) {
-	if (open) spaceContextSearch.value = ''
-}
-
 const spaceSearchItem = computed<ContextMenuItem>(() => ({
 	label: t('note.addToSpace'),
 	icon: appConfig.ui.icons.folderOpen,
 	kbds: shortcutStore.kbds('addToSpace'),
 	onSelect: openSpaceMenu,
+}))
+
+const contextSpaceItem = computed<ContextMenuItem>(() => ({
+	...spaceSearchItem.value,
+	onSelect: () => {
+		prepareSpaceMenu()
+		pendingSpaceMenu.value = true
+	},
 }))
 
 const laterItem = computed<ContextMenuItem>(() => ({
@@ -275,13 +287,14 @@ const pinItem = computed<ContextMenuItem>(() => ({
 const archiveItem = computed<ContextMenuItem>(() => ({
 	label: isArchived.value ? t('note.unarchive') : t('note.archive'),
 	icon: appConfig.ui.icons.archive,
-	kbds: shortcutStore.kbds(isArchived.value ? 'unarchiveNote' : 'archiveNote'),
+	kbds: shortcutStore.kbds('archiveNote'),
 	onSelect: toggleArchive,
 }))
 
 const deleteItem = computed<ContextMenuItem>(() => ({
 	label: t('common.delete'),
 	icon: appConfig.ui.icons.trash,
+	kbds: shortcutStore.kbds('destroyNote'),
 	color: 'error',
 	onSelect: () => confirmDestructive(handleDelete),
 }))
@@ -289,13 +302,13 @@ const deleteItem = computed<ContextMenuItem>(() => ({
 const contextMenuItems = computed<ContextMenuItem[][]>(() =>
 	isOwn.value
 		? [
-				[spaceSubmenuItem.value, laterItem.value, pinItem.value, archiveItem.value],
+				[contextSpaceItem.value, laterItem.value, pinItem.value, archiveItem.value],
 				[deleteItem.value],
 			]
 		: [],
 )
 
-const libraryMenuItems = computed<ContextMenuItem[][]>(() =>
+const menuItems = computed<ContextMenuItem[][]>(() =>
 	isOwn.value
 		? [
 				[spaceSearchItem.value, laterItem.value, pinItem.value, archiveItem.value],
@@ -304,16 +317,8 @@ const libraryMenuItems = computed<ContextMenuItem[][]>(() =>
 		: [],
 )
 
-const overflowItems = computed<ContextMenuItem[][]>(() =>
-	isOwn.value ? [[...(isArchived.value ? [] : [spaceSearchItem.value]), pinItem.value]] : [],
-)
-
 const dropdownItems = computed<ContextMenuItem[][]>(() =>
-	menuSpaceMode.value
-		? spaceMenu.items.value
-		: props.actionsMenu
-			? libraryMenuItems.value
-			: overflowItems.value,
+	menuSpaceMode.value ? spaceMenu.items.value : menuItems.value,
 )
 
 const markdownComponents = { a: NoteLink, tag: NoteTag }
@@ -358,7 +363,11 @@ const absoluteHint = computed(() => {
 </script>
 
 <template>
-	<UContextMenu :items="contextMenuItems" @update:open="onContextOpen">
+	<UContextMenu
+		:items="contextMenuItems"
+		:content="{ onCloseAutoFocus: onContextCloseAutoFocus }"
+		@update:open="onContextOpen"
+	>
 		<div
 			ref="card"
 			tabindex="-1"
@@ -371,7 +380,9 @@ const absoluteHint = computed(() => {
 			</article>
 			<div class="flex flex-wrap items-center gap-2 pl-2 text-xs text-muted sm:py-1 sm:text-sm">
 				<div class="flex items-center gap-1 truncate">
-					<UIcon v-if="isPinned" :name="appConfig.ui.icons.pin" class="size-3.5 shrink-0" />
+					<UTooltip v-if="isPinned" :text="t('common.pinned')">
+						<UIcon :name="appConfig.ui.icons.pin" class="size-3.5 shrink-0" />
+					</UTooltip>
 					<UTooltip v-if="hasDraft" :text="$t('note.draft')">
 						<UIcon :name="appConfig.ui.icons.notePen" class="size-3.5 shrink-0 text-warning" />
 					</UTooltip>
@@ -440,6 +451,7 @@ const absoluteHint = computed(() => {
 					</template>
 					<UDropdownMenu
 						v-model:search-term="menuSearch"
+						:open="menuOpen"
 						:items="dropdownItems"
 						:filter="spaceFilter"
 						:filter-fields="['label']"
@@ -448,7 +460,6 @@ const absoluteHint = computed(() => {
 						@update:open="onMenuOpen"
 					>
 						<UButton
-							ref="menuTrigger"
 							:icon="appConfig.ui.icons.ellipsis"
 							color="neutral"
 							variant="ghost"

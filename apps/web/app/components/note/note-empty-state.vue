@@ -1,15 +1,8 @@
 <script setup lang="ts">
 const appConfig = useAppConfig()
 const noteStore = useNoteStore()
-const { keyword, visibilityFilter, tagFilter, pinnedOnly } = storeToRefs(noteStore)
 
-const filtered = computed(
-	() =>
-		Boolean(keyword.value.trim()) ||
-		visibilityFilter.value.length > 0 ||
-		tagFilter.value.length > 0 ||
-		pinnedOnly.value,
-)
+const filtered = computed(() => countFilterValues(noteStore.explicitFilter) > 0)
 </script>
 
 <template>

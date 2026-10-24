@@ -111,13 +111,40 @@ const noteCursorSchema = z
 export const listNotesQuerySchema = z.object({
 	limit: z.coerce.number().int().min(1).max(50).default(20),
 	cursor: noteCursorSchema.optional(),
-	status: z.enum(noteStatus).optional(),
+	status: z.preprocess(
+		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
+		z.array(z.enum(noteStatus)).optional(),
+	),
+	notStatus: z.preprocess(
+		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
+		z.array(z.enum(noteStatus)).optional(),
+	),
 	noSpace: z.coerce.boolean().optional(),
 	noTags: z.coerce.boolean().optional(),
 	explore: z.coerce.boolean().optional(),
 	spaceId: z.string().trim().min(1).optional(),
+	spaceIds: z.preprocess(
+		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
+		z.array(z.string().trim().min(1)).optional(),
+	),
+	notSpaceIds: z.preprocess(
+		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
+		z.array(z.string().trim().min(1)).optional(),
+	),
+	viewIds: z.preprocess(
+		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
+		z.array(z.string().trim().min(1)).optional(),
+	),
+	notViewIds: z.preprocess(
+		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
+		z.array(z.string().trim().min(1)).optional(),
+	),
 	username: z.string().trim().min(1).optional(),
 	tagIds: z.preprocess(
+		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
+		z.array(z.string().trim().min(1)).optional(),
+	),
+	notTagIds: z.preprocess(
 		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
 		z.array(z.string().trim().min(1)).optional(),
 	),
@@ -125,7 +152,10 @@ export const listNotesQuerySchema = z.object({
 		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
 		z.array(z.enum(noteVisibility)).optional(),
 	),
-	pinnedOnly: z.coerce.boolean().optional(),
+	notVisibility: z.preprocess(
+		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
+		z.array(z.enum(noteVisibility)).optional(),
+	),
 	q: z.string().trim().min(1).optional(),
 })
 

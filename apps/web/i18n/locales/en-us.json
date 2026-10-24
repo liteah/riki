@@ -17,6 +17,7 @@
 		"save": "Save",
 		"saved": "Saved",
 		"toggle": "Toggle",
+		"more": "More",
 		"search": "Search",
 		"required": "{label} is required",
 		"placeholder": "Enter {label}",
@@ -36,8 +37,7 @@
 		"placeholder": "Type a command or search...",
 		"commands": "Commands",
 		"notes": "Notes",
-		"recentNotes": "Recent notes",
-		"goTo": "Go to"
+		"navigate": "Navigate"
 	},
 	"auth": {
 		"signIn": "Sign in",
@@ -76,12 +76,13 @@
 		"updatedAt": "Updated {time}",
 		"deleteTitle": "Delete note",
 		"deleteDescription": "Are you sure you want to delete this note? This action cannot be undone.",
-		"searchPlaceholder": "Search notes...",
 		"archive": "Archive",
 		"unarchive": "Unarchive",
 		"addToSpace": "Add to space",
 		"removeFromSpace": "Remove from space",
 		"later": "Later",
+		"statusNormal": "Normal",
+		"statusArchived": "Archived",
 		"unlater": "Remove from later",
 		"laterEmptyTitle": "No notes saved for later",
 		"archivedEmptyTitle": "No archived notes",
@@ -93,7 +94,6 @@
 		"unassigned": "Unassigned",
 		"later": "Later",
 		"review": "Review",
-		"archived": "Archived",
 		"explore": "Explore"
 	},
 	"profile": {
@@ -118,6 +118,7 @@
 	},
 	"tag": {
 		"label": "Tags",
+		"searchPlaceholder": "Search tags...",
 		"deleteTitle": "Delete tag",
 		"deleteDescription": "Delete the tag {name}? Notes keep their content but lose this tag."
 	},
@@ -193,9 +194,14 @@
 		"label": "Views",
 		"name": "Name",
 		"new": "New view",
-		"tags": "Tags",
-		"tagsSearchPlaceholder": "Search tags...",
-		"pinnedOnly": "Pinned only",
+		"saveFilter": "Save current filters as view",
+		"saveFilterDescription": "Name the view. The current filters will be saved with it.",
+		"searchPlaceholder": "Search views...",
+		"status": "Status",
+		"filterIs": "is",
+		"filterIsNot": "is not",
+		"filterContains": "contains",
+		"filterNotContains": "does not contain",
 		"clearFilter": "Clear filter",
 		"editTitle": "Rename view",
 		"deleteTitle": "Delete view",

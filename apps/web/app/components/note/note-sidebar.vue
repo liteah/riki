@@ -15,6 +15,7 @@ const session = useAuth().useSession()
 const spaceStore = useSpaceStore()
 const tagStore = useTagStore()
 const viewStore = useViewStore()
+const noteStore = useNoteStore()
 const { spaces } = storeToRefs(spaceStore)
 const { tags } = storeToRefs(tagStore)
 const { target, pinnedTargets, unpinnedViews, unpinnedSpaces, unpinnedTags } =
@@ -95,7 +96,7 @@ function openDeleteSpace(space: SpaceListItem) {
 }
 
 function openCreateView() {
-	viewFormModal.open({ view: null, filter: { ...useNoteStore().activeFilter } })
+	viewFormModal.open({ view: null, filter: { ...noteStore.activeFilter } })
 }
 
 function openEditView(id: string) {
@@ -206,7 +207,7 @@ function openDeleteTag(tag: TagListItem) {
 		destructive: true,
 		onConfirm: () => {
 			const noteStore = useNoteStore()
-			noteStore.tagFilter = noteStore.tagFilter.filter((id) => id !== tag.id)
+			noteStore.removeTagFromFilter(tag.id)
 			void tagStore.deleteTag(tag.id)
 		},
 	})
