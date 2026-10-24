@@ -1,4 +1,5 @@
 import * as z from 'zod'
+import type { EntityIcon } from './icon'
 
 export interface Note {
 	id: string
@@ -14,6 +15,7 @@ export interface Note {
 export interface Space {
 	id: string
 	name: string
+	icon: EntityIcon
 	userId: string
 	createdAt: Date
 	updatedAt: Date
@@ -163,6 +165,7 @@ export type ListNotesQuery = z.output<typeof listNotesQuerySchema>
 
 export type NoteListItem = Note & {
 	spaceName: string | null
+	spaceIcon: EntityIcon | null
 	authorName: string | null
 	authorImage: string | null
 	tagIds: string[]

@@ -16,6 +16,7 @@ const spaceStore = useSpaceStore()
 const tagStore = useTagStore()
 const viewStore = useViewStore()
 const noteStore = useNoteStore()
+const { forSpace, forView } = useEntityIcon()
 const { spaces } = storeToRefs(spaceStore)
 const { tags } = storeToRefs(tagStore)
 const { target, pinnedTargets, unpinnedViews, unpinnedSpaces, unpinnedTags } =
@@ -87,7 +88,6 @@ function openDeleteSpace(space: SpaceListItem) {
 	confirmDialog.open({
 		title: t('space.deleteTitle'),
 		description: t('space.deleteDescription'),
-		icon: appConfig.ui.icons.trash,
 		destructive: true,
 		onConfirm: () => {
 			void spaceStore.deleteSpace(space.id)
@@ -110,7 +110,6 @@ function openDeleteView(id: string) {
 	confirmDialog.open({
 		title: t('view.deleteTitle'),
 		description: t('view.deleteDescription', { name: view.name }),
-		icon: appConfig.ui.icons.trash,
 		destructive: true,
 		onConfirm: () => {
 			void viewStore.deleteView(id)
@@ -203,7 +202,6 @@ function openDeleteTag(tag: TagListItem) {
 	confirmDialog.open({
 		title: t('tag.deleteTitle'),
 		description: t('tag.deleteDescription', { name: tag.name }),
-		icon: appConfig.ui.icons.trash,
 		destructive: true,
 		onConfirm: () => {
 			const noteStore = useNoteStore()
@@ -237,10 +235,10 @@ const pinnedItems = computed<NavigationMenuItem[]>(() =>
 		label: entry.label,
 		icon:
 			entry.kind === sidebarKind.space
-				? spaceStore.iconForSpace(entry.space!)
+				? forSpace(entry.space!)
 				: entry.kind === sidebarKind.tag
 					? appConfig.ui.icons.hash
-					: appConfig.ui.icons.file,
+					: forView(entry.view!),
 		active: isActive(entry.kind, entry.id),
 		slot: `pin-${entry.entry.id}`,
 		'data-item-kind': entry.kind,
@@ -258,7 +256,7 @@ const items = computed<NavigationMenuItem[][]>(() => {
 		{ label: t('view.label'), type: 'label', slot: 'views' },
 		...unpinnedViews.value.map<NavigationMenuItem>((view) => ({
 			label: view.name,
-			icon: appConfig.ui.icons.file,
+			icon: forView(view),
 			active: isActive(sidebarKind.view, view.id),
 			slot: `view-${view.id}`,
 			'data-item-kind': sidebarKind.view,
@@ -271,7 +269,7 @@ const items = computed<NavigationMenuItem[][]>(() => {
 		{ label: t('space.label'), type: 'label', slot: 'spaces' },
 		...unpinnedSpaces.value.map<NavigationMenuItem>((space) => ({
 			label: space.name,
-			icon: spaceStore.iconForSpace(space),
+			icon: forSpace(space),
 			active: isActive(sidebarKind.space, space.id),
 			slot: `space-${space.id}`,
 			'data-item-kind': sidebarKind.space,

@@ -1,24 +1,28 @@
 <script setup lang="ts">
+import { defaultSpaceIcon } from '#shared/types/icon'
+import type { EntityIcon } from '#shared/types/icon'
 import type { Space } from '#shared/types/note'
 
 const props = defineProps<{
-	space?: Pick<Space, 'id' | 'name'> | null
+	space?: Pick<Space, 'id' | 'name' | 'icon'> | null
 }>()
 
 const open = defineModel<boolean>('open', { default: false })
 
 const { t } = useI18n()
 const toast = useToast()
-const appConfig = useAppConfig()
 const spaceStore = useSpaceStore()
 
 const name = ref('')
+const icon = ref<EntityIcon>(defaultSpaceIcon)
 const saving = ref(false)
 
 watch(
 	() => open.value,
 	(isOpen) => {
-		if (isOpen) name.value = props.space?.name ?? ''
+		if (!isOpen) return
+		name.value = props.space?.name ?? ''
+		icon.value = props.space?.icon ?? defaultSpaceIcon
 	},
 	{ immediate: true },
 )
@@ -36,11 +40,14 @@ async function handleConfirm() {
 		if (props.space) {
 			const space = await $fetch<Space>(`/api/spaces/${props.space.id}`, {
 				method: 'PATCH',
-				body: { name: value },
+				body: { name: value, icon: icon.value },
 			})
 			spaceStore.renameSpace(space)
 		} else {
-			const space = await $fetch<Space>('/api/spaces', { method: 'POST', body: { name: value } })
+			const space = await $fetch<Space>('/api/spaces', {
+				method: 'POST',
+				body: { name: value, icon: icon.value },
+			})
 			spaceStore.addSpace(space)
 		}
 	} catch (error) {
@@ -60,18 +67,19 @@ async function handleConfirm() {
 		v-model:open="open"
 		:title="title"
 		:description="description"
-		:icon="appConfig.ui.icons.folder"
 		:on-confirm="handleConfirm"
-		@close="open = false"
 	>
-		<UFormField :label="t('space.name')" :hint="t('common.required', { label: t('space.name') })">
-			<UInput
-				v-model="name"
-				:placeholder="t('common.placeholder', { label: t('space.name') })"
-				class="w-full"
-				maxlength="64"
-				@keydown.enter="handleConfirm"
-			/>
+		<UFormField :label="t('common.iconAndName')">
+			<UFieldGroup class="w-full">
+				<IconPicker v-model="icon" />
+				<UInput
+					v-model="name"
+					:placeholder="t('common.placeholder', { label: t('space.name') })"
+					class="min-w-0 flex-1"
+					maxlength="64"
+					@keydown.enter="handleConfirm"
+				/>
+			</UFieldGroup>
 		</UFormField>
 	</DialogModal>
 </template>

@@ -1,9 +1,12 @@
 import * as z from 'zod'
 import { noteStatus, noteVisibility } from './note'
+import { defaultViewIcon, entityIconSchema } from './icon'
+import type { EntityIcon } from './icon'
 
 export interface View {
 	id: string
 	name: string
+	icon: EntityIcon
 	filter: ViewFilter
 	position: number
 	userId: string
@@ -76,12 +79,14 @@ export type ViewFilter = z.infer<typeof viewFilterSchema>
 
 export const createViewBodySchema = z.object({
 	name: z.string().trim().min(1).max(64),
+	icon: entityIconSchema.default(defaultViewIcon),
 	filter: viewFilterSchema.default({}),
 })
 export type CreateViewBody = z.output<typeof createViewBodySchema>
 
 export const updateViewBodySchema = z.object({
 	name: z.string().trim().min(1).max(64).optional(),
+	icon: entityIconSchema.optional(),
 	filter: viewFilterSchema.optional(),
 })
 export type UpdateViewBody = z.output<typeof updateViewBodySchema>

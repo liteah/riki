@@ -27,6 +27,7 @@ const appConfig = useAppConfig()
 const spaceStore = useSpaceStore()
 const tagStore = useTagStore()
 const viewStore = useViewStore()
+const { forView } = useEntityIcon()
 
 const operators = reactive<Record<FilterProperty, boolean>>({
 	view: false,
@@ -49,7 +50,7 @@ const items = computed<DropdownMenuItem[][]>(() => {
 	if (!props.embedded) {
 		actions.push({
 			label: t('view.saveFilter'),
-			icon: appConfig.ui.icons.file,
+			icon: appConfig.ui.icons.view,
 			onSelect: () => emit('save-view'),
 		})
 	}
@@ -118,7 +119,7 @@ function valueOptions(property: ValueProperty) {
 			return viewStore.views.map((view) => ({
 				label: view.name,
 				value: view.id,
-				icon: appConfig.ui.icons.file,
+				icon: forView(view),
 			}))
 		case 'tag':
 			return tagStore.tags.map((tag) => ({
@@ -308,9 +309,9 @@ function propertyLabel(property: FilterProperty) {
 function propertyIcon(property: FilterProperty) {
 	switch (property) {
 		case 'view':
-			return appConfig.ui.icons.file
+			return appConfig.ui.icons.view
 		case 'space':
-			return appConfig.ui.icons.folder
+			return appConfig.ui.icons.space
 		case 'tag':
 			return appConfig.ui.icons.hash
 		case 'status':

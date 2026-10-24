@@ -8,6 +8,7 @@ export function useNoteSpaceFilterOptions(
 	const { t } = useI18n()
 	const appConfig = useAppConfig()
 	const spaceStore = useSpaceStore()
+	const { forSpace } = useEntityIcon()
 
 	const items = computed<DropdownMenuItem[][]>(() => {
 		const groups: DropdownMenuItem[][] = []
@@ -16,7 +17,7 @@ export function useNoteSpaceFilterOptions(
 				spaceStore.spaces.map((space) => ({
 					type: 'checkbox' as const,
 					label: space.name,
-					icon: spaceStore.iconForSpace(space),
+					icon: forSpace(space),
 					checked: selectedIds().includes(space.id),
 					onSelect: (event: Event) => {
 						event.preventDefault()
@@ -40,6 +41,7 @@ export function useNoteSpaceOptions(
 	const { t } = useI18n()
 	const appConfig = useAppConfig()
 	const spaceStore = useSpaceStore()
+	const { forSpace } = useEntityIcon()
 
 	const items = computed<DropdownMenuItem[][]>(() => {
 		const groups: DropdownMenuItem[][] = []
@@ -48,7 +50,7 @@ export function useNoteSpaceOptions(
 			groups.push(
 				spaceStore.spaces.map((space) => ({
 					label: space.name,
-					icon: spaceStore.iconForSpace(space),
+					icon: forSpace(space),
 					onSelect: () => onSelect(space.id),
 				})),
 			)

@@ -232,6 +232,7 @@ export default defineEventHandler(async (event) => {
 			.select({
 				...getColumns(notes),
 				spaceName: spaces.name,
+				spaceIcon: spaces.icon,
 				authorName: user.name,
 				authorImage: user.image,
 			})
@@ -269,6 +270,7 @@ export default defineEventHandler(async (event) => {
 	const items = page.map((row) => ({
 		...row,
 		spaceName: row.userId === viewerId ? row.spaceName : null,
+		spaceIcon: row.userId === viewerId ? row.spaceIcon : null,
 		tagIds: tagIdsByNote.get(row.id) ?? [],
 	}))
 	const last = items[items.length - 1]

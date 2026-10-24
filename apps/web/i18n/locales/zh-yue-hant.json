@@ -19,6 +19,8 @@
 		"toggle": "切換",
 		"more": "更多",
 		"search": "搜尋",
+		"chooseIcon": "選擇圖示",
+		"iconAndName": "圖示同名稱",
 		"required": "{label}唔可以留空",
 		"placeholder": "請輸入{label}",
 		"invalid": "請輸入有效嘅{label}",

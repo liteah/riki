@@ -2,6 +2,7 @@ import { skipHydrate } from 'pinia'
 import { localKeys } from '~/utils/local-cache'
 import { sidebarKind } from '#shared/types/view'
 import type { SidebarEntry, SidebarKind, SidebarTarget, View, ViewFilter } from '#shared/types/view'
+import type { EntityIcon } from '#shared/types/icon'
 import type { SpaceListItem } from '#shared/types/space'
 import type { TagListItem } from '#shared/types/tag'
 
@@ -122,16 +123,19 @@ export const useViewStore = defineStore('view', () => {
 		{ immediate: true },
 	)
 
-	async function createView(name: string, filter: ViewFilter) {
-		const view = await $fetch<View>('/api/views', { method: 'POST', body: { name, filter } })
+	async function createView(name: string, icon: EntityIcon, filter: ViewFilter) {
+		const view = await $fetch<View>('/api/views', {
+			method: 'POST',
+			body: { name, icon, filter },
+		})
 		views.value = [...views.value, view]
 		return view
 	}
 
-	async function saveView(id: string, name: string, filter: ViewFilter) {
+	async function saveView(id: string, name: string, icon: EntityIcon, filter: ViewFilter) {
 		const updated = await $fetch<View>(`/api/views/${id}`, {
 			method: 'PATCH',
-			body: { name, filter },
+			body: { name, icon, filter },
 		})
 		views.value = views.value.map((view) => (view.id === id ? updated : view))
 		return updated

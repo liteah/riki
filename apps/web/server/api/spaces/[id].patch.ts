@@ -14,7 +14,10 @@ export default defineEventHandler(async (event) => {
 
 	const [updated] = await db
 		.update(spaces)
-		.set({ name: body.name })
+		.set({
+			name: body.name,
+			...(body.icon !== undefined && { icon: body.icon }),
+		})
 		.where(and(eq(spaces.id, id), eq(spaces.userId, user.id)))
 		.returning()
 	if (!updated) throw createError({ statusCode: 404, statusMessage: 'Space not found' })

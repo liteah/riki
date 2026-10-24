@@ -11,7 +11,10 @@ export default defineEventHandler(async (event) => {
 
 	const spaceId = newId()
 	const [space] = await db.batch([
-		db.insert(spaces).values({ id: spaceId, name: body.name, userId: user.id }).returning(),
+		db
+			.insert(spaces)
+			.values({ id: spaceId, name: body.name, icon: body.icon, userId: user.id })
+			.returning(),
 	])
 
 	setResponseStatus(event, 201)

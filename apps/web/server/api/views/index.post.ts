@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
 		.values({
 			userId: user.id,
 			name: body.name,
+			icon: body.icon,
 			filter: body.filter,
 			position: (max?.position ?? -1) + 1,
 		})

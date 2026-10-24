@@ -36,6 +36,15 @@ const isLater = computed(() => props.note.status === noteStatus.later)
 
 const spaceStore = useSpaceStore()
 const spaceForm = overlay.create(LazyNoteSpaceFormModal)
+const { forNote } = useEntityIcon()
+
+const noteSpaceName = computed(
+	() =>
+		props.note.spaceName ??
+		spaceStore.spaces.find((space) => space.id === props.note.spaceId)?.name ??
+		null,
+)
+const noteSpaceIcon = computed(() => forNote(props.note))
 
 function openNewSpace() {
 	spaceForm.open()
@@ -125,7 +134,6 @@ function confirmDestructive(onConfirm: () => void) {
 	confirmDialog.open({
 		title: t('note.deleteTitle'),
 		description: t('note.deleteDescription'),
-		icon: appConfig.ui.icons.trash,
 		destructive: true,
 		onConfirm,
 	})
@@ -171,7 +179,7 @@ const spaceAction = computed<NoteAction>(() => ({
 	id: 'space',
 	shortcut: 'addToSpace',
 	label: t('note.addToSpace'),
-	icon: appConfig.ui.icons.folderOpen,
+	icon: appConfig.ui.icons.space,
 	onSelect: openSpaceMenu,
 }))
 
@@ -258,7 +266,7 @@ watchEffect(() => {
 
 const spaceSearchItem = computed<ContextMenuItem>(() => ({
 	label: t('note.addToSpace'),
-	icon: appConfig.ui.icons.folderOpen,
+	icon: appConfig.ui.icons.space,
 	kbds: shortcutStore.kbds('addToSpace'),
 	onSelect: openSpaceMenu,
 }))
@@ -405,9 +413,9 @@ const absoluteHint = computed(() => {
 						<UIcon :name="appConfig.ui.icons.user" class="size-3.5 shrink-0" />
 						<span class="max-w-24 truncate">{{ props.note.authorName }}</span>
 					</span>
-					<div v-if="props.note.spaceName" class="flex shrink-0 items-center gap-1">
-						<UIcon :name="appConfig.ui.icons.folder" class="size-3.5" />
-						<span class="max-w-24 truncate">{{ props.note.spaceName }}</span>
+					<div v-if="noteSpaceName" class="flex shrink-0 items-center gap-1">
+						<UIcon :name="noteSpaceIcon" class="size-3.5" />
+						<span class="max-w-24 truncate">{{ noteSpaceName }}</span>
 					</div>
 				</div>
 				<div

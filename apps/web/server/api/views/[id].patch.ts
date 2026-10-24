@@ -17,6 +17,7 @@ export default defineEventHandler(async (event) => {
 		.update(views)
 		.set({
 			...(body.name !== undefined && { name: body.name }),
+			...(body.icon !== undefined && { icon: body.icon }),
 			...(body.filter !== undefined && { filter: body.filter }),
 		})
 		.where(and(eq(views.id, id), eq(views.userId, user.id)))

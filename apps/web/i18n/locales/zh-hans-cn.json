@@ -19,6 +19,8 @@
 		"toggle": "切换",
 		"more": "更多",
 		"search": "搜索",
+		"chooseIcon": "选择图标",
+		"iconAndName": "图标和名称",
 		"required": "{label}不能为空",
 		"placeholder": "请输入{label}",
 		"invalid": "请输入有效的{label}",

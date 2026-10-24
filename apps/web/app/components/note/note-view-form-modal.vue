@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { LazyNoteSpaceFormModal } from '#components'
+import { defaultViewIcon } from '#shared/types/icon'
+import type { EntityIcon } from '#shared/types/icon'
 import type { View } from '#shared/types/view'
 import type { ViewFilter } from '#shared/types/view'
 
@@ -21,6 +23,7 @@ const noteStore = useNoteStore()
 const spaceFormModal = overlay.create(LazyNoteSpaceFormModal)
 
 const name = ref('')
+const icon = ref<EntityIcon>(defaultViewIcon)
 const saving = ref(false)
 const draftFilter = ref<ViewFilter>({})
 
@@ -39,6 +42,7 @@ watch(
 	(isOpen) => {
 		if (!isOpen) return
 		name.value = props.view?.name ?? ''
+		icon.value = props.view?.icon ?? defaultViewIcon
 		draftFilter.value = { ...(props.view?.filter ?? props.filter) }
 	},
 	{ immediate: true },
@@ -54,9 +58,9 @@ async function handleConfirm() {
 	saving.value = true
 	try {
 		const payload = { ...draftFilter.value }
-		if (props.view) await viewStore.saveView(props.view.id, value, payload)
+		if (props.view) await viewStore.saveView(props.view.id, value, icon.value, payload)
 		else {
-			await viewStore.createView(value, payload)
+			await viewStore.createView(value, icon.value, payload)
 			noteStore.resetFilter()
 		}
 		open.value = false
@@ -77,19 +81,21 @@ async function handleConfirm() {
 		v-model:open="open"
 		:title="title"
 		:description="description"
-		:icon="appConfig.ui.icons.file"
 		:on-confirm="handleConfirm"
 		@close="open = false"
 	>
-		<div class="flex items-end gap-2">
-			<UFormField :label="t('view.name')" class="min-w-0 flex-1">
-				<UInput
-					v-model="name"
-					:placeholder="t('common.placeholder', { label: t('view.name') })"
-					class="w-full"
-					maxlength="64"
-					@keydown.enter="handleConfirm"
-				/>
+		<div class="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2">
+			<UFormField :label="t('common.iconAndName')">
+				<UFieldGroup class="w-full">
+					<IconPicker v-model="icon" />
+					<UInput
+						v-model="name"
+						:placeholder="t('common.placeholder', { label: t('view.name') })"
+						class="min-w-0 flex-1"
+						maxlength="64"
+						@keydown.enter="handleConfirm"
+					/>
+				</UFieldGroup>
 			</UFormField>
 
 			<NoteFilterMenu v-if="!nameOnly" v-model="draftFilter" embedded @create-space="openNewSpace">

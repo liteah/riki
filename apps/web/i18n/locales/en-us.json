@@ -19,6 +19,8 @@
 		"toggle": "Toggle",
 		"more": "More",
 		"search": "Search",
+		"chooseIcon": "Choose icon",
+		"iconAndName": "Icon & name",
 		"required": "{label} is required",
 		"placeholder": "Enter {label}",
 		"invalid": "Enter a valid {label}",

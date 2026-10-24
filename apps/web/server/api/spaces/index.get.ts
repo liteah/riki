@@ -11,6 +11,7 @@ export default defineEventHandler(async (event) => {
 		.select({
 			id: spaces.id,
 			name: spaces.name,
+			icon: spaces.icon,
 			noteCount: sql<number>`count(${notes.id})`,
 		})
 		.from(spaces)

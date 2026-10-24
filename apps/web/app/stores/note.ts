@@ -313,6 +313,11 @@ export const useNoteStore = defineStore('note', () => {
 		return spaceStore.spaces.find((space) => space.id === spaceId)?.name ?? null
 	}
 
+	function spaceIconOf(spaceId: string | null) {
+		if (!spaceId) return null
+		return spaceStore.spaces.find((space) => space.id === spaceId)?.icon ?? null
+	}
+
 	function resolvedTagIds(tagNames?: string[]): string[] {
 		if (!tagNames?.length) return []
 		const byName = new Map(tagStore.tags.map((tag) => [tag.name.toLowerCase(), tag.id]))
@@ -361,9 +366,13 @@ export const useNoteStore = defineStore('note', () => {
 			if (!spaceStore.spaces.length) return
 			notes.value = notes.value.map((note) => {
 				const spaceName = spaceNameOf(note.spaceId)
-				return spaceName === note.spaceName ? note : { ...note, spaceName }
+				const spaceIcon = spaceIconOf(note.spaceId)
+				return spaceName === note.spaceName && spaceIcon === note.spaceIcon
+					? note
+					: { ...note, spaceName, spaceIcon }
 			})
 		},
+		{ immediate: true },
 	)
 
 	function enqueue(row: OutboxRow) {
@@ -414,6 +423,7 @@ export const useNoteStore = defineStore('note', () => {
 			{
 				...winner,
 				spaceName: spaceNameOf(winner.spaceId),
+				spaceIcon: spaceIconOf(winner.spaceId),
 				authorName: author?.name ?? null,
 				authorImage: author?.image ?? null,
 			},
@@ -567,6 +577,7 @@ export const useNoteStore = defineStore('note', () => {
 			content: input.content,
 			spaceId,
 			spaceName: spaceNameOf(spaceId),
+			spaceIcon: spaceIconOf(spaceId),
 			authorName: author?.name ?? null,
 			authorImage: author?.image ?? null,
 			tagIds: resolvedTagIds(input.tagNames),
@@ -592,6 +603,7 @@ export const useNoteStore = defineStore('note', () => {
 			content: body.content ?? previous.content,
 			spaceId: body.spaceId === undefined ? previous.spaceId : body.spaceId,
 			spaceName: body.spaceId === undefined ? previous.spaceName : spaceNameOf(body.spaceId),
+			spaceIcon: body.spaceId === undefined ? previous.spaceIcon : spaceIconOf(body.spaceId),
 			tagIds: body.tagNames ? resolvedTagIds(body.tagNames) : previous.tagIds,
 			visibility: body.visibility ?? previous.visibility,
 			status: body.status ?? previous.status,

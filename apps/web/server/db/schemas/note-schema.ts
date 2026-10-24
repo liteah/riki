@@ -10,6 +10,7 @@ import {
 	noteVisibility,
 	noteVisibilityValues,
 } from '#shared/types/note'
+import { defaultSpaceIcon, defaultViewIcon, entityIconValues } from '#shared/types/icon'
 
 export const notes = sqliteTable(
 	'notes',
@@ -48,6 +49,7 @@ export const spaces = sqliteTable(
 			.primaryKey()
 			.$defaultFn(() => newId()),
 		name: text('name').notNull(),
+		icon: text('icon', { enum: entityIconValues }).notNull().default(defaultSpaceIcon),
 		userId: text('user_id')
 			.notNull()
 			.references(() => user.id, { onDelete: 'cascade' }),
@@ -119,6 +121,7 @@ export const views = sqliteTable(
 			.primaryKey()
 			.$defaultFn(() => newId()),
 		name: text('name').notNull(),
+		icon: text('icon', { enum: entityIconValues }).notNull().default(defaultViewIcon),
 		filter: text('filter', { mode: 'json' }).$type<ViewFilter>().notNull(),
 		position: integer('position').notNull().default(0),
 		userId: text('user_id')

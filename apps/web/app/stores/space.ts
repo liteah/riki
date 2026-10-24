@@ -1,9 +1,9 @@
 import type { SpaceListItem } from '#shared/types/space'
+import type { EntityIcon } from '#shared/types/icon'
 
 export const useSpaceStore = defineStore('space', () => {
 	const { $i18n } = useNuxtApp()
 	const toast = useToast()
-	const appConfig = useAppConfig()
 
 	const spaces = ref<SpaceListItem[]>([])
 	const pending = ref(false)
@@ -25,16 +25,17 @@ export const useSpaceStore = defineStore('space', () => {
 		pending.value = false
 	}
 
-	function addSpace(space: { id: string; name: string }) {
-		spaces.value.push({ id: space.id, name: space.name, noteCount: 0 })
+	function addSpace(space: { id: string; name: string; icon: EntityIcon }) {
+		spaces.value.push({ id: space.id, name: space.name, icon: space.icon, noteCount: 0 })
 	}
 
-	function renameSpace(space: { id: string; name: string }) {
+	function renameSpace(space: { id: string; name: string; icon: EntityIcon }) {
 		const index = spaces.value.findIndex((item) => item.id === space.id)
 		if (index === -1) return
 		spaces.value[index] = {
 			id: space.id,
 			name: space.name,
+			icon: space.icon,
 			noteCount: spaces.value[index]?.noteCount ?? 0,
 		}
 	}
@@ -58,10 +59,6 @@ export const useSpaceStore = defineStore('space', () => {
 		}
 	}
 
-	function iconForSpace(space: SpaceListItem) {
-		return space.noteCount > 0 ? appConfig.ui.icons.folderOpen : appConfig.ui.icons.folder
-	}
-
 	return {
 		spaces,
 		pending,
@@ -71,6 +68,5 @@ export const useSpaceStore = defineStore('space', () => {
 		renameSpace,
 		removeSpace,
 		deleteSpace,
-		iconForSpace,
 	}
 })

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { LazyNoteSpaceFormModal } from '#components'
 import { noteVisibility, noteVisibilityValues } from '#shared/types/note'
 import type { Note, NoteVisibility } from '#shared/types/note'
 import type { DropdownMenuItem } from '@nuxt/ui'
@@ -14,9 +15,13 @@ const open = defineModel<boolean>('open', { default: false })
 const { t } = useI18n()
 const toast = useToast()
 const appConfig = useAppConfig()
+const overlay = useOverlay()
 const noteStore = useNoteStore()
 const draftStore = useDraftStore()
 const viewStore = useViewStore()
+const spaceStore = useSpaceStore()
+
+const spaceFormModal = overlay.create(LazyNoteSpaceFormModal)
 
 const content = ref('')
 const spaceId = ref<string | null>(null)
@@ -30,6 +35,7 @@ watch(
 	() => open.value,
 	(isOpen) => {
 		if (!isOpen) return
+		void spaceStore.load()
 		content.value = draftStore.load(draftScope.value) || baseline.value
 		spaceId.value = props.note ? props.note.spaceId : (viewStore.baseFilter.spaceId ?? null)
 		visibility.value = props.note?.visibility ?? noteVisibility.private
@@ -94,6 +100,17 @@ const visibilityItems = computed<DropdownMenuItem[][]>(() => [
 
 const currentVisibility = computed(() => noteVisibilityMeta[visibility.value])
 
+const currentSpace = computed(() => spaceStore.spaces.find((space) => space.id === spaceId.value))
+const spaceLabel = computed(() => currentSpace.value?.name ?? t('note.inbox'))
+const { forSpace } = useEntityIcon()
+const spaceIcon = computed(() =>
+	currentSpace.value ? forSpace(currentSpace.value) : appConfig.ui.icons.inbox,
+)
+
+function openNewSpace() {
+	spaceFormModal.open({ space: null })
+}
+
 const submitLabel = computed(() => {
 	const publishing = visibility.value === noteVisibility.public
 	if (!props.note?.id) return publishing ? t('note.publish') : t('note.send')
@@ -153,7 +170,15 @@ async function handleSend() {
 				<UDropdownMenu :items="addItems" :content="{ align: 'start', side: 'top' }">
 					<UButton :icon="appConfig.ui.icons.plus" color="neutral" variant="ghost" />
 				</UDropdownMenu>
-				<NoteSpaceMenu v-model="spaceId" />
+				<NoteSpacePicker
+					:space-id="spaceId"
+					modal
+					align="start"
+					@select="spaceId = $event"
+					@create="openNewSpace"
+				>
+					<UButton :icon="spaceIcon" :label="spaceLabel" color="neutral" variant="ghost" />
+				</NoteSpacePicker>
 				<UFieldGroup class="ml-auto">
 					<UButton :label="submitLabel" variant="soft" :loading="sending" @click="handleSend" />
 					<UDropdownMenu :items="visibilityItems" :content="{ align: 'end', side: 'top' }">

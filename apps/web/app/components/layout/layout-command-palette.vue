@@ -145,7 +145,7 @@ const commands = computed<CommandPaletteItem[]>(() => {
 		},
 		{
 			label: t('space.new'),
-			icon: appConfig.ui.icons.folder,
+			icon: appConfig.ui.icons.space,
 			onSelect: createSpace,
 		},
 	]
