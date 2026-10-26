@@ -59,6 +59,7 @@ export const iconsTheme = {
 	refresh: 'ph:arrows-clockwise',
 	rows: 'ph:rows',
 	grid: 'ph:grid-nine',
+	sort: 'ph:arrows-down-up',
 	send: 'ph:paper-plane-tilt',
 	image: 'ph:image',
 	waveform: 'ph:waveform',

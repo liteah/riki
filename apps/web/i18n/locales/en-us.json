@@ -95,7 +95,12 @@
 		"columnsAuto": "Auto fill",
 		"columnsSingle": "Single column",
 		"columnsDouble": "Double column",
-		"columnsTriple": "Triple column"
+		"columnsTriple": "Triple column",
+		"sort": "Sort",
+		"sortCreatedDesc": "Created: newest first",
+		"sortCreatedAsc": "Created: oldest first",
+		"sortUpdatedDesc": "Updated: newest first",
+		"sortUpdatedAsc": "Updated: oldest first"
 	},
 	"inbox": {
 		"unassigned": "Unassigned",

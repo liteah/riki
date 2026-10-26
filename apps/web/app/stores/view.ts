@@ -1,5 +1,7 @@
 import { skipHydrate } from 'pinia'
 import { localKeys } from '~/utils/local-cache'
+import { noteSort as noteSortValues } from '#shared/types/note'
+import type { NoteSort } from '#shared/types/note'
 import { sidebarKind } from '#shared/types/view'
 import type { SidebarEntry, SidebarKind, SidebarTarget, View, ViewFilter } from '#shared/types/view'
 import type { EntityIcon } from '#shared/types/icon'
@@ -21,6 +23,9 @@ export const useViewStore = defineStore('view', () => {
 	const pending = ref(false)
 	const sidebarOpen = skipHydrate(useLocalStorage(localKeys.sidebarOpen, true))
 	const noteColumnMode = skipHydrate(useLocalStorage<NoteColumnMode>(localKeys.noteColumns, 'auto'))
+	const noteSort = skipHydrate(
+		useLocalStorage<NoteSort>(localKeys.noteSort, noteSortValues.createdDesc),
+	)
 
 	const spaceStore = useSpaceStore()
 	const tagStore = useTagStore()
@@ -177,6 +182,7 @@ export const useViewStore = defineStore('view', () => {
 		target,
 		sidebarOpen,
 		noteColumnMode,
+		noteSort,
 		loaded,
 		pending,
 		baseFilter,

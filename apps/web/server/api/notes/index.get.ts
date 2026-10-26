@@ -1,17 +1,20 @@
 import { db } from '#server/utils/db'
 import { noteTags, notes, spaces, user, views } from '#server/db/schemas'
-import { listNotesQuerySchema, noteStatus, noteVisibility } from '#shared/types/note'
+import { listNotesQuerySchema, noteSort, noteStatus, noteVisibility } from '#shared/types/note'
+import type { NoteSort } from '#shared/types/note'
 import type { ViewFilter } from '#shared/types/view'
 import { getSessionUser } from '#server/utils/session'
 import { normalizeViewFilter } from '#server/utils/view-filter'
 import { readQueryZod } from '#server/utils/validation'
 import {
 	and,
+	asc,
 	count,
 	desc,
 	eq,
 	exists,
 	getColumns,
+	gt,
 	inArray,
 	isNull,
 	like,
@@ -25,8 +28,9 @@ import {
 } from 'drizzle-orm'
 import type { SQL } from 'drizzle-orm'
 
-export function encodeNoteCursor(createdAt: Date, id: string, pinned: boolean): string {
-	return `${createdAt.getTime()}:${id}:${pinned ? 1 : 0}`
+export function encodeNoteCursor(sort: NoteSort, value: Date, id: string, pinned: boolean): string {
+	const position = `${value.getTime()}:${id}:${pinned ? 1 : 0}`
+	return sort === noteSort.createdDesc ? position : `${sort}:${position}`
 }
 
 function viewFilterCondition(
@@ -134,19 +138,28 @@ export default defineEventHandler(async (event) => {
 			: undefined
 
 	const pinnedFlag = sql<number>`case when ${notes.status} = ${noteStatus.pinned} then 1 else 0 end`
+	const sortByUpdated = query.sort === noteSort.updatedDesc || query.sort === noteSort.updatedAsc
+	const sortAscending = query.sort === noteSort.createdAsc || query.sort === noteSort.updatedAsc
+	const sortValue = sortByUpdated ? notes.updatedAt : notes.createdAt
 
-	const cursorFilter = query.cursor
-		? or(
-				lt(pinnedFlag, query.cursor.pinned ? 1 : 0),
-				and(
-					eq(pinnedFlag, query.cursor.pinned ? 1 : 0),
-					or(
-						lt(notes.createdAt, query.cursor.createdAt),
-						and(eq(notes.createdAt, query.cursor.createdAt), lt(notes.id, query.cursor.id)),
+	const cursorFilter =
+		query.cursor && query.cursor.sort === query.sort
+			? or(
+					lt(pinnedFlag, query.cursor.pinned ? 1 : 0),
+					and(
+						eq(pinnedFlag, query.cursor.pinned ? 1 : 0),
+						sortAscending
+							? or(
+									gt(sortValue, query.cursor.value),
+									and(eq(sortValue, query.cursor.value), gt(notes.id, query.cursor.id)),
+								)
+							: or(
+									lt(sortValue, query.cursor.value),
+									and(eq(sortValue, query.cursor.value), lt(notes.id, query.cursor.id)),
+								),
 					),
-				),
-			)
-		: undefined
+				)
+			: undefined
 
 	const readable = query.explore
 		? viewerId
@@ -240,7 +253,11 @@ export default defineEventHandler(async (event) => {
 			.leftJoin(spaces, eq(spaces.id, notes.spaceId))
 			.innerJoin(user, eq(user.id, notes.userId))
 			.where(and(cursorFilter, where))
-			.orderBy(desc(pinnedFlag), desc(notes.createdAt), desc(notes.id))
+			.orderBy(
+				desc(pinnedFlag),
+				sortAscending ? asc(sortValue) : desc(sortValue),
+				sortAscending ? asc(notes.id) : desc(notes.id),
+			)
 			.limit(query.limit + 1),
 		db
 			.select({ count: count() })
@@ -278,7 +295,12 @@ export default defineEventHandler(async (event) => {
 		items,
 		nextCursor:
 			rows.length > query.limit && last
-				? encodeNoteCursor(last.createdAt, last.id, last.status === noteStatus.pinned)
+				? encodeNoteCursor(
+						query.sort,
+						sortByUpdated ? last.updatedAt : last.createdAt,
+						last.id,
+						last.status === noteStatus.pinned,
+					)
 				: null,
 		total: totalRow?.count ?? 0,
 	}

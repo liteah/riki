@@ -18,6 +18,7 @@ const viewStore = useViewStore()
 const noteStore = useNoteStore()
 const { forSpace, forView } = useEntityIcon()
 const { item: columnItem } = useNoteColumnMenu()
+const { item: sortItem } = useNoteSortMenu()
 const { spaces } = storeToRefs(spaceStore)
 const { tags } = storeToRefs(tagStore)
 const { target, pinnedTargets, unpinnedViews, unpinnedSpaces, unpinnedTags } =
@@ -128,7 +129,7 @@ function spaceActions(space: SpaceListItem): DropdownMenuItem[][] {
 			},
 		],
 		[pinAction(sidebarKind.space, space.id)],
-		[columnItem.value],
+		[columnItem.value, sortItem.value],
 		[
 			{
 				label: t('common.delete'),
@@ -150,7 +151,7 @@ function viewActions(view: { id: string; name: string }): DropdownMenuItem[][] {
 				onSelect: () => openEditView(view.id),
 			},
 		],
-		[columnItem.value],
+		[columnItem.value, sortItem.value],
 		[
 			{
 				label: t('common.delete'),
@@ -184,7 +185,7 @@ function pinAction(kind: SidebarKind, id: string): DropdownMenuItem {
 function tagActions(tag: TagListItem): DropdownMenuItem[][] {
 	return [
 		[pinAction(sidebarKind.tag, tag.id)],
-		[columnItem.value],
+		[columnItem.value, sortItem.value],
 		[
 			{
 				label: t('common.delete'),

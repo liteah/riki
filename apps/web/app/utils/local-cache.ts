@@ -7,5 +7,6 @@ export const localKeys = {
 	drafts: `${PREFIX}.drafts`,
 	sidebarOpen: `${PREFIX}.sidebarOpen`,
 	noteColumns: `${PREFIX}.noteColumns`,
+	noteSort: `${PREFIX}.noteSort`,
 	shortcuts: `${PREFIX}.shortcuts`,
 } as const

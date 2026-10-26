@@ -95,7 +95,12 @@
 		"columnsAuto": "自動鋪滿",
 		"columnsSingle": "單欄",
 		"columnsDouble": "雙欄",
-		"columnsTriple": "三欄"
+		"columnsTriple": "三欄",
+		"sort": "排序",
+		"sortCreatedDesc": "建立時間：從新到舊",
+		"sortCreatedAsc": "建立時間：從舊到新",
+		"sortUpdatedDesc": "更新時間：從新到舊",
+		"sortUpdatedAsc": "更新時間：從舊到新"
 	},
 	"inbox": {
 		"unassigned": "未歸類",

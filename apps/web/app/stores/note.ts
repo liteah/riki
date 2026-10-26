@@ -3,6 +3,7 @@ import { noteFeed, noteStatus, noteVisibility } from '#shared/types/note'
 import { localKeys } from '~/utils/local-cache'
 import { mergeFilters } from '~/utils/note-filter'
 import { noteQueryFromFilter } from '~/utils/note-query'
+import { compareNotes } from '~/utils/note-sort'
 import { toEpoch } from '~/utils/time'
 import type {
 	CreateNoteInput,
@@ -64,14 +65,6 @@ function statusOf(error: unknown) {
 function backoffDelay(attempts: number) {
 	const exponential = Math.min(RETRY_BASE_MS * 2 ** attempts, RETRY_MAX_MS)
 	return Math.round(exponential * (0.5 + Math.random() * 0.5))
-}
-
-function compareNotes(a: NoteListItem, b: NoteListItem) {
-	const pinned = Number(b.status === noteStatus.pinned) - Number(a.status === noteStatus.pinned)
-	if (pinned) return pinned
-	const byTime = toEpoch(b.createdAt) - toEpoch(a.createdAt)
-	if (byTime) return byTime
-	return a.id < b.id ? 1 : a.id > b.id ? -1 : 0
 }
 
 export const useNoteStore = defineStore('note', () => {
@@ -260,7 +253,7 @@ export const useNoteStore = defineStore('note', () => {
 				if (scope.notVisibility?.includes(note.visibility)) return false
 				return true
 			})
-			.sort(compareNotes)
+			.sort((a, b) => compareNotes(a, b, viewStore.noteSort))
 	})
 
 	function resetFilter() {
@@ -338,7 +331,7 @@ export const useNoteStore = defineStore('note', () => {
 			changed = true
 		}
 		if (!changed) return rows
-		return [...byId.values()].sort(compareNotes)
+		return [...byId.values()].sort((a, b) => compareNotes(a, b, viewStore.noteSort))
 	}
 
 	function mergeIncoming(incoming: NoteListItem[]) {
@@ -505,6 +498,7 @@ export const useNoteStore = defineStore('note', () => {
 		const data = await $fetch<ListNotesResponse>('/api/notes', {
 			query: {
 				limit: PAGE_SIZE,
+				sort: viewStore.noteSort,
 				...(nextCursor.value ? { cursor: nextCursor.value } : {}),
 				...noteQueryFromFilter(filter),
 			},
@@ -538,7 +532,8 @@ export const useNoteStore = defineStore('note', () => {
 	)
 
 	watch(
-		() => `${inInbox.value ? feed.value : ''}|${JSON.stringify(feedScope.value)}`,
+		() =>
+			`${inInbox.value ? feed.value : ''}|${JSON.stringify(feedScope.value)}|${viewStore.noteSort}`,
 		(key, previous) => {
 			if (import.meta.server || key === previous) return
 			nextCursor.value = null

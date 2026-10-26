@@ -95,7 +95,12 @@
 		"columnsAuto": "自动铺满",
 		"columnsSingle": "单栏",
 		"columnsDouble": "双栏",
-		"columnsTriple": "三栏"
+		"columnsTriple": "三栏",
+		"sort": "排序",
+		"sortCreatedDesc": "创建时间：从新到旧",
+		"sortCreatedAsc": "创建时间：从旧到新",
+		"sortUpdatedDesc": "修改时间：从新到旧",
+		"sortUpdatedAsc": "修改时间：从旧到新"
 	},
 	"inbox": {
 		"unassigned": "未归类",

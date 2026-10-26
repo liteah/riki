@@ -16,6 +16,7 @@ const viewStore = useViewStore()
 const spaceStore = useSpaceStore()
 const tagStore = useTagStore()
 const { item: columnItem } = useNoteColumnMenu()
+const { item: sortItem } = useNoteSortMenu()
 const { target } = storeToRefs(viewStore)
 
 const spaceFormModal = overlay.create(LazyNoteSpaceFormModal)
@@ -136,7 +137,7 @@ function deleteCurrent() {
 
 const items = computed<DropdownMenuItem[][]>(() => {
 	const current = targetEntry.value
-	if (!current) return [[columnItem.value]]
+	if (!current) return [[columnItem.value, sortItem.value]]
 	const actions: DropdownMenuItem[] = []
 	if (currentView.value || currentSpace.value) {
 		actions.push({
@@ -152,7 +153,7 @@ const items = computed<DropdownMenuItem[][]>(() => {
 	})
 	const rows: DropdownMenuItem[][] = [
 		actions,
-		[columnItem.value],
+		[columnItem.value, sortItem.value],
 		[pinAction(current.kind, current.id)],
 	]
 	if (currentView.value || currentSpace.value || currentTag.value) {

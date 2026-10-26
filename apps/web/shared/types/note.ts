@@ -57,6 +57,15 @@ export const noteFeed = {
 } as const
 export type NoteFeed = (typeof noteFeed)[keyof typeof noteFeed]
 
+export const noteSort = {
+	createdDesc: 'created-desc',
+	createdAsc: 'created-asc',
+	updatedDesc: 'updated-desc',
+	updatedAsc: 'updated-asc',
+} as const
+export type NoteSort = (typeof noteSort)[keyof typeof noteSort]
+export const noteSortValues = Object.values(noteSort) as [NoteSort, ...NoteSort[]]
+
 export const createNoteBodySchema = z.object({
 	id: z.string().trim().min(1).max(64).optional(),
 	content: z.string().trim().min(1),
@@ -99,20 +108,22 @@ export type UpdateNoteBody = z.output<typeof updateNoteBodySchema>
 
 const noteCursorSchema = z
 	.string()
-	.regex(/^\d+:[^:]+:[01]$/)
+	.regex(/^(?:(?:created|updated)-(?:asc|desc):)?\d+:[^:]+:[01]$/)
 	.transform((value) => {
-		const [createdAt, id, pinned] = value.split(':')
-		return {
-			createdAt: new Date(Number(createdAt)),
-			id: id as string,
-			pinned: pinned === '1',
-		}
+		const parts = value.split(':')
+		const sorted = parts.length === 4
+		const sort = sorted ? (parts[0] as NoteSort) : noteSort.createdDesc
+		const time = Number(parts[sorted ? 1 : 0])
+		const id = parts[sorted ? 2 : 1] as string
+		const pinned = parts[sorted ? 3 : 2] === '1'
+		return { sort, value: new Date(time), id, pinned }
 	})
-	.refine((cursor) => !Number.isNaN(cursor.createdAt.getTime()))
+	.refine((cursor) => !Number.isNaN(cursor.value.getTime()))
 
 export const listNotesQuerySchema = z.object({
 	limit: z.coerce.number().int().min(1).max(50).default(20),
 	cursor: noteCursorSchema.optional(),
+	sort: z.enum(noteSort).default(noteSort.createdDesc),
 	status: z.preprocess(
 		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),
 		z.array(z.enum(noteStatus)).optional(),
