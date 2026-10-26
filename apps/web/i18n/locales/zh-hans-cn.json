@@ -90,7 +90,12 @@
 		"archivedEmptyTitle": "没有已归档的笔记",
 		"exploreEmptyTitle": "暂时没有可探索的公开笔记",
 		"unsynced": "未同步",
-		"draft": "有未保存的修改"
+		"draft": "有未保存的修改",
+		"columns": "列数",
+		"columnsAuto": "自动铺满",
+		"columnsSingle": "单栏",
+		"columnsDouble": "双栏",
+		"columnsTriple": "三栏"
 	},
 	"inbox": {
 		"unassigned": "未归类",

@@ -90,7 +90,12 @@
 		"archivedEmptyTitle": "沒有已封存的筆記",
 		"exploreEmptyTitle": "暫時沒有可探索的公開筆記",
 		"unsynced": "未同步",
-		"draft": "有未儲存的修改"
+		"draft": "有未儲存的修改",
+		"columns": "欄數",
+		"columnsAuto": "自動鋪滿",
+		"columnsSingle": "單欄",
+		"columnsDouble": "雙欄",
+		"columnsTriple": "三欄"
 	},
 	"inbox": {
 		"unassigned": "未歸類",

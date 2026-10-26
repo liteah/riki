@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { builtinView, sidebarKind } from '#shared/types/view'
+import { resolveNoteColumnLanes } from '~/utils/note-columns'
 
 const { t } = useI18n()
 const noteStore = useNoteStore()
 const { visibleNotes } = storeToRefs(noteStore)
 const viewStore = useViewStore()
+const { noteColumnMode } = storeToRefs(viewStore)
 const spaceStore = useSpaceStore()
 const tagStore = useTagStore()
 
@@ -30,6 +32,15 @@ const scrollArea = useTemplateRef<{
 	$el: HTMLElement
 	virtualizer?: { scrollToIndex: (index: number, options?: Record<string, unknown>) => void }
 }>('scrollArea')
+
+const { width: listWidth } = useElementSize(() => scrollArea.value?.$el)
+const lanes = computed(() =>
+	resolveNoteColumnLanes(noteColumnMode.value, Math.max(0, listWidth.value - 16)),
+)
+const listUi = computed(() => {
+	if (noteColumnMode.value === 'single') return { viewport: 'mx-auto max-w-2xl' }
+	if (noteColumnMode.value === 'double') return { viewport: 'mx-auto max-w-4xl' }
+})
 
 function scrollToTop() {
 	scrollArea.value?.virtualizer?.scrollToIndex(0, { align: 'start' })
@@ -68,7 +79,8 @@ watch(() => visibleNotes.value[0]?.id, scrollToTop)
 			v-slot="{ item }"
 			:items="visibleNotes"
 			shadow
-			:virtualize="{ gap: 8, lanes: 3, estimateSize: 200 }"
+			:virtualize="{ gap: 8, lanes, estimateSize: 200 }"
+			:ui="listUi"
 			class="size-full p-2"
 		>
 			<NoteListItem

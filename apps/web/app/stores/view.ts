@@ -5,6 +5,7 @@ import type { SidebarEntry, SidebarKind, SidebarTarget, View, ViewFilter } from 
 import type { EntityIcon } from '#shared/types/icon'
 import type { SpaceListItem } from '#shared/types/space'
 import type { TagListItem } from '#shared/types/tag'
+import type { NoteColumnMode } from '~/utils/note-columns'
 
 export type PinnedTarget =
 	| { entry: SidebarEntry; kind: 'view'; id: string; label: string; view: View }
@@ -19,6 +20,7 @@ export const useViewStore = defineStore('view', () => {
 	const loaded = ref(false)
 	const pending = ref(false)
 	const sidebarOpen = skipHydrate(useLocalStorage(localKeys.sidebarOpen, true))
+	const noteColumnMode = skipHydrate(useLocalStorage<NoteColumnMode>(localKeys.noteColumns, 'auto'))
 
 	const spaceStore = useSpaceStore()
 	const tagStore = useTagStore()
@@ -174,6 +176,7 @@ export const useViewStore = defineStore('view', () => {
 		pinned,
 		target,
 		sidebarOpen,
+		noteColumnMode,
 		loaded,
 		pending,
 		baseFilter,

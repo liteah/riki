@@ -90,7 +90,12 @@
 		"archivedEmptyTitle": "No archived notes",
 		"exploreEmptyTitle": "No public notes to explore yet",
 		"unsynced": "Not synced",
-		"draft": "Unsaved changes"
+		"draft": "Unsaved changes",
+		"columns": "Columns",
+		"columnsAuto": "Auto fill",
+		"columnsSingle": "Single column",
+		"columnsDouble": "Double column",
+		"columnsTriple": "Triple column"
 	},
 	"inbox": {
 		"unassigned": "Unassigned",

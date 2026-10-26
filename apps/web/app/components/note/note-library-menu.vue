@@ -15,6 +15,7 @@ const overlay = useOverlay()
 const viewStore = useViewStore()
 const spaceStore = useSpaceStore()
 const tagStore = useTagStore()
+const { item: columnItem } = useNoteColumnMenu()
 const { target } = storeToRefs(viewStore)
 
 const spaceFormModal = overlay.create(LazyNoteSpaceFormModal)
@@ -135,7 +136,7 @@ function deleteCurrent() {
 
 const items = computed<DropdownMenuItem[][]>(() => {
 	const current = targetEntry.value
-	if (!current) return []
+	if (!current) return [[columnItem.value]]
 	const actions: DropdownMenuItem[] = []
 	if (currentView.value || currentSpace.value) {
 		actions.push({
@@ -149,7 +150,11 @@ const items = computed<DropdownMenuItem[][]>(() => {
 		icon: appConfig.ui.icons.search,
 		onSelect: searchInTarget,
 	})
-	const rows: DropdownMenuItem[][] = [actions, [pinAction(current.kind, current.id)]]
+	const rows: DropdownMenuItem[][] = [
+		actions,
+		[columnItem.value],
+		[pinAction(current.kind, current.id)],
+	]
 	if (currentView.value || currentSpace.value || currentTag.value) {
 		rows.push([
 			{
@@ -165,7 +170,7 @@ const items = computed<DropdownMenuItem[][]>(() => {
 </script>
 
 <template>
-	<UDropdownMenu v-if="scope" :items="items" :content="{ align: 'end' }">
+	<UDropdownMenu :items="items" :content="{ align: 'end' }">
 		<UTooltip :text="t('common.more')">
 			<UButton
 				:icon="appConfig.ui.icons.ellipsis"
