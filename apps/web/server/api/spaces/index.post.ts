@@ -10,12 +10,14 @@ export default defineEventHandler(async (event) => {
 	const body = await readBodyZod(event, createSpaceBodySchema)
 
 	const spaceId = newId()
-	const [space] = await db.batch([
+	const [spaceRows] = await db.batch([
 		db
 			.insert(spaces)
 			.values({ id: spaceId, name: body.name, icon: body.icon, userId: user.id })
 			.returning(),
 	])
+	const space = spaceRows[0]
+	if (!space) throw createError({ statusCode: 500, statusMessage: 'Space not created' })
 
 	setResponseStatus(event, 201)
 	setResponseHeader(event, 'Location', `/api/spaces/${spaceId}`)

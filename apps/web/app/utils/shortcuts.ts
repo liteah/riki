@@ -51,7 +51,7 @@ export const noteViewShortcutActions = [
 	{
 		id: 'openNote',
 		defaultKey: 'enter',
-		labelKey: 'settings.shortcuts.openNote',
+		labelKey: 'note.openNote',
 	},
 	{
 		id: 'addToSpace',

@@ -7,6 +7,7 @@ import type { SidebarEntry, SidebarKind, SidebarTarget, View, ViewFilter } from 
 import type { EntityIcon } from '#shared/types/icon'
 import type { SpaceListItem } from '#shared/types/space'
 import type { TagListItem } from '#shared/types/tag'
+import { noteColumnModes } from '~/utils/note-columns'
 import type { NoteColumnMode } from '~/utils/note-columns'
 
 export type PinnedTarget =
@@ -23,6 +24,10 @@ export const useViewStore = defineStore('view', () => {
 	const pending = ref(false)
 	const sidebarOpen = skipHydrate(useLocalStorage(localKeys.sidebarOpen, true))
 	const noteColumnMode = skipHydrate(useLocalStorage<NoteColumnMode>(localKeys.noteColumns, 'auto'))
+	// Persisted column modes outlive the menu; reset retired values.
+	if (import.meta.client && !noteColumnModes.includes(noteColumnMode.value)) {
+		noteColumnMode.value = 'auto'
+	}
 	const noteSort = skipHydrate(
 		useLocalStorage<NoteSort>(localKeys.noteSort, noteSortValues.createdDesc),
 	)

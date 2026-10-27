@@ -177,7 +177,13 @@ async function handleSend() {
 					@select="spaceId = $event"
 					@create="openNewSpace"
 				>
-					<UButton :icon="spaceIcon" :label="spaceLabel" color="neutral" variant="ghost" />
+					<UButton
+						:icon="spaceIcon"
+						:label="spaceLabel"
+						color="neutral"
+						variant="ghost"
+						:ui="{ leadingIcon: 'size-4' }"
+					/>
 				</NoteSpacePicker>
 				<UFieldGroup class="ml-auto">
 					<UButton :label="submitLabel" variant="soft" :loading="sending" @click="handleSend" />

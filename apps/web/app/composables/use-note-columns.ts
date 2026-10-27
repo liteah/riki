@@ -11,7 +11,6 @@ export function useNoteColumnMenu() {
 		auto: t('note.columnsAuto'),
 		single: t('note.columnsSingle'),
 		double: t('note.columnsDouble'),
-		triple: t('note.columnsTriple'),
 	}))
 
 	const items = computed<DropdownMenuItem[]>(() =>

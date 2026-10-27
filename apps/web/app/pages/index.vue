@@ -79,7 +79,7 @@ watch(() => visibleNotes.value[0]?.id, scrollToTop)
 			v-slot="{ item }"
 			:items="visibleNotes"
 			shadow
-			:virtualize="{ gap: 8, lanes, estimateSize: 200 }"
+			:virtualize="{ gap: 8, lanes, estimateSize: 200, laneAssignmentMode: 'measured' }"
 			:ui="listUi"
 			class="size-full p-2"
 		>

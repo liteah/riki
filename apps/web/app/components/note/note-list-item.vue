@@ -226,6 +226,12 @@ const shortcutActions = computed<NoteAction[]>(() =>
 
 const cardEl = useTemplateRef<HTMLElement>('card')
 
+const collapsedHeight = 500
+const contentEl = useTemplateRef<HTMLElement>('content')
+const { height: contentHeight } = useElementSize(contentEl)
+const isLongNote = computed(() => contentHeight.value > collapsedHeight)
+const showCollapse = computed(() => isOwn.value && isLongNote.value)
+
 const showActions = computed(() => props.giveActions && actions.value.length > 0)
 
 const actionBarClass = computed(() =>
@@ -384,7 +390,33 @@ const absoluteHint = computed(() => {
 			@click="onSelect"
 		>
 			<article class="h-full rounded-xl bg-default p-2 py-1">
-				<Markdown :value="props.note.content" :components="markdownComponents" />
+				<div class="relative">
+					<div
+						:class="isOwn && 'overflow-hidden'"
+						:style="isOwn ? { maxHeight: `${collapsedHeight}px` } : undefined"
+					>
+						<div ref="content" class="flow-root">
+							<Markdown :value="props.note.content" :components="markdownComponents" />
+						</div>
+					</div>
+					<div
+						v-if="showCollapse"
+						class="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-end justify-center bg-linear-to-t from-default to-transparent px-2 pt-8 pb-2"
+					>
+						<UTooltip :text="t('note.openNote')">
+							<UButton
+								:icon="appConfig.ui.icons.chevronDown"
+								:aria-label="t('note.openNote')"
+								color="neutral"
+								variant="ghost"
+								size="sm"
+								square
+								class="pointer-events-auto"
+								@click.stop="onSelect"
+							/>
+						</UTooltip>
+					</div>
+				</div>
 			</article>
 			<div class="flex flex-wrap items-center gap-2 pl-2 text-xs text-muted sm:py-1 sm:text-sm">
 				<div class="flex items-center gap-1 truncate">
@@ -414,7 +446,7 @@ const absoluteHint = computed(() => {
 						<span class="max-w-24 truncate">{{ props.note.authorName }}</span>
 					</span>
 					<div v-if="noteSpaceName" class="flex shrink-0 items-center gap-1">
-						<UIcon :name="noteSpaceIcon" class="size-3.5" />
+						<UIcon :name="noteSpaceIcon" class="size-3.5 shrink-0" />
 						<span class="max-w-24 truncate">{{ noteSpaceName }}</span>
 					</div>
 				</div>
