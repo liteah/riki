@@ -5,6 +5,12 @@ const settingsStore = useSettingsStore()
 const { state } = storeToRefs(settingsStore)
 
 const appConfig = useAppConfig()
+
+const linkPreviewModeItems = computed(() => [
+	{ code: 'never' as const, name: $t('common.never') },
+	{ code: 'landscape' as const, name: $t('settings.preferences.linkPreviewLandscape') },
+	{ code: 'portrait' as const, name: $t('settings.preferences.linkPreviewPortrait') },
+])
 </script>
 
 <template>
@@ -20,8 +26,27 @@ const appConfig = useAppConfig()
 		>
 			<SettingsColorModeTabs v-model="state.colorMode" />
 		</SettingsItem>
-		<SettingsItem :label="$t('settings.preferences.linkPreviews')" :icon="appConfig.ui.icons.link">
-			<USwitch v-model="state.linkPreviews" size="sm" />
+	</SettingsItemGroup>
+	<SettingsItemGroup :label="$t('settings.preferences.noteBrowsingAndEditor')">
+		<SettingsItem
+			:label="$t('settings.preferences.linkPreview')"
+			:description="$t('settings.preferences.linkPreviewDescription')"
+			:icon="appConfig.ui.icons.link"
+		>
+			<USelectMenu
+				v-model="state.linkPreviewMode"
+				:items="linkPreviewModeItems"
+				label-key="name"
+				value-key="code"
+				:search-input="false"
+			/>
+		</SettingsItem>
+		<SettingsItem
+			:label="$t('settings.preferences.linkPreviewHover')"
+			:description="$t('settings.preferences.linkPreviewHoverDescription')"
+			:icon="appConfig.ui.icons.eye"
+		>
+			<USwitch v-model="state.linkPreviewHover" />
 		</SettingsItem>
 	</SettingsItemGroup>
 	<SettingsItemGroup :label="$t('settings.preferences.format')">

@@ -138,6 +138,20 @@ export const iconsTheme = {
 	signOut: 'ph:sign-out',
 
 	// logos
-	googleLogo: 'ph:google-logo-bold',
-	githubLogo: 'ph:github-logo-bold',
+	googleLogo: 'ph:google-logo',
+	githubLogo: 'ph:github-logo',
+	appleLogo: 'ph:apple-logo',
+	instagramLogo: 'ph:instagram-logo',
+	lastfmLogo: 'ph:lastfm-logo',
+	linkedinLogo: 'ph:linkedin-logo',
+	mastodonLogo: 'ph:mastodon-logo',
+	mediumLogo: 'ph:medium-logo',
+	pinterestLogo: 'ph:pinterest-logo',
+	redditLogo: 'ph:reddit-logo',
+	soundcloudLogo: 'ph:soundcloud-logo',
+	spotifyLogo: 'ph:spotify-logo',
+	threadsLogo: 'ph:threads-logo',
+	twitchLogo: 'ph:twitch-logo',
+	twitterLogo: 'ph:twitter-logo',
+	youtubeLogo: 'ph:youtube-logo',
 } satisfies Record<string, string>

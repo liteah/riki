@@ -3,9 +3,9 @@ import {
 	cleanText,
 	hostLabel,
 	inferLinkPreviewType,
+	isLinkPreviewUrlBlocked,
 	linkPreviewMetaForUrl,
 	linkPreviewProviderName,
-	normalizeOgType,
 	parseHttpUrl,
 	resolveHttpAsset,
 } from '#shared/utils/link-preview'
@@ -19,43 +19,6 @@ const htmlContentType = /^(?:application\/xhtml\+xml|text\/html)/i
 
 const cache = new Map<string, { preview: LinkPreview; expiresAt: number }>()
 const pending = new Map<string, Promise<LinkPreview | null>>()
-const blockedHosts = new Set(['localhost', 'metadata.google.internal'])
-const blockedSuffixes = [
-	'.localhost',
-	'.local',
-	'.internal',
-	'.lan',
-	'.home.arpa',
-	'.nip.io',
-	'.sslip.io',
-	'.xip.io',
-	'.localtest.me',
-	'.lvh.me',
-	'.vcap.me',
-]
-// [network, prefix length] pairs, including non-routable documentation ranges.
-const privateIpv4Ranges: Array<[number, number]> = [
-	[0x00000000, 8],
-	[0x0a000000, 8],
-	[0x64400000, 10],
-	[0x7f000000, 8],
-	[0xa9fe0000, 16],
-	[0xac100000, 12],
-	[0xc0000000, 24],
-	[0xc0000200, 24],
-	[0xc0a80000, 16],
-	[0xc6120000, 15],
-	[0xc6336400, 24],
-	[0xcb007100, 24],
-	[0xe0000000, 4],
-	[0xf0000000, 4],
-]
-const privateIpv6Ranges: Array<[number, number]> = [
-	[0xfc00, 0xfe00],
-	[0xfe80, 0xffc0],
-	[0xfec0, 0xffc0],
-	[0xff00, 0xff00],
-]
 
 export async function resolveLinkPreview(value: string): Promise<LinkPreview | null> {
 	const url = parseHttpUrl(value)
@@ -178,6 +141,7 @@ export function parseLinkPreviewHtml(html: string, pageUrl: URL, sourceUrl: URL)
 	)
 	const imageWidth = metaNumber(meta, ['og:image:width', 'twitter:image:width'])
 	const imageHeight = metaNumber(meta, ['og:image:height', 'twitter:image:height'])
+	const imageAlt = metaValue(meta, ['og:image:alt', 'twitter:image:alt'])
 	const author = metaValue(meta, ['article:author', 'author', 'twitter:creator'], 100)
 	const publishedAt = metaValue(
 		meta,
@@ -187,16 +151,17 @@ export function parseLinkPreviewHtml(html: string, pageUrl: URL, sourceUrl: URL)
 	return {
 		url: sourceUrl.href,
 		type,
-		ogType: normalizeOgType(ogTypeValue),
+		ogType: ogTypeValue,
 		title,
 		description,
 		image,
 		imageWidth,
 		imageHeight,
+		imageAlt,
 		icon: resolveHttpAsset(icon, pageUrl.href),
 		siteName:
-			metaValue(meta, ['og:site_name', 'application-name'], 100) ??
 			linkPreviewProviderName(sourceUrl.href) ??
+			metaValue(meta, ['og:site_name', 'application-name'], 100) ??
 			hostLabel(sourceUrl.href),
 		author: author && !isHttpUrlText(author) ? author : undefined,
 		publishedAt,
@@ -236,43 +201,5 @@ function isHttpUrlText(value: string) {
 // Note content is untrusted; reject loopback, private, and metadata targets before fetching.
 function assertPublicUrl(url: URL) {
 	if (url.protocol !== 'http:' && url.protocol !== 'https:') throw new Error('Unsupported protocol')
-	if (url.username || url.password) throw new Error('Credentials are not allowed')
-	if (url.port && url.port !== '80' && url.port !== '443') throw new Error('Port is not allowed')
-	const host = url.hostname
-		.toLowerCase()
-		.replace(/^\[|\]$/g, '')
-		.replace(/\.$/, '')
-	if (!host || isBlockedHostname(host) || isBlockedIp(host)) throw new Error('Private host')
-}
-
-function isBlockedHostname(host: string) {
-	return (
-		blockedHosts.has(host) ||
-		blockedSuffixes.some((suffix) => host.endsWith(suffix)) ||
-		(!host.includes('.') && !host.includes(':'))
-	)
-}
-
-function isBlockedIp(host: string) {
-	if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)) return isPrivateIpv4(host)
-	if (host.includes(':')) return isPrivateIpv6(host)
-	return false
-}
-
-function isPrivateIpv4(host: string) {
-	const parts = host.split('.').map(Number)
-	if (parts.length !== 4 || parts.some((part) => part < 0 || part > 255)) return false
-	const value = ((parts[0]! << 24) | (parts[1]! << 16) | (parts[2]! << 8) | parts[3]!) >>> 0
-	return privateIpv4Ranges.some(([base, bits]) => {
-		const mask = bits === 0 ? 0 : (0xffffffff << (32 - bits)) >>> 0
-		return (value & mask) === base
-	})
-}
-
-function isPrivateIpv6(host: string) {
-	const normalized = host.replace(/^\[|\]$/g, '').toLowerCase()
-	if (normalized === '::' || normalized === '::1' || normalized.startsWith('::ffff:')) return true
-	const first = Number.parseInt(normalized.split(':')[0] ?? '', 16)
-	if (Number.isNaN(first)) return false
-	return privateIpv6Ranges.some(([base, mask]) => (first & mask) === base)
+	if (isLinkPreviewUrlBlocked(url.href)) throw new Error('Private host')
 }

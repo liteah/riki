@@ -12,6 +12,14 @@ export const linkPreviewTypes = [
 
 export type LinkPreviewType = (typeof linkPreviewTypes)[number]
 
+export type LinkPreviewMode = 'never' | 'landscape' | 'portrait'
+
+export interface LinkPreviewSource {
+	url: string
+	label?: string
+	preview?: boolean
+}
+
 export type LinkPreviewMetaValue = string | number | boolean | null
 
 export type LinkPreviewMeta = Record<string, LinkPreviewMetaValue | undefined>
@@ -25,6 +33,7 @@ export interface LinkPreview {
 	image?: string
 	imageWidth?: number
 	imageHeight?: number
+	imageAlt?: string
 	icon?: string
 	siteName?: string
 	author?: string

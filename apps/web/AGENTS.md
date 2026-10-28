@@ -1,5 +1,9 @@
 # apps/web - AGENTS.md
 
+## Documentation
+
+When a task touches a library below, consult its official documentation at the point of change instead of relying on memory.
+
 ## Tech stack
 
 - [Nuxt 4](https://nuxt.com)
@@ -14,6 +18,9 @@
 ## UI
 
 - Icons only via `appConfig.ui.icons` (`app/theme/icons.ts`). Never hardcode icon strings in components.
+- Never use the native `title` attribute in place of a tooltip. Remove `title` from links; use `UTooltip`.
+- Variant classes are computed with `tv` from `tailwind-variants`; never assemble variant class strings in a computed ref.
+- Use Tailwind `aspect-*` utilities for aspect ratios; never set `aspectRatio` inline.
 - Modals only via `useOverlay` (`overlay.create(LazyXxxModal)` + `.open(props)`); dialog components expose a `close` emit. Never mount modal tags statically.
 - Should follow optimistic UI principles.
 
@@ -80,7 +87,13 @@
 ## Link previews
 
 - Link URLs stay in the note content; preview metadata is a cache, never a second source of truth. Re-derive links from stored content on every write and never trust a client-supplied preview URL.
-- Preserve the `og:type` namespace detail (`music.album` -> `musicAlbum`); derive the base presentation type separately. Do not add an exhaustive subtype map.
+- Preserve the raw `og:type` namespace (`music.album`, `video.movie`) and derive the base presentation type separately. Do not add an exhaustive subtype map.
+- A link opts into a bottom card with the Comark `preview` attribute: `[label](url){preview}`; `{preview=false}` opts out of the automatic single-link card. Without it, cards appear only for a note with exactly one link and no title; multiple links require explicit `preview`.
+- A carded link is not also rendered as a link at its original position; labeled links keep plain text, bare URLs disappear.
+- Display modes are `never`, `landscape`, and `portrait`. `landscape` always wins; `portrait` applies only when there is exactly one card, and multiple cards stay landscape.
+- Portrait cards use an `aspect-video` cover only when OGP reports wide, high-resolution dimensions; otherwise they fall back to a landscape card. Use `og:image:alt` when present.
+- Known providers use their brand icon instead of a favicon; other sites use the favicon or a small image, then the presentation-type icon.
+- Hover previews are opt-out in settings; blocked and private hosts never show hover or card previews.
 
 ## Editor vs renderer
 

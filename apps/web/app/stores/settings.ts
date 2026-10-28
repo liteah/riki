@@ -1,3 +1,4 @@
+import type { LinkPreviewMode } from '#shared/types/link-preview'
 import type { AvailableLocales } from '~~/i18n/locales'
 import type { TimeFormat } from '~/utils/time'
 
@@ -11,7 +12,8 @@ export const useSettingsStore = defineStore(
 			colorMode: 'system' as 'light' | 'dark' | 'system',
 			timeZone: 'system',
 			timeFormat: 'relative' as TimeFormat,
-			linkPreviews: true,
+			linkPreviewMode: 'portrait' as LinkPreviewMode,
+			linkPreviewHover: true,
 		})
 
 		watch(
@@ -30,5 +32,14 @@ export const useSettingsStore = defineStore(
 
 		return { state }
 	},
-	{ persist: { pick: ['state.linkPreviews'] } },
+	{
+		persist: {
+			pick: ['state.linkPreviewMode', 'state.linkPreviewHover'],
+			afterHydrate: ({ store }) => {
+				const mode = store.state.linkPreviewMode
+				if (mode === 'compact') store.state.linkPreviewMode = 'landscape'
+				else if (mode === 'single-large') store.state.linkPreviewMode = 'portrait'
+			},
+		},
+	},
 )

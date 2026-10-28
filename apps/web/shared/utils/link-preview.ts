@@ -6,16 +6,12 @@ import type {
 	LinkPreviewType,
 } from '../types/link-preview'
 
-export interface LinkPreviewSource {
-	url: string
-	label?: string
-}
-
 type MetaContext = { url: URL; host: string; segments: string[] }
 
 interface HostRule {
 	type: LinkPreviewType
 	provider?: string
+	icon?: string
 	hosts?: string[]
 	hostPrefixes?: string[]
 	hostSuffixes?: string[]
@@ -31,6 +27,44 @@ const audioExtensions = /\.(?:aac|flac|m4a|mp3|oga|ogg|opus|wav|weba)$/i
 const videoExtensions = /\.(?:m3u8|mov|mp4|mpeg|mpg|ogv|webm)$/i
 const articlePath = /(?:^|\/)(?:article|articles|blog|news|post|posts|story|stories)(?:\/|$)/i
 
+const blockedPreviewHosts = new Set(['localhost', 'metadata.google.internal'])
+const blockedPreviewSuffixes = [
+	'.localhost',
+	'.local',
+	'.internal',
+	'.lan',
+	'.home.arpa',
+	'.nip.io',
+	'.sslip.io',
+	'.xip.io',
+	'.localtest.me',
+	'.lvh.me',
+	'.vcap.me',
+]
+// [network, prefix length] pairs, including non-routable documentation ranges.
+const privateIpv4Ranges: Array<[number, number]> = [
+	[0x00000000, 8],
+	[0x0a000000, 8],
+	[0x64400000, 10],
+	[0x7f000000, 8],
+	[0xa9fe0000, 16],
+	[0xac100000, 12],
+	[0xc0000000, 24],
+	[0xc0000200, 24],
+	[0xc0a80000, 16],
+	[0xc6120000, 15],
+	[0xc6336400, 24],
+	[0xcb007100, 24],
+	[0xe0000000, 4],
+	[0xf0000000, 4],
+]
+const privateIpv6Ranges: Array<[number, number]> = [
+	[0xfc00, 0xfe00],
+	[0xfe80, 0xffc0],
+	[0xfec0, 0xffc0],
+	[0xff00, 0xff00],
+]
+
 const entityMap: Record<string, string> = {
 	amp: '&',
 	apos: "'",
@@ -45,39 +79,148 @@ const entityMap: Record<string, string> = {
 
 // First match wins; keep narrower host and path rules above their siblings.
 const hostRules: HostRule[] = [
-	{ type: 'github', provider: 'GitHub', hosts: ['github.com', 'gist.github.com'] },
+	{
+		type: 'github',
+		provider: 'GitHub',
+		icon: 'githubLogo',
+		hosts: ['github.com', 'gist.github.com'],
+	},
 	{
 		type: 'tweet',
-		provider: 'X',
+		provider: 'Twitter (X)',
+		icon: 'twitterLogo',
 		hosts: ['x.com', 'twitter.com', 't.co'],
 		hostSuffixes: ['.twitter.com'],
 	},
-	{ type: 'music', provider: 'YouTube', hosts: ['music.youtube.com'] },
-	{ type: 'video', provider: 'YouTube', hosts: ['youtube.com', 'youtu.be'] },
+	{
+		type: 'music',
+		provider: 'YouTube',
+		icon: 'youtubeLogo',
+		hosts: ['music.youtube.com'],
+	},
+	{
+		type: 'video',
+		provider: 'YouTube',
+		icon: 'youtubeLogo',
+		hosts: ['youtube.com', 'youtu.be'],
+		hostSuffixes: ['.youtube.com'],
+	},
 	{ type: 'video', provider: 'Vimeo', hosts: ['vimeo.com'] },
 	{ type: 'video', provider: 'Bilibili', hosts: ['bilibili.com', 'b23.tv'] },
 	{ type: 'video', provider: 'Dailymotion', hosts: ['dailymotion.com'] },
-	{ type: 'video', provider: 'Twitch', hosts: ['twitch.tv'] },
+	{
+		type: 'video',
+		provider: 'Twitch',
+		icon: 'twitchLogo',
+		hosts: ['twitch.tv'],
+		hostSuffixes: ['.twitch.tv'],
+	},
 	{ type: 'video', provider: 'TikTok', hosts: ['tiktok.com'] },
 	{
 		type: 'podcast',
 		provider: 'Spotify',
+		icon: 'spotifyLogo',
 		hosts: ['open.spotify.com'],
 		path: /^\/(?:episode|show)\//,
 	},
-	{ type: 'music', provider: 'Spotify', hosts: ['open.spotify.com'] },
-	{ type: 'music', provider: 'Apple Music', hosts: ['music.apple.com'] },
-	{ type: 'music', provider: 'SoundCloud', hosts: ['soundcloud.com'] },
+	{ type: 'music', provider: 'Spotify', icon: 'spotifyLogo', hosts: ['open.spotify.com'] },
+	{ type: 'music', provider: 'Apple Music', icon: 'music', hosts: ['music.apple.com'] },
+	{
+		type: 'music',
+		provider: 'SoundCloud',
+		icon: 'soundcloudLogo',
+		hosts: ['soundcloud.com'],
+		hostSuffixes: ['.soundcloud.com'],
+	},
 	{ type: 'music', provider: 'Bandcamp', hosts: ['bandcamp.com'] },
 	{ type: 'music', provider: 'Mixcloud', hosts: ['mixcloud.com'] },
 	{ type: 'music', provider: 'Audiomack', hosts: ['audiomack.com'] },
-	{ type: 'podcast', provider: 'Apple Podcasts', hosts: ['podcasts.apple.com'] },
+	{
+		type: 'music',
+		provider: 'Last.fm',
+		icon: 'lastfmLogo',
+		hosts: ['last.fm', 'lastfm.com'],
+	},
+	{
+		type: 'podcast',
+		provider: 'Apple Podcasts',
+		icon: 'appleLogo',
+		hosts: ['podcasts.apple.com'],
+	},
 	{ type: 'podcast', provider: 'Castbox', hosts: ['castbox.fm'] },
 	{ type: 'podcast', provider: 'Overcast', hosts: ['overcast.fm'] },
 	{ type: 'podcast', provider: 'Pocket Casts', hosts: ['pca.st'] },
 	{ type: 'podcast', provider: 'Podbean', hosts: ['podbean.com'] },
 	{ type: 'podcast', provider: 'Player FM', hosts: ['player.fm'] },
-	{ type: 'article', provider: 'Medium', hosts: ['medium.com'] },
+	{
+		type: 'article',
+		provider: 'Medium',
+		icon: 'mediumLogo',
+		hosts: ['medium.com'],
+		hostSuffixes: ['.medium.com'],
+	},
+	{
+		type: 'article',
+		provider: 'LinkedIn',
+		icon: 'linkedinLogo',
+		hosts: ['linkedin.com', 'lnkd.in'],
+		hostSuffixes: ['.linkedin.com'],
+	},
+	{
+		type: 'article',
+		provider: 'Reddit',
+		icon: 'redditLogo',
+		hosts: ['reddit.com', 'redd.it'],
+		hostSuffixes: ['.reddit.com'],
+	},
+	{
+		type: 'website',
+		provider: 'Instagram',
+		icon: 'instagramLogo',
+		hosts: ['instagram.com'],
+		hostSuffixes: ['.instagram.com'],
+	},
+	{
+		type: 'website',
+		provider: 'Mastodon',
+		icon: 'mastodonLogo',
+		hosts: [
+			'mastodon.social',
+			'mastodon.online',
+			'mstdn.social',
+			'mstdn.jp',
+			'fosstodon.org',
+			'hachyderm.io',
+			'infosec.exchange',
+			'techhub.social',
+			'mas.to',
+			'mastodon.world',
+			'universeodon.com',
+			'mastodon.cloud',
+			'mastodonapp.uk',
+			'pawoo.net',
+		],
+	},
+	{
+		type: 'website',
+		provider: 'Threads',
+		icon: 'threadsLogo',
+		hosts: ['threads.net', 'threads.com'],
+	},
+	{
+		type: 'website',
+		provider: 'Pinterest',
+		icon: 'pinterestLogo',
+		hosts: ['pinterest.com', 'pin.it'],
+		hostSuffixes: ['.pinterest.com'],
+	},
+	{
+		type: 'website',
+		provider: 'Apple',
+		icon: 'appleLogo',
+		hosts: ['apple.com'],
+		hostSuffixes: ['.apple.com'],
+	},
 	{ type: 'article', provider: 'DEV', hosts: ['dev.to'] },
 	{ type: 'article', hostPrefixes: ['blog.', 'news.'], hostSuffixes: ['.substack.com'] },
 ]
@@ -158,12 +301,6 @@ function pathTypeFor(path: string) {
 	return pathTypeRules.find(([pattern]) => pattern.test(path))?.[1]
 }
 
-export function normalizeOgType(value?: string | null) {
-	const normalized = value?.trim().toLowerCase()
-	if (!normalized || !/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/.test(normalized)) return undefined
-	return normalized.replace(/[._-]([a-z0-9])/g, (_, character: string) => character.toUpperCase())
-}
-
 // OGP types are namespaced (`music.song`, `video.movie`); compare the base namespace only.
 function linkPreviewTypeFromOg(value?: string | null) {
 	const base = value
@@ -171,63 +308,6 @@ function linkPreviewTypeFromOg(value?: string | null) {
 		.toLowerCase()
 		.match(/^[^.:]+/)?.[0]
 	return base && linkPreviewTypes.some((type) => type === base) ? (base as LinkPreviewType) : null
-}
-
-const markdownLink = /\[([^\]\n]*)\]\(\s*(https?:\/\/[^)\s]+)(?:\s+["'][^"']*["'])?\s*\)/gi
-const bareUrl = /https?:\/\/[^\s<>"']+/gi
-
-function blankRange(value: string, index: number, length: number) {
-	return `${value.slice(0, index)}${' '.repeat(length)}${value.slice(index + length)}`
-}
-
-function trimUrlCandidate(value: string) {
-	let candidate = value
-	while (/[.,;!?，。；：！？、]$/.test(candidate)) candidate = candidate.slice(0, -1)
-	let open = 0
-	let close = 0
-	for (const character of candidate) {
-		if (character === '(') open += 1
-		if (character === ')') close += 1
-	}
-	while (close > open && candidate.endsWith(')')) {
-		candidate = candidate.slice(0, -1)
-		close -= 1
-	}
-	return candidate
-}
-
-export function extractLinkPreviewSources(content: string): LinkPreviewSource[] {
-	let text = content
-		.replace(/```[\s\S]*?```/g, ' ')
-		.replace(/`[^`\n]*`/g, ' ')
-		.replace(/!\[[^\]\n]*\]\([^)]*\)/g, ' ')
-	const candidates: Array<{ index: number; url: string; label?: string }> = []
-
-	for (const match of text.matchAll(markdownLink)) {
-		candidates.push({
-			index: match.index ?? 0,
-			url: match[2] ?? '',
-			label: match[1],
-		})
-		text = blankRange(text, match.index ?? 0, match[0].length)
-	}
-	for (const match of text.matchAll(bareUrl)) {
-		candidates.push({
-			index: match.index ?? 0,
-			url: trimUrlCandidate(match[0]),
-		})
-	}
-
-	const sources = new Map<string, LinkPreviewSource>()
-	for (const candidate of candidates.sort((a, b) => a.index - b.index)) {
-		const url = parseHttpUrl(candidate.url)
-		if (!url || sources.has(url.href)) continue
-		sources.set(url.href, {
-			url: url.href,
-			label: cleanText(candidate.label, 300),
-		})
-	}
-	return [...sources.values()]
 }
 
 export function parseHttpUrl(value: string): URL | null {
@@ -243,6 +323,50 @@ export function parseHttpUrl(value: string): URL | null {
 
 export function isHttpUrl(value: string) {
 	return parseHttpUrl(value) !== null
+}
+
+export function isLinkPreviewUrlBlocked(value: string) {
+	const url = parseHttpUrl(value)
+	if (!url) return true
+	if (url.username || url.password) return true
+	if (url.port && url.port !== '80' && url.port !== '443') return true
+	const host = url.hostname
+		.toLowerCase()
+		.replace(/^\[|\]$/g, '')
+		.replace(/\.$/, '')
+	return !host || isBlockedHostname(host) || isBlockedIp(host)
+}
+
+function isBlockedHostname(host: string) {
+	return (
+		blockedPreviewHosts.has(host) ||
+		blockedPreviewSuffixes.some((suffix) => host.endsWith(suffix)) ||
+		(!host.includes('.') && !host.includes(':'))
+	)
+}
+
+function isBlockedIp(host: string) {
+	if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)) return isPrivateIpv4(host)
+	if (host.includes(':')) return isPrivateIpv6(host)
+	return false
+}
+
+function isPrivateIpv4(host: string) {
+	const parts = host.split('.').map(Number)
+	if (parts.length !== 4 || parts.some((part) => part < 0 || part > 255)) return false
+	const value = ((parts[0]! << 24) | (parts[1]! << 16) | (parts[2]! << 8) | parts[3]!) >>> 0
+	return privateIpv4Ranges.some(([base, bits]) => {
+		const mask = bits === 0 ? 0 : (0xffffffff << (32 - bits)) >>> 0
+		return (value & mask) === base
+	})
+}
+
+function isPrivateIpv6(host: string) {
+	const normalized = host.replace(/^\[|\]$/g, '').toLowerCase()
+	if (normalized === '::' || normalized === '::1' || normalized.startsWith('::ffff:')) return true
+	const first = Number.parseInt(normalized.split(':')[0] ?? '', 16)
+	if (Number.isNaN(first)) return false
+	return privateIpv6Ranges.some(([base, mask]) => (first & mask) === base)
 }
 
 export function cleanText(value: string | null | undefined, maxLength = 0) {
@@ -272,6 +396,12 @@ export function linkPreviewProviderName(value: string) {
 	const url = parseHttpUrl(value)
 	if (!url) return undefined
 	return hostRuleFor(normalizeHost(url.hostname), url.pathname.toLowerCase())?.provider
+}
+
+export function linkPreviewProviderIconKey(value: string) {
+	const url = parseHttpUrl(value)
+	if (!url) return undefined
+	return hostRuleFor(normalizeHost(url.hostname), url.pathname.toLowerCase())?.icon
 }
 
 export function linkPreviewMetaLabel(type: LinkPreviewType, meta?: LinkPreviewMeta) {

@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import type { ContextMenuItem } from '@nuxt/ui'
+import { defineComarkPlugin } from '@comark/nuxt/parse'
 import { LazyDialogModal, LazyNoteSpaceFormModal, NoteLink, NoteTag } from '#components'
 import { noteStatus } from '#shared/types/note'
-import type { LinkPreview } from '#shared/types/link-preview'
+import type { LinkPreview, LinkPreviewSource } from '#shared/types/link-preview'
 import type { NoteListItem, NoteStatus } from '#shared/types/note'
-import { createFallbackLinkPreview, extractLinkPreviewSources } from '#shared/utils/link-preview'
+import { createFallbackLinkPreview, isLinkPreviewUrlBlocked } from '#shared/utils/link-preview'
+import { suppressedLinkPreviewsKey } from '~/utils/link-preview-suppression'
+import { planNoteContent } from '~/utils/note-content'
+import type { NoteContentPlan } from '~/utils/note-content'
 import { eventToShortcut } from '~/utils/shortcuts'
 import type { NoteViewShortcutId } from '~/utils/shortcuts'
 
@@ -358,24 +362,68 @@ const settingsStore = useSettingsStore()
 const { state: settings } = storeToRefs(settingsStore)
 const linkPreviewStore = useLinkPreviewStore()
 
-const linkSources = computed(() => extractLinkPreviewSources(props.note.content))
+const notePlan = shallowRef<NoteContentPlan>({ sources: [], hasTitle: false })
+const linkPreviewPlugin = defineComarkPlugin(() => ({
+	name: 'link-preview-plan',
+	post(state) {
+		notePlan.value = planNoteContent(state.tree)
+	},
+}))()
+const markdownPlugins = [linkPreviewPlugin]
 
-function previewFor(source: { url: string; label?: string }): LinkPreview {
+const linkSources = computed(() =>
+	notePlan.value.sources.filter((source) => !isLinkPreviewUrlBlocked(source.url)),
+)
+
+function previewFor(source: LinkPreviewSource): LinkPreview {
 	return linkPreviewStore.cached(source.url) ?? createFallbackLinkPreview(source.url, source.label)
 }
 
-const previews = computed(() => {
-	if (!settings.value.linkPreviews) return []
-	return linkSources.value.map((source) => previewFor(source))
+const cardSources = computed(() => {
+	if (settings.value.linkPreviewMode === 'never') return []
+	const explicit = linkSources.value.filter((source) => source.preview === true)
+	if (explicit.length > 0) return explicit
+	const auto = linkSources.value[0]
+	if (!notePlan.value.hasTitle && linkSources.value.length === 1 && auto?.preview !== false) {
+		return linkSources.value
+	}
+	return []
 })
 
-const linkSourceKey = computed(() => linkSources.value.map((source) => source.url).join('|'))
+const cardPreviews = computed(() =>
+	cardSources.value.map((source) => ({ source, preview: previewFor(source) })),
+)
+
+const suppressedLinks = computed(
+	() =>
+		new Map(
+			cardSources.value.map((source) => [
+				source.url,
+				source.label && source.label !== source.url ? ('text' as const) : ('hide' as const),
+			]),
+		),
+)
+provide(suppressedLinkPreviewsKey, suppressedLinks)
+
+const portraitPreview = computed<LinkPreview | null>(() => {
+	if (settings.value.linkPreviewMode !== 'portrait' || cardPreviews.value.length !== 1) {
+		return null
+	}
+	return cardPreviews.value[0]?.preview ?? null
+})
+
+const landscapePreviews = computed(() =>
+	portraitPreview.value ? [] : cardPreviews.value.map((item) => item.preview),
+)
+
+const cardSourceKey = computed(() => cardSources.value.map((source) => source.url).join('|'))
 
 watch(
-	() => [settings.value.linkPreviews, linkSourceKey.value, session.value.data?.user?.id] as const,
-	([enabled, key, userId]) => {
-		if (!enabled || !key || !userId) return
-		for (const source of linkSources.value) void linkPreviewStore.load(source.url)
+	() =>
+		[settings.value.linkPreviewMode, cardSourceKey.value, session.value.data?.user?.id] as const,
+	([mode, key, userId]) => {
+		if (mode === 'never' || !key || !userId) return
+		for (const source of cardSources.value) void linkPreviewStore.load(source.url)
 	},
 	{ immediate: true },
 )
@@ -421,7 +469,11 @@ const absoluteHint = computed(() => {
 						:style="isOwn ? { maxHeight: `${collapsedHeight}px` } : undefined"
 					>
 						<div ref="content" class="flow-root">
-							<Markdown :value="props.note.content" :components="markdownComponents" />
+							<Markdown
+								:value="props.note.content"
+								:components="markdownComponents"
+								:plugins="markdownPlugins"
+							/>
 						</div>
 					</div>
 					<div
@@ -442,8 +494,21 @@ const absoluteHint = computed(() => {
 						</UTooltip>
 					</div>
 				</div>
-				<NoteLinkPreview v-for="preview in previews" :key="preview.url" :preview="preview" />
 			</article>
+			<div v-if="portraitPreview || landscapePreviews.length" class="flex flex-col gap-2 py-1">
+				<NoteLinkPreview
+					v-if="portraitPreview"
+					:preview="portraitPreview"
+					variant="portrait"
+					flush
+				/>
+				<NoteLinkPreview
+					v-for="preview in landscapePreviews"
+					:key="preview.url"
+					:preview="preview"
+					flush
+				/>
+			</div>
 			<div class="flex flex-wrap items-center gap-2 pl-2 text-xs text-muted sm:py-1 sm:text-sm">
 				<div class="flex items-center gap-1 truncate">
 					<UTooltip v-if="isPinned" :text="t('common.pinned')">
