@@ -2,7 +2,8 @@
 import { LazyNoteSpaceFormModal } from '#components'
 import { noteVisibility, noteVisibilityValues } from '#shared/types/note'
 import type { Note, NoteVisibility } from '#shared/types/note'
-import type { DropdownMenuItem } from '@nuxt/ui'
+import { parseHttpUrl } from '#shared/utils/link-preview'
+import type { DropdownMenuItem, EditorToolbarItem } from '@nuxt/ui'
 import { noteVisibilityMeta } from '~/utils/note-visibility'
 import { tagMention } from '~/utils/tiptap-tag'
 
@@ -54,17 +55,55 @@ watch(content, (value) => {
 
 const editorRef = useTemplateRef<any>('editorRef')
 const editor = computed(() => editorRef.value?.editor)
+const linkPopoverRef = useTemplateRef<{
+	openAt: (position?: number, href?: string) => void
+	openAtSelection: () => void
+}>('linkPopoverRef')
 
 const isEmpty = computed(() => !content.value.trim())
 
-const toolbarItems = [
+const toolbarItems: EditorToolbarItem[] = [
 	{ kind: 'heading', level: 1, icon: appConfig.ui.icons.heading },
 	{ kind: 'mark', mark: 'bold', icon: appConfig.ui.icons.bold },
 	{ kind: 'mark', mark: 'italic', icon: appConfig.ui.icons.italic },
 	{ kind: 'bulletList', icon: appConfig.ui.icons.bulletList },
 	{ kind: 'orderedList', icon: appConfig.ui.icons.orderedList },
 	{ kind: 'codeBlock', icon: appConfig.ui.icons.code },
+	{ kind: 'link', slot: 'link' },
 ]
+
+let pasteTimer: ReturnType<typeof setTimeout> | undefined
+
+function handlePaste(event: ClipboardEvent) {
+	const text = event.clipboardData?.getData('text/plain')?.trim()
+	if (!text || /\s/.test(text)) return
+	const target = parseHttpUrl(text)
+	if (!target) return
+	clearTimeout(pasteTimer)
+	pasteTimer = setTimeout(() => {
+		const instance = editor.value
+		if (!instance?.isEditable || instance.isActive('code')) return
+		linkPopoverRef.value?.openAt(instance.state.selection.from, target.href)
+	}, 0)
+}
+
+watch(
+	editor,
+	(instance, _, onCleanup) => {
+		if (!instance) return
+		const dom = instance.view.dom
+		dom.addEventListener('paste', handlePaste, true)
+		onCleanup(() => {
+			dom.removeEventListener('paste', handlePaste, true)
+			clearTimeout(pasteTimer)
+		})
+	},
+	{ immediate: true },
+)
+
+function openLinkPopover() {
+	linkPopoverRef.value?.openAtSelection()
+}
 
 const addItems = computed<DropdownMenuItem[][]>(() => [
 	[
@@ -149,9 +188,6 @@ async function handleSend() {
 
 <template>
 	<UModal v-model:open="open">
-		<template #title>
-			<UEditorToolbar v-if="editor" :editor="editor" :items="toolbarItems" class="w-full" />
-		</template>
 		<template #body>
 			<UEditor
 				ref="editorRef"
@@ -162,6 +198,31 @@ async function handleSend() {
 				:extensions="[tagMention]"
 				class="min-h-48 w-full"
 			>
+				<UEditorToolbar
+					v-if="editor"
+					:editor="editor"
+					:items="toolbarItems"
+					layout="bubble"
+					:options="{ placement: 'top', offset: 8 }"
+				>
+					<template #link="{ item, isActive, isDisabled }">
+						<UTooltip :text="t('note.link')" :disabled="isDisabled(item)">
+							<UButton
+								:icon="appConfig.ui.icons.link"
+								:aria-label="t('note.link')"
+								color="neutral"
+								active-color="primary"
+								variant="ghost"
+								active-variant="soft"
+								size="sm"
+								:active="isActive(item)"
+								:disabled="isDisabled(item)"
+								@click="openLinkPopover"
+							/>
+						</UTooltip>
+					</template>
+				</UEditorToolbar>
+				<NoteLinkPopover v-if="editor" ref="linkPopoverRef" :editor="editor" />
 				<NoteTagMenu :editor="editor" />
 			</UEditor>
 		</template>
