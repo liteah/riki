@@ -6,5 +6,11 @@ export default defineNuxtPlugin(({ $pinia }) => {
 	const pinia = $pinia as Pinia
 
 	if (isTauri) pinia.use(TauriPluginPinia())
-	pinia.use(createPersistedState())
+	pinia.use(
+		createPersistedState({
+			storage: import.meta.client
+				? window.localStorage
+				: { getItem: () => null, setItem: () => {} },
+		}),
+	)
 })

@@ -173,6 +173,7 @@
 			"colorMode": "Color mode",
 			"colorModeLight": "Light",
 			"colorModeDark": "Dark",
+			"linkPreviews": "Link previews",
 			"format": "Format",
 			"timeZone": "Time zone",
 			"timeZoneSearchPlaceholder": "Search time zones...",

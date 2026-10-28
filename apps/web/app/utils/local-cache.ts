@@ -9,4 +9,5 @@ export const localKeys = {
 	noteColumns: `${PREFIX}.noteColumns`,
 	noteSort: `${PREFIX}.noteSort`,
 	shortcuts: `${PREFIX}.shortcuts`,
+	linkPreviewCache: `${PREFIX}.linkPreviewCache`,
 } as const

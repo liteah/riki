@@ -77,7 +77,13 @@
 - REST: POST returns 201 + `Location` + row; PATCH returns the updated row; DELETE returns `{ id }`. A deleted note is archived via `PATCH { status: 'archived' }`; `DELETE` stays a hard delete.
 - Every endpoint must fit that contract. An endpoint that exists only to serve one client's internal transport is not an API - build that client on the documented routes instead. `POST /api/notes` accepts an optional client-minted `id`, which is what makes a create retryable, and `PATCH /api/notes/:id` takes an optional `updatedAt` for last-write-wins.
 
+## Link previews
+
+- Link URLs stay in the note content; preview metadata is a cache, never a second source of truth. Re-derive links from stored content on every write and never trust a client-supplied preview URL.
+- Preserve the `og:type` namespace detail (`music.album` -> `musicAlbum`); derive the base presentation type separately. Do not add an exhaustive subtype map.
+
 ## Editor vs renderer
 
 - Tiptap `UEditor` (single modal instance) is the only writer; Comark `<Markdown>` is the reader for lists. Never mount editors in lists - ProseMirror instances are heavy, static VNodes are cheap and SSR-friendly.
-- Stored note content is strict `:tag{label="…"}` MDC. All editor/storage translation lives in `app/utils/tiptap-tag.ts` and nowhere else. Prefer one-time data migrations over permanent runtime compat shims.
+- Stored note content is strict MDC. All editor/storage translation lives in `app/utils/tiptap-tag.ts` and nowhere else. Prefer one-time data migrations over permanent runtime compat shims.
+- Never hand-write MDC parsing. Register or use a Comark MDC plugin/component instead.

@@ -20,6 +20,9 @@ const appConfig = useAppConfig()
 		>
 			<SettingsColorModeTabs v-model="state.colorMode" />
 		</SettingsItem>
+		<SettingsItem :label="$t('settings.preferences.linkPreviews')" :icon="appConfig.ui.icons.link">
+			<USwitch v-model="state.linkPreviews" size="sm" />
+		</SettingsItem>
 	</SettingsItemGroup>
 	<SettingsItemGroup :label="$t('settings.preferences.format')">
 		<SettingsItem :label="$t('settings.preferences.timeZone')" :icon="appConfig.ui.icons.timeZone">

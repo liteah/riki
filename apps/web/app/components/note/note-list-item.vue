@@ -2,7 +2,9 @@
 import type { ContextMenuItem } from '@nuxt/ui'
 import { LazyDialogModal, LazyNoteSpaceFormModal, NoteLink, NoteTag } from '#components'
 import { noteStatus } from '#shared/types/note'
+import type { LinkPreview } from '#shared/types/link-preview'
 import type { NoteListItem, NoteStatus } from '#shared/types/note'
+import { createFallbackLinkPreview, extractLinkPreviewSources } from '#shared/utils/link-preview'
 import { eventToShortcut } from '~/utils/shortcuts'
 import type { NoteViewShortcutId } from '~/utils/shortcuts'
 
@@ -354,6 +356,29 @@ function onRetry() {
 const { locale } = useI18n()
 const settingsStore = useSettingsStore()
 const { state: settings } = storeToRefs(settingsStore)
+const linkPreviewStore = useLinkPreviewStore()
+
+const linkSources = computed(() => extractLinkPreviewSources(props.note.content))
+
+function previewFor(source: { url: string; label?: string }): LinkPreview {
+	return linkPreviewStore.cached(source.url) ?? createFallbackLinkPreview(source.url, source.label)
+}
+
+const previews = computed(() => {
+	if (!settings.value.linkPreviews) return []
+	return linkSources.value.map((source) => previewFor(source))
+})
+
+const linkSourceKey = computed(() => linkSources.value.map((source) => source.url).join('|'))
+
+watch(
+	() => [settings.value.linkPreviews, linkSourceKey.value, session.value.data?.user?.id] as const,
+	([enabled, key, userId]) => {
+		if (!enabled || !key || !userId) return
+		for (const source of linkSources.value) void linkPreviewStore.load(source.url)
+	},
+	{ immediate: true },
+)
 
 const noteTime = computed(() =>
 	formatTime(
@@ -417,6 +442,7 @@ const absoluteHint = computed(() => {
 						</UTooltip>
 					</div>
 				</div>
+				<NoteLinkPreview v-for="preview in previews" :key="preview.url" :preview="preview" />
 			</article>
 			<div class="flex flex-wrap items-center gap-2 pl-2 text-xs text-muted sm:py-1 sm:text-sm">
 				<div class="flex items-center gap-1 truncate">
