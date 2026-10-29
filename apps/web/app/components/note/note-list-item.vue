@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { ContextMenuItem } from '@nuxt/ui'
 import { defineComarkPlugin } from '@comark/nuxt/parse'
+import { tv } from 'tailwind-variants'
 import { LazyDialogModal, LazyNoteSpaceFormModal, NoteLink, NoteTag } from '#components'
-import { noteStatus } from '#shared/types/note'
+import { noteStatus, noteVisibility } from '#shared/types/note'
 import type { LinkPreview, LinkPreviewSource } from '#shared/types/link-preview'
-import type { NoteListItem, NoteStatus } from '#shared/types/note'
+import type { NoteStatus, NoteViewItem } from '#shared/types/note'
 import { createFallbackLinkPreview, isLinkPreviewUrlBlocked } from '#shared/utils/link-preview'
 import { suppressedLinkPreviewsKey } from '~/utils/link-preview-suppression'
 import { planNoteContent } from '~/utils/note-content'
@@ -13,15 +14,43 @@ import { eventToShortcut } from '~/utils/shortcuts'
 import type { NoteViewShortcutId } from '~/utils/shortcuts'
 
 const props = defineProps<{
-	note: NoteListItem
+	note: NoteViewItem
 	giveActions?: boolean
 	actionsMenu?: boolean
 	selected?: boolean
+	readonly?: boolean
+	detail?: boolean
 }>()
 
 const emit = defineEmits<{
-	select: [note: NoteListItem]
+	select: [note: NoteViewItem]
 }>()
+
+const card = tv({
+	base: 'group/note-item-card flex w-full flex-col rounded-2xl p-1 outline-none select-text',
+	variants: {
+		detail: {
+			true: '',
+			false: 'bg-muted dark:bg-muted/50',
+		},
+	},
+	defaultVariants: {
+		detail: false,
+	},
+})
+
+const article = tv({
+	base: 'h-full rounded-xl p-2 py-1',
+	variants: {
+		detail: {
+			true: '',
+			false: 'bg-default',
+		},
+	},
+	defaultVariants: {
+		detail: false,
+	},
+})
 
 const { t } = useI18n()
 const toast = useToast()
@@ -39,6 +68,7 @@ const isOwn = computed(() => props.note.userId === session.value.data?.user?.id)
 const isPinned = computed(() => props.note.status === noteStatus.pinned)
 const isArchived = computed(() => props.note.status === noteStatus.archived)
 const isLater = computed(() => props.note.status === noteStatus.later)
+const isPublic = computed(() => props.note.visibility === noteVisibility.public)
 
 const spaceStore = useSpaceStore()
 const spaceForm = overlay.create(LazyNoteSpaceFormModal)
@@ -114,6 +144,19 @@ async function attempt(action: string, run: () => Promise<unknown>) {
 		toast.add({
 			title: t('common.actionFailed', { action }),
 			description: error instanceof Error ? error.message : undefined,
+			color: 'error',
+		})
+	}
+}
+
+async function copyLink() {
+	const url = new URL(`/note/${encodeURIComponent(props.note.id)}`, window.location.origin).href
+	try {
+		await navigator.clipboard.writeText(url)
+		toast.add({ title: t('common.copied'), color: 'success' })
+	} catch {
+		toast.add({
+			title: t('common.actionFailed', { action: t('note.copyLink') }),
 			color: 'error',
 		})
 	}
@@ -225,7 +268,7 @@ const showInlineSpace = computed(
 )
 
 const shortcutActions = computed<NoteAction[]>(() =>
-	isOwn.value
+	!props.readonly && isOwn.value
 		? [spaceAction.value, laterAction.value, archiveAction.value, destroyAction.value]
 		: [],
 )
@@ -236,9 +279,12 @@ const collapsedHeight = 500
 const contentEl = useTemplateRef<HTMLElement>('content')
 const { height: contentHeight } = useElementSize(contentEl)
 const isLongNote = computed(() => contentHeight.value > collapsedHeight)
-const showCollapse = computed(() => isOwn.value && isLongNote.value)
+const isCollapsible = computed(() => !props.readonly && isOwn.value)
+const showCollapse = computed(() => isCollapsible.value && isLongNote.value)
 
-const showActions = computed(() => props.giveActions && actions.value.length > 0)
+const showActions = computed(
+	() => !props.readonly && props.giveActions && (actions.value.length > 0 || isPublic.value),
+)
 
 const actionBarClass = computed(() =>
 	props.selected
@@ -319,23 +365,31 @@ const deleteItem = computed<ContextMenuItem>(() => ({
 	onSelect: () => confirmDestructive(handleDelete),
 }))
 
-const contextMenuItems = computed<ContextMenuItem[][]>(() =>
-	isOwn.value
-		? [
-				[contextSpaceItem.value, laterItem.value, pinItem.value, archiveItem.value],
-				[deleteItem.value],
-			]
-		: [],
-)
+const copyLinkItem = computed<ContextMenuItem>(() => ({
+	label: t('note.copyLink'),
+	icon: appConfig.ui.icons.link,
+	onSelect: copyLink,
+}))
 
-const menuItems = computed<ContextMenuItem[][]>(() =>
-	isOwn.value
-		? [
-				[spaceSearchItem.value, laterItem.value, pinItem.value, archiveItem.value],
-				[deleteItem.value],
-			]
-		: [],
-)
+const contextMenuItems = computed<ContextMenuItem[][]>(() => {
+	if (props.readonly) return []
+	const rows: ContextMenuItem[][] = isOwn.value
+		? [[contextSpaceItem.value, laterItem.value, pinItem.value, archiveItem.value]]
+		: []
+	if (isPublic.value) rows.push([copyLinkItem.value])
+	if (isOwn.value) rows.push([deleteItem.value])
+	return rows
+})
+
+const menuItems = computed<ContextMenuItem[][]>(() => {
+	if (props.readonly) return []
+	const rows: ContextMenuItem[][] = isOwn.value
+		? [[spaceSearchItem.value, laterItem.value, pinItem.value, archiveItem.value]]
+		: []
+	if (isPublic.value) rows.push([copyLinkItem.value])
+	if (isOwn.value) rows.push([deleteItem.value])
+	return rows
+})
 
 const dropdownItems = computed<ContextMenuItem[][]>(() =>
 	menuSpaceMode.value ? spaceMenu.items.value : menuItems.value,
@@ -346,11 +400,11 @@ const markdownComponents = { a: NoteLink, tag: NoteTag }
 const isUnsynced = computed(() => noteStore.isPending(props.note.id))
 const draftScope = computed(() => draftStore.scopeFor(props.note.id))
 const hasDraft = computed(
-	() => isOwn.value && draftStore.isDirty(draftScope.value, props.note.content),
+	() => !props.readonly && isOwn.value && draftStore.isDirty(draftScope.value, props.note.content),
 )
 
 function onSelect() {
-	if (isOwn.value) emit('select', props.note)
+	if (!props.readonly && isOwn.value) emit('select', props.note)
 }
 
 function onRetry() {
@@ -458,15 +512,18 @@ const absoluteHint = computed(() => {
 		<div
 			ref="card"
 			tabindex="-1"
-			class="group/note-item-card flex w-full flex-col rounded-2xl bg-muted p-1 outline-none select-text dark:bg-muted/50"
-			:class="[isOwn && 'cursor-pointer', props.selected && 'ring-2 ring-accented']"
+			:class="[
+				card({ detail }),
+				!readonly && isOwn && 'cursor-pointer',
+				props.selected && 'ring-2 ring-accented',
+			]"
 			@click="onSelect"
 		>
-			<article class="h-full rounded-xl bg-default p-2 py-1">
+			<article :class="article({ detail })">
 				<div class="relative">
 					<div
-						:class="isOwn && 'overflow-hidden'"
-						:style="isOwn ? { maxHeight: `${collapsedHeight}px` } : undefined"
+						:class="isCollapsible && 'overflow-hidden'"
+						:style="isCollapsible ? { maxHeight: `${collapsedHeight}px` } : undefined"
 					>
 						<div ref="content" class="flow-root">
 							<Markdown

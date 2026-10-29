@@ -1,6 +1,6 @@
 import { defaultSpaceIcon, defaultViewIcon } from '#shared/types/icon'
 import type { EntityIcon } from '#shared/types/icon'
-import type { NoteListItem } from '#shared/types/note'
+import type { NoteViewItem } from '#shared/types/note'
 import type { SpaceListItem } from '#shared/types/space'
 import type { View } from '#shared/types/view'
 import { resolveEntityIcon } from '~/utils/entity-icon'
@@ -21,7 +21,7 @@ export function useEntityIcon() {
 		return resolve(view?.icon, defaultViewIcon)
 	}
 
-	function forNote(note: Pick<NoteListItem, 'spaceId' | 'spaceIcon'>) {
+	function forNote(note: Pick<NoteViewItem, 'spaceId' | 'spaceIcon'>) {
 		const space = spaceStore.spaces.find((item) => item.id === note.spaceId)
 		return resolve(space?.icon ?? note.spaceIcon, defaultSpaceIcon)
 	}
