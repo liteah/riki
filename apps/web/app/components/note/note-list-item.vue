@@ -409,7 +409,6 @@ function onRetry() {
 const { locale } = useI18n()
 const settingsStore = useSettingsStore()
 const { state: settings } = storeToRefs(settingsStore)
-const linkPreviewStore = useLinkPreviewStore()
 
 const notePlan = shallowRef<NoteContentPlan>({ sources: [], hasTitle: false })
 const linkPreviewPlugin = defineComarkPlugin(() => ({
@@ -424,8 +423,11 @@ const linkSources = computed(() =>
 	notePlan.value.sources.filter((source) => !isLinkPreviewUrlBlocked(source.url)),
 )
 
+const linkPreviews = computed(() => props.note.linkPreviews ?? {})
+provide(noteLinkPreviewsKey, linkPreviews)
+
 function previewFor(source: LinkPreviewSource): LinkPreview {
-	return linkPreviewStore.cached(source.url) ?? createFallbackLinkPreview(source.url, source.label)
+	return linkPreviews.value[source.url] ?? createFallbackLinkPreview(source.url, source.label)
 }
 
 const cardSources = computed(() => {
@@ -463,18 +465,6 @@ const portraitPreview = computed<LinkPreview | null>(() => {
 
 const landscapePreviews = computed(() =>
 	portraitPreview.value ? [] : cardPreviews.value.map((item) => item.preview),
-)
-
-const cardSourceKey = computed(() => cardSources.value.map((source) => source.url).join('|'))
-
-watch(
-	() =>
-		[settings.value.linkPreviewMode, cardSourceKey.value, session.value.data?.user?.id] as const,
-	([mode, key, userId]) => {
-		if (mode === 'never' || !key || !userId) return
-		for (const source of cardSources.value) void linkPreviewStore.load(source.url)
-	},
-	{ immediate: true },
 )
 
 const noteTime = computed(() =>

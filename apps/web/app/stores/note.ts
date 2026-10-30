@@ -365,10 +365,15 @@ export const useNoteStore = defineStore('note', () => {
 			updatedAt: row.updatedAt,
 		}
 		if (row.kind === 'create') {
-			await $fetch<NoteWithTags>('/api/notes', {
+			const winner = await $fetch<NoteWithTags>('/api/notes', {
 				method: 'POST',
 				body: { id: row.noteId, ...body },
 			})
+			const index = indexOf(winner.id)
+			const local = notes.value[index]
+			if (local && local.content === winner.content) {
+				notes.value[index] = { ...local, linkPreviews: winner.linkPreviews ?? {} }
+			}
 			return
 		}
 		const winner = await $fetch<NoteWithTags>(`/api/notes/${row.noteId}`, { method: 'PATCH', body })
@@ -531,6 +536,7 @@ export const useNoteStore = defineStore('note', () => {
 			id: newId(),
 			userId: author?.id ?? '',
 			content: input.content,
+			linkPreviews: {},
 			spaceId,
 			spaceName: spaceNameOf(spaceId),
 			spaceIcon: spaceIconOf(spaceId),

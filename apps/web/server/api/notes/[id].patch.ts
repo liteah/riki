@@ -1,6 +1,7 @@
 import { db } from '#server/utils/db'
 import { noteTags, notes, spaces } from '#server/db/schemas'
 import { updateNoteBodySchema } from '#shared/types/note'
+import { resolveNoteLinkPreviews } from '#server/utils/note-preview'
 import { resolveTagIdsForNames, tagIdsForNote, tagLinkInserts } from '#server/utils/note-tags'
 import { requireUser } from '#server/utils/session'
 import { readBodyZod } from '#server/utils/validation'
@@ -42,10 +43,16 @@ export default defineEventHandler(async (event) => {
 		}
 	}
 
+	const linkPreviews =
+		body.content !== undefined && body.content !== current.content
+			? await resolveNoteLinkPreviews(body.content, current.linkPreviews ?? {})
+			: undefined
+
 	const [updated] = await db
 		.update(notes)
 		.set({
 			...(body.content !== undefined && { content: body.content }),
+			...(linkPreviews !== undefined && { linkPreviews }),
 			...(body.spaceId !== undefined && { spaceId: body.spaceId }),
 			...(body.status !== undefined && { status: body.status }),
 			...(body.visibility !== undefined && { visibility: body.visibility }),

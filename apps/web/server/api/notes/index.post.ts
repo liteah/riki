@@ -1,6 +1,7 @@
 import { db } from '#server/utils/db'
 import { notes, spaces } from '#server/db/schemas'
 import { createNoteBodySchema } from '#shared/types/note'
+import { resolveNoteLinkPreviews } from '#server/utils/note-preview'
 import { resolveTagIdsForNames, tagIdsForNote, tagLinkInserts } from '#server/utils/note-tags'
 import { requireUser } from '#server/utils/session'
 import { readBodyZod } from '#server/utils/validation'
@@ -38,7 +39,10 @@ export default defineEventHandler(async (event) => {
 	}
 
 	const noteId = body.id ?? newId()
-	const tagIds = await resolveTagIdsForNames(user.id, body.tagNames ?? [])
+	const [tagIds, linkPreviews] = await Promise.all([
+		resolveTagIdsForNames(user.id, body.tagNames ?? []),
+		resolveNoteLinkPreviews(body.content),
+	])
 
 	const [noteRows] = await db.batch([
 		db
@@ -46,6 +50,7 @@ export default defineEventHandler(async (event) => {
 			.values({
 				id: noteId,
 				content: body.content,
+				linkPreviews,
 				userId: user.id,
 				spaceId: body.spaceId,
 				visibility: body.visibility,

@@ -5,6 +5,7 @@ import {
 	isLinkPreviewUrlBlocked,
 	parseHttpUrl,
 } from '#shared/utils/link-preview'
+import { noteLinkPreviewsKey } from '~/utils/link-preview-context'
 import { suppressedLinkPreviewsKey } from '~/utils/link-preview-suppression'
 
 const props = defineProps<{
@@ -14,8 +15,7 @@ const props = defineProps<{
 
 const settingsStore = useSettingsStore()
 const { state: settings } = storeToRefs(settingsStore)
-const linkPreviewStore = useLinkPreviewStore()
-const session = useAuth().useSession()
+const linkPreviews = inject(noteLinkPreviewsKey, null)
 const suppressedLinks = inject(suppressedLinkPreviewsKey, null)
 
 const open = ref(false)
@@ -31,12 +31,7 @@ const showPreview = computed(
 )
 const linkPreview = computed<LinkPreview | null>(() => {
 	if (!canPreview.value || !props.href) return null
-	return linkPreviewStore.cached(props.href) ?? createFallbackLinkPreview(props.href)
-})
-
-watch(open, (isOpen) => {
-	if (!isOpen || !canPreview.value || !props.href || !session.value.data?.user?.id) return
-	void linkPreviewStore.load(props.href)
+	return linkPreviews?.value[linkKey.value] ?? createFallbackLinkPreview(props.href)
 })
 </script>
 
@@ -52,7 +47,7 @@ watch(open, (isOpen) => {
 			<slot />
 		</ProseA>
 		<template #content>
-			<NoteLinkPreview :preview="linkPreview" flush class="w-80" />
+			<NoteLinkPreview :preview="linkPreview" flush class="w-95" />
 		</template>
 	</UPopover>
 	<ProseA

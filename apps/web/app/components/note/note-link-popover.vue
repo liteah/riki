@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { LinkPreview } from '#shared/types/link-preview'
 import { cleanText, parseHttpUrl } from '#shared/utils/link-preview'
 
 const props = defineProps<{
@@ -8,7 +9,6 @@ const props = defineProps<{
 const { t } = useI18n()
 const toast = useToast()
 const appConfig = useAppConfig()
-const linkPreviewStore = useLinkPreviewStore()
 
 const open = ref(false)
 const reference = shallowRef<any>()
@@ -115,7 +115,9 @@ async function fetchTitle() {
 	}
 	fetching.value = true
 	try {
-		const preview = await linkPreviewStore.resolve(target.href)
+		const preview = await $fetch<LinkPreview>('/api/link-preview', {
+			query: { url: target.href },
+		}).catch(() => null)
 		const next = cleanText(preview?.title, 300)
 		if (!next) {
 			toast.add({
@@ -241,18 +243,15 @@ function handleKeyDown(event: KeyboardEvent) {
 						:placeholder="t('note.linkTitlePlaceholder')"
 						@keydown="handleKeyDown"
 					/>
-					<UTooltip :text="t('note.fetchTitle')">
-						<UButton
-							:icon="appConfig.ui.icons.reload"
-							:aria-label="t('note.fetchTitle')"
-							color="neutral"
-							variant="ghost"
-							size="sm"
-							:loading="fetching"
-							:disabled="!url"
-							@click="fetchTitle"
-						/>
-					</UTooltip>
+					<UButton
+						:label="t('note.fetchTitle')"
+						color="neutral"
+						variant="ghost"
+						size="sm"
+						:loading="fetching"
+						:disabled="!url"
+						@click="fetchTitle"
+					/>
 				</div>
 			</div>
 		</template>

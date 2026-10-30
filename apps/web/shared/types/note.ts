@@ -1,9 +1,11 @@
 import * as z from 'zod'
 import type { EntityIcon } from './icon'
+import type { LinkPreview } from './link-preview'
 
 export interface Note {
 	id: string
 	content: string
+	linkPreviews: Record<string, LinkPreview>
 	userId: string
 	spaceId: string | null
 	visibility: NoteVisibility

@@ -2,7 +2,6 @@
 import { LazyNoteSpaceFormModal } from '#components'
 import { noteVisibility, noteVisibilityValues } from '#shared/types/note'
 import type { Note, NoteVisibility } from '#shared/types/note'
-import { parseHttpUrl } from '#shared/utils/link-preview'
 import type { DropdownMenuItem, EditorToolbarItem } from '@nuxt/ui'
 import { noteVisibilityMeta } from '~/utils/note-visibility'
 import { tagMention } from '~/utils/tiptap-tag'
@@ -71,35 +70,6 @@ const toolbarItems: EditorToolbarItem[] = [
 	{ kind: 'codeBlock', icon: appConfig.ui.icons.code },
 	{ kind: 'link', slot: 'link' },
 ]
-
-let pasteTimer: ReturnType<typeof setTimeout> | undefined
-
-function handlePaste(event: ClipboardEvent) {
-	const text = event.clipboardData?.getData('text/plain')?.trim()
-	if (!text || /\s/.test(text)) return
-	const target = parseHttpUrl(text)
-	if (!target) return
-	clearTimeout(pasteTimer)
-	pasteTimer = setTimeout(() => {
-		const instance = editor.value
-		if (!instance?.isEditable || instance.isActive('code')) return
-		linkPopoverRef.value?.openAt(instance.state.selection.from, target.href)
-	}, 0)
-}
-
-watch(
-	editor,
-	(instance, _, onCleanup) => {
-		if (!instance) return
-		const dom = instance.view.dom
-		dom.addEventListener('paste', handlePaste, true)
-		onCleanup(() => {
-			dom.removeEventListener('paste', handlePaste, true)
-			clearTimeout(pasteTimer)
-		})
-	},
-	{ immediate: true },
-)
 
 function openLinkPopover() {
 	linkPopoverRef.value?.openAtSelection()

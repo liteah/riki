@@ -2,6 +2,7 @@ import { defineRelationsPart, sql } from 'drizzle-orm'
 import { sqliteTable, text, integer, index, primaryKey, uniqueIndex } from 'drizzle-orm/sqlite-core'
 import { user } from './auth-schema'
 import { newId } from '#shared/utils/id'
+import type { LinkPreview } from '#shared/types/link-preview'
 import type { ViewFilter } from '#shared/types/view'
 import { sidebarKindValues } from '#shared/types/view'
 import {
@@ -19,6 +20,10 @@ export const notes = sqliteTable(
 			.primaryKey()
 			.$defaultFn(() => newId()),
 		content: text('content').notNull(),
+		linkPreviews: text('link_previews', { mode: 'json' })
+			.$type<Record<string, LinkPreview>>()
+			.notNull()
+			.default(sql`'{}'`),
 		userId: text('user_id')
 			.notNull()
 			.references(() => user.id, { onDelete: 'cascade' }),
