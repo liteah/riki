@@ -1,5 +1,5 @@
 import { skipHydrate } from 'pinia'
-import { noteFeed, noteStatus, noteVisibility } from '#shared/types/note'
+import { noteInbox, noteStatus, noteVisibility } from '#shared/types/note'
 import { localKeys } from '~/utils/local-cache'
 import { mergeFilters } from '~/utils/note-filter'
 import { noteQueryFromFilter } from '~/utils/note-query'
@@ -13,17 +13,15 @@ import type {
 	NoteWithTags,
 	UpdateNoteBody,
 } from '#shared/types/note'
-import type { NoteFeed } from '#shared/types/note'
+import type { NoteInbox } from '#shared/types/note'
 import type { ViewFilter } from '#shared/types/view'
 import { newId } from '#shared/utils/id'
 
 type NoteVisibilityValue = (typeof noteVisibility)[keyof typeof noteVisibility]
 type NoteStatusValue = (typeof noteStatus)[keyof typeof noteStatus]
 
-interface FeedScope extends ViewFilter {
-	archived?: boolean
+interface InboxScope extends ViewFilter {
 	noTags?: boolean
-	explore?: boolean
 }
 
 interface OutboxPayload {
@@ -82,43 +80,14 @@ export const useNoteStore = defineStore('note', () => {
 		mergeFilters(viewStore.baseFilter, explicitFilter.value),
 	)
 
-	const feed = ref<NoteFeed>(noteFeed.unassigned)
+	const inbox = ref<NoteInbox>(noteInbox.unassigned)
 
 	const inInbox = computed(() => viewStore.target.kind === 'inbox')
 
-	const feedFilter = computed<FeedScope>(() => {
-		switch (feed.value) {
-			case noteFeed.archived:
-				// The archive feed owns the status; a library status filter must not empty it.
-				return {
-					archived: true,
-					status: [noteStatus.archived],
-					spaceId: undefined,
-					spaceIds: undefined,
-					notSpaceIds: undefined,
-					viewIds: undefined,
-					notViewIds: undefined,
-					tagIds: undefined,
-					notTagIds: undefined,
-					notStatus: undefined,
-					notVisibility: undefined,
-				}
-			case noteFeed.explore:
-				return {
-					explore: true,
-					visibility: [noteVisibility.public],
-					spaceId: undefined,
-					spaceIds: undefined,
-					notSpaceIds: undefined,
-					viewIds: undefined,
-					notViewIds: undefined,
-					tagIds: undefined,
-					notTagIds: undefined,
-					notStatus: undefined,
-					notVisibility: undefined,
-				}
-			// A deferred note stays in the later feed after it is filed into a space.
-			case noteFeed.later:
+	const inboxFilter = computed<InboxScope>(() => {
+		switch (inbox.value) {
+			// A deferred note stays in the later tab after it is filed into a space.
+			case noteInbox.later:
 				return {
 					status: [noteStatus.later],
 					spaceId: undefined,
@@ -134,13 +103,13 @@ export const useNoteStore = defineStore('note', () => {
 			default:
 				// The inbox triage queue: nothing assigned anywhere. Tags count as
 				// assignment too, so an untagged note held in a space is not pending.
-				// Deferred notes are not pending either: they live in the later feed.
+				// Deferred notes are not pending either: they live in the later tab.
 				return { noTags: true }
 		}
 	})
 
-	const feedScope = computed<FeedScope>(() =>
-		inInbox.value ? { ...activeFilter.value, ...feedFilter.value } : activeFilter.value,
+	const inboxScope = computed<InboxScope>(() =>
+		inInbox.value ? { ...activeFilter.value, ...inboxFilter.value } : activeFilter.value,
 	)
 
 	function matchesViewFilter(note: NoteListItem, filter: ViewFilter, depth = 0): boolean {
@@ -184,14 +153,10 @@ export const useNoteStore = defineStore('note', () => {
 	}
 
 	const visibleNotes = computed(() => {
-		const scope = feedScope.value
+		const scope = inboxScope.value
 		const q = scope.q?.toLowerCase()
 		const viewerId = session.value.data?.user?.id ?? null
-		const statuses: NoteStatus[] | null = scope.archived
-			? [noteStatus.archived]
-			: scope.status?.length
-				? scope.status
-				: null
+		const statuses: NoteStatus[] | null = scope.status?.length ? scope.status : null
 		const excludeArchived = !scope.viewIds?.length || Boolean(scope.noTags)
 		const viewFilters = scope.viewIds
 			?.map((id) => viewStore.views.find((view) => view.id === id)?.filter)
@@ -208,10 +173,6 @@ export const useNoteStore = defineStore('note', () => {
 				}
 				if (scope.noTags && ((note.tagIds?.length ?? 0) > 0 || note.status === noteStatus.later)) {
 					return false
-				}
-				if (scope.explore) {
-					if (note.visibility !== noteVisibility.public) return false
-					if (viewerId && note.userId === viewerId) return false
 				}
 				if (viewerId && note.userId && note.userId !== viewerId) {
 					if (!scope.visibility?.length) return false
@@ -493,7 +454,7 @@ export const useNoteStore = defineStore('note', () => {
 	async function loadMore() {
 		if (pending.value || !online.value) return
 		if (paginationDone.value) return
-		const filter = feedScope.value
+		const filter = inboxScope.value
 		pending.value = true
 		const data = await $fetch<ListNotesResponse>('/api/notes', {
 			query: {
@@ -533,7 +494,7 @@ export const useNoteStore = defineStore('note', () => {
 
 	watch(
 		() =>
-			`${inInbox.value ? feed.value : ''}|${JSON.stringify(feedScope.value)}|${viewStore.noteSort}`,
+			`${inInbox.value ? inbox.value : ''}|${JSON.stringify(inboxScope.value)}|${viewStore.noteSort}`,
 		(key, previous) => {
 			if (import.meta.server || key === previous) return
 			nextCursor.value = null
@@ -647,7 +608,7 @@ export const useNoteStore = defineStore('note', () => {
 		visibleNotes,
 		explicitFilter,
 		activeFilter,
-		feed,
+		inbox,
 		pending,
 		loaded,
 		total,

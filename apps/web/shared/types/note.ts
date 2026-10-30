@@ -49,13 +49,11 @@ export const noteStatus = {
 export type NoteStatus = (typeof noteStatus)[keyof typeof noteStatus]
 export const noteStatusValues = Object.values(noteStatus) as [NoteStatus, ...NoteStatus[]]
 
-export const noteFeed = {
+export const noteInbox = {
 	unassigned: 'unassigned',
 	later: 'later',
-	archived: 'archived',
-	explore: 'explore',
 } as const
-export type NoteFeed = (typeof noteFeed)[keyof typeof noteFeed]
+export type NoteInbox = (typeof noteInbox)[keyof typeof noteInbox]
 
 export const noteSort = {
 	createdDesc: 'created-desc',
@@ -134,7 +132,6 @@ export const listNotesQuerySchema = z.object({
 	),
 	noSpace: z.coerce.boolean().optional(),
 	noTags: z.coerce.boolean().optional(),
-	explore: z.coerce.boolean().optional(),
 	spaceId: z.string().trim().min(1).optional(),
 	spaceIds: z.preprocess(
 		(value) => (value === undefined ? undefined : Array.isArray(value) ? value : [value]),

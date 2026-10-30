@@ -99,9 +99,6 @@
 		"statusNormal": "Normal",
 		"statusArchived": "Archived",
 		"unlater": "Remove from later",
-		"laterEmptyTitle": "No notes saved for later",
-		"archivedEmptyTitle": "No archived notes",
-		"exploreEmptyTitle": "No public notes to explore yet",
 		"unsynced": "Not synced",
 		"draft": "Unsaved changes",
 		"openNote": "Open note",
@@ -116,10 +113,9 @@
 		"sortUpdatedAsc": "Updated: oldest first"
 	},
 	"inbox": {
+		"emptyTitle": "Inbox is empty",
 		"unassigned": "Unassigned",
-		"later": "Later",
-		"review": "Review",
-		"explore": "Explore"
+		"review": "Review"
 	},
 	"profile": {
 		"label": "Profile",

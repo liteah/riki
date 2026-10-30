@@ -161,20 +161,16 @@ export default defineEventHandler(async (event) => {
 				)
 			: undefined
 
-	const readable = query.explore
-		? viewerId
-			? and(ne(notes.userId, viewerId), eq(notes.visibility, noteVisibility.public))
-			: eq(notes.visibility, noteVisibility.public)
-		: viewerId
-			? query.visibility?.length
-				? or(
-						eq(notes.userId, viewerId),
-						and(ne(notes.userId, viewerId), ne(notes.visibility, noteVisibility.private)),
-					)
-				: eq(notes.userId, viewerId)
-			: eq(notes.visibility, noteVisibility.public)
+	const readable = viewerId
+		? query.visibility?.length
+			? or(
+					eq(notes.userId, viewerId),
+					and(ne(notes.userId, viewerId), ne(notes.visibility, noteVisibility.private)),
+				)
+			: eq(notes.userId, viewerId)
+		: eq(notes.visibility, noteVisibility.public)
 
-	// The untagged inbox feed is the triage queue: a deferred note belongs to the later feed.
+	// The untagged inbox is the triage queue: a deferred note belongs to the later tab.
 	const defaultStatuses = query.noTags
 		? [noteStatus.normal, noteStatus.pinned]
 		: [noteStatus.normal, noteStatus.later, noteStatus.pinned]

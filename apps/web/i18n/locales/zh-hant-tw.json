@@ -99,9 +99,6 @@
 		"statusNormal": "常規",
 		"statusArchived": "已封存",
 		"unlater": "取消稍後看",
-		"laterEmptyTitle": "沒有稍後看的筆記",
-		"archivedEmptyTitle": "沒有已封存的筆記",
-		"exploreEmptyTitle": "暫時沒有可探索的公開筆記",
 		"unsynced": "未同步",
 		"draft": "有未儲存的修改",
 		"openNote": "開啟筆記",
@@ -116,10 +113,9 @@
 		"sortUpdatedAsc": "更新時間：從舊到新"
 	},
 	"inbox": {
+		"emptyTitle": "收件匣空空如也",
 		"unassigned": "未歸類",
-		"later": "稍後看",
-		"review": "回顧",
-		"explore": "探索"
+		"review": "回顧"
 	},
 	"profile": {
 		"label": "個人檔案",

@@ -99,9 +99,6 @@
 		"statusNormal": "常规",
 		"statusArchived": "已归档",
 		"unlater": "取消稍后",
-		"laterEmptyTitle": "没有稍后看的笔记",
-		"archivedEmptyTitle": "没有已归档的笔记",
-		"exploreEmptyTitle": "暂时没有可探索的公开笔记",
 		"unsynced": "未同步",
 		"draft": "有未保存的修改",
 		"openNote": "打开笔记",
@@ -116,10 +113,9 @@
 		"sortUpdatedAsc": "修改时间：从旧到新"
 	},
 	"inbox": {
+		"emptyTitle": "收件箱空空如也",
 		"unassigned": "未归类",
-		"later": "稍后看",
-		"review": "回顾",
-		"explore": "探索"
+		"review": "回顾"
 	},
 	"profile": {
 		"label": "个人资料",

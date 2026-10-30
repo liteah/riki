@@ -258,14 +258,10 @@ const destroyAction = computed<NoteAction>(() => ({
 
 const actions = computed<NoteAction[]>(() => {
 	if (!isOwn.value) return []
-	return isArchived.value
-		? [archiveAction.value, destroyAction.value]
-		: [laterAction.value, archiveAction.value]
+	return [laterAction.value, archiveAction.value]
 })
 
-const showInlineSpace = computed(
-	() => props.giveActions && !props.actionsMenu && !isLater.value && !isArchived.value,
-)
+const showInlineSpace = computed(() => props.giveActions && !props.actionsMenu)
 
 const shortcutActions = computed<NoteAction[]>(() =>
 	!props.readonly && isOwn.value
@@ -282,9 +278,7 @@ const isLongNote = computed(() => contentHeight.value > collapsedHeight)
 const isCollapsible = computed(() => !props.readonly && isOwn.value)
 const showCollapse = computed(() => isCollapsible.value && isLongNote.value)
 
-const showActions = computed(
-	() => !props.readonly && props.giveActions && (actions.value.length > 0 || isPublic.value),
-)
+const showActions = computed(() => !props.readonly && props.giveActions && actions.value.length > 0)
 
 const actionBarClass = computed(() =>
 	props.selected
@@ -372,22 +366,22 @@ const copyLinkItem = computed<ContextMenuItem>(() => ({
 }))
 
 const contextMenuItems = computed<ContextMenuItem[][]>(() => {
-	if (props.readonly) return []
-	const rows: ContextMenuItem[][] = isOwn.value
-		? [[contextSpaceItem.value, laterItem.value, pinItem.value, archiveItem.value]]
-		: []
+	if (props.readonly || !isOwn.value) return []
+	const rows: ContextMenuItem[][] = [
+		[contextSpaceItem.value, laterItem.value, pinItem.value, archiveItem.value],
+	]
 	if (isPublic.value) rows.push([copyLinkItem.value])
-	if (isOwn.value) rows.push([deleteItem.value])
+	rows.push([deleteItem.value])
 	return rows
 })
 
 const menuItems = computed<ContextMenuItem[][]>(() => {
-	if (props.readonly) return []
-	const rows: ContextMenuItem[][] = isOwn.value
-		? [[spaceSearchItem.value, laterItem.value, pinItem.value, archiveItem.value]]
-		: []
+	if (props.readonly || !isOwn.value) return []
+	const rows: ContextMenuItem[][] = [
+		[spaceSearchItem.value, laterItem.value, pinItem.value, archiveItem.value],
+	]
 	if (isPublic.value) rows.push([copyLinkItem.value])
-	if (isOwn.value) rows.push([deleteItem.value])
+	rows.push([deleteItem.value])
 	return rows
 })
 
