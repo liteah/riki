@@ -28,12 +28,13 @@ const label = computed(() =>
 	viewStore.target.kind === builtinView.library && noteStore.loaded ? noteStore.total : undefined,
 )
 
-const scrollArea = useTemplateRef<{
-	$el: HTMLElement
-	virtualizer?: { scrollToIndex: (index: number, options?: Record<string, unknown>) => void }
-}>('scrollArea')
+const noteList = useTemplateRef<{
+	getElement: () => HTMLElement | undefined
+	scrollToTop: () => void
+	scrollToIndex: (index: number) => void
+}>('noteList')
 
-const { width: listWidth } = useElementSize(() => scrollArea.value?.$el)
+const { width: listWidth } = useElementSize(() => noteList.value?.getElement())
 const lanes = computed(() =>
 	resolveNoteColumnLanes(noteColumnMode.value, Math.max(0, listWidth.value - 16)),
 )
@@ -42,27 +43,18 @@ const listUi = computed(() => {
 	if (noteColumnMode.value === 'double') return { viewport: 'mx-auto max-w-4xl' }
 })
 
-function scrollToTop() {
-	scrollArea.value?.virtualizer?.scrollToIndex(0, { align: 'start' })
-}
-
-function scrollToIndex(index: number) {
-	scrollArea.value?.virtualizer?.scrollToIndex(index, { align: 'auto' })
-}
-
-const { selectedId } = useNoteListShortcuts(visibleNotes, scrollToIndex, openComposer)
+const { selectedId } = useNoteListShortcuts(
+	visibleNotes,
+	(index) => noteList.value?.scrollToIndex(index),
+	openComposer,
+)
 
 noteStore.start()
 
-onMounted(() => {
-	useInfiniteScroll(
-		() => scrollArea.value?.$el,
-		() => void noteStore.loadMore(),
-		{ distance: 200 },
-	)
-})
-
-watch(() => visibleNotes.value[0]?.id, scrollToTop)
+watch(
+	() => visibleNotes.value[0]?.id,
+	() => noteList.value?.scrollToTop(),
+)
 </script>
 
 <template>
@@ -73,28 +65,22 @@ watch(() => visibleNotes.value[0]?.id, scrollToTop)
 				<NoteLibraryMenu />
 			</template>
 		</LayoutPageHeader>
-		<UScrollArea
-			v-if="visibleNotes.length"
-			ref="scrollArea"
-			v-slot="{ item }"
-			:items="visibleNotes"
-			shadow
-			:virtualize="{ gap: 8, lanes, estimateSize: 200, laneAssignmentMode: 'measured' }"
+		<NoteList
+			ref="noteList"
+			:notes="visibleNotes"
+			:selected-id="selectedId"
+			:loaded="noteStore.loaded"
+			:lanes="lanes"
 			:ui="listUi"
-			class="size-full p-2"
+			give-actions
+			actions-menu
+			@select="openComposer"
+			@load-more="noteStore.loadMore()"
 		>
-			<NoteListItem
-				:note="item"
-				give-actions
-				actions-menu
-				:selected="selectedId === item.id"
-				@select="openComposer"
-			/>
-		</UScrollArea>
-		<NoteEmptyState
-			v-else-if="noteStore.loaded"
-			class="flex min-h-0 flex-1 items-center justify-center p-6"
-		/>
+			<template #empty>
+				<NoteEmptyState />
+			</template>
+		</NoteList>
 		<div class="absolute bottom-4 left-1/2 z-50 -translate-x-1/2 sm:hidden">
 			<NoteNewButton />
 		</div>

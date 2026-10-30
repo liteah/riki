@@ -16,11 +16,9 @@ const { data: note, error } = await useFetch<Note>(
 	<NoteSidebar />
 	<div class="relative flex min-w-0 flex-1 flex-col items-center overflow-hidden">
 		<LayoutPageHeader :title="$t('note.detailTitle')" />
-		<UScrollArea v-if="note" shadow class="size-full p-2">
-			<div class="mx-auto w-full max-w-2xl">
-				<NoteListItem :key="note.id" :note="note" detail readonly />
-			</div>
-		</UScrollArea>
+		<div v-if="note" class="mx-auto w-full max-w-2xl p-2">
+			<NoteListItem :key="note.id" :note="note" detail readonly />
+		</div>
 		<UEmpty
 			v-else-if="error"
 			variant="naked"

@@ -11,16 +11,14 @@ const { visibleNotes } = storeToRefs(noteStore)
 const appConfig = useAppConfig()
 const { t } = useI18n()
 
-const scrollArea = useTemplateRef<{
-	$el: HTMLElement
-	virtualizer?: { scrollToIndex: (index: number, options?: Record<string, unknown>) => void }
-}>('scrollArea')
+const noteList = useTemplateRef<{ scrollToIndex: (index: number) => void }>('noteList')
+const listUi = { viewport: 'mx-auto max-w-2xl' }
 
-function scrollToIndex(index: number) {
-	scrollArea.value?.virtualizer?.scrollToIndex(index, { align: 'auto' })
-}
-
-const { selectedId } = useNoteListShortcuts(visibleNotes, scrollToIndex, openComposer)
+const { selectedId } = useNoteListShortcuts(
+	visibleNotes,
+	(index) => noteList.value?.scrollToIndex(index),
+	openComposer,
+)
 
 noteStore.start()
 
@@ -33,7 +31,7 @@ const inbox = ref<NoteInbox>(isInboxTab(route.query.tab) ? route.query.tab : not
 const tabs = computed<NavigationMenuItem[]>(() => {
 	const items: NavigationMenuItem[] = [
 		{ label: t('inbox.unassigned'), value: noteInbox.unassigned },
-		{ label: t('inbox.later'), value: noteInbox.later },
+		{ label: t('note.later'), value: noteInbox.later },
 		{ label: t('inbox.review'), value: 'review', disabled: true },
 	]
 	return items.map((tab) => ({
@@ -66,14 +64,6 @@ watch(
 		if (isInboxTab(value) && value !== inbox.value) inbox.value = value
 	},
 )
-
-onMounted(() => {
-	useInfiniteScroll(
-		() => scrollArea.value?.$el,
-		() => void noteStore.loadMore(),
-		{ distance: 200 },
-	)
-})
 </script>
 
 <template>
@@ -88,31 +78,20 @@ onMounted(() => {
 				:items="tabs"
 			/>
 		</LayoutPageHeader>
-		<UScrollArea
-			v-if="visibleNotes.length"
-			ref="scrollArea"
-			v-slot="{ item }"
-			:items="visibleNotes"
-			shadow
-			:virtualize="{ gap: 8, estimateSize: 200 }"
-			class="size-full p-2"
+		<NoteList
+			ref="noteList"
+			:notes="visibleNotes"
+			:selected-id="selectedId"
+			:loaded="noteStore.loaded"
+			:ui="listUi"
+			give-actions
+			@select="openComposer"
+			@load-more="noteStore.loadMore()"
 		>
-			<div class="mx-auto w-full max-w-2xl">
-				<NoteListItem
-					:note="item"
-					give-actions
-					:selected="selectedId === item.id"
-					@select="openComposer"
-				/>
-			</div>
-		</UScrollArea>
-		<UEmpty
-			v-else-if="noteStore.loaded"
-			variant="naked"
-			:icon="appConfig.ui.icons.note"
-			:title="$t('inbox.emptyTitle')"
-			class="flex min-h-0 flex-1 items-center justify-center p-6"
-		/>
+			<template #empty>
+				<UEmpty variant="naked" :icon="appConfig.ui.icons.note" :title="$t('inbox.emptyTitle')" />
+			</template>
+		</NoteList>
 		<div class="absolute bottom-4 left-1/2 z-50 -translate-x-1/2 sm:hidden">
 			<NoteNewButton />
 		</div>
