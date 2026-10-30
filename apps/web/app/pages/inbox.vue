@@ -4,6 +4,8 @@ import type { LocationQueryRaw } from 'vue-router'
 import { noteInbox } from '#shared/types/note'
 import type { NoteInbox } from '#shared/types/note'
 
+definePageMeta({ layout: false })
+
 const route = useRoute()
 const router = useRouter()
 const noteStore = useNoteStore()
@@ -67,9 +69,8 @@ watch(
 </script>
 
 <template>
-	<NoteSidebar />
-	<div class="relative flex min-w-0 flex-1 flex-col items-center overflow-hidden">
-		<LayoutPageHeader>
+	<NuxtLayout name="note" :title="$t('note.inbox')">
+		<template #header>
 			<UNavigationMenu
 				:ui="{ root: 'justify-center', item: 'py-0', link: 'py-1' }"
 				orientation="horizontal"
@@ -77,7 +78,7 @@ watch(
 				variant="link"
 				:items="tabs"
 			/>
-		</LayoutPageHeader>
+		</template>
 		<NoteList
 			ref="noteList"
 			:notes="visibleNotes"
@@ -92,9 +93,5 @@ watch(
 				<UEmpty variant="naked" :icon="appConfig.ui.icons.note" :title="$t('inbox.emptyTitle')" />
 			</template>
 		</NoteList>
-		<div class="absolute bottom-4 left-1/2 z-50 -translate-x-1/2 sm:hidden">
-			<NoteNewButton />
-		</div>
-	</div>
-	<ChatSidebar />
+	</NuxtLayout>
 </template>

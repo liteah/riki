@@ -1,6 +1,6 @@
 import { textContent, visit } from '@comark/nuxt/utils'
-import type { LinkPreviewSource } from '#shared/types/link-preview'
-import { cleanText, parseHttpUrl } from '#shared/utils/link-preview'
+import type { LinkPreviewSource } from '../types/link-preview'
+import { cleanText, parseHttpUrl } from './link-preview'
 
 type MarkdownDocument = Parameters<typeof visit>[0]
 

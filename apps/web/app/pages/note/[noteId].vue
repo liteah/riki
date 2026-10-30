@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { Note } from '#shared/types/note'
 
+definePageMeta({ layout: false })
+
 const route = useRoute()
 const appConfig = useAppConfig()
 
@@ -13,9 +15,7 @@ const { data: note, error } = await useFetch<Note>(
 </script>
 
 <template>
-	<NoteSidebar />
-	<div class="relative flex min-w-0 flex-1 flex-col items-center overflow-hidden">
-		<LayoutPageHeader :title="$t('note.detailTitle')" />
+	<NuxtLayout name="note" :title="$t('note.detailTitle')">
 		<div v-if="note" class="mx-auto w-full max-w-2xl p-2">
 			<NoteListItem :key="note.id" :note="note" detail readonly />
 		</div>
@@ -30,5 +30,5 @@ const { data: note, error } = await useFetch<Note>(
 		<div v-else class="flex min-h-0 flex-1 items-center justify-center">
 			<UIcon :name="appConfig.ui.icons.loading" class="size-6 animate-spin text-muted" />
 		</div>
-	</div>
+	</NuxtLayout>
 </template>

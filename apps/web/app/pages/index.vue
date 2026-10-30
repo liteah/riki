@@ -2,13 +2,15 @@
 import { builtinView, sidebarKind } from '#shared/types/view'
 import { resolveNoteColumnLanes } from '~/utils/note-columns'
 
+definePageMeta({ layout: false })
+
 const { t } = useI18n()
 const noteStore = useNoteStore()
 const { visibleNotes } = storeToRefs(noteStore)
 const viewStore = useViewStore()
-const { noteColumnMode } = storeToRefs(viewStore)
 const spaceStore = useSpaceStore()
 const tagStore = useTagStore()
+const { noteColumnMode } = storeToRefs(viewStore)
 
 const title = computed(() => {
 	const target = viewStore.target
@@ -58,13 +60,10 @@ watch(
 </script>
 
 <template>
-	<NoteSidebar />
-	<div class="relative flex min-w-0 flex-1 flex-col items-center overflow-hidden">
-		<LayoutPageHeader :title="title" :label="label">
-			<template #right>
-				<NoteLibraryMenu />
-			</template>
-		</LayoutPageHeader>
+	<NuxtLayout name="note" :title="title" :label="label">
+		<template #header-actions>
+			<NoteLibraryMenu />
+		</template>
 		<NoteList
 			ref="noteList"
 			:notes="visibleNotes"
@@ -81,9 +80,5 @@ watch(
 				<NoteEmptyState />
 			</template>
 		</NoteList>
-		<div class="absolute bottom-4 left-1/2 z-50 -translate-x-1/2 sm:hidden">
-			<NoteNewButton />
-		</div>
-	</div>
-	<ChatSidebar />
+	</NuxtLayout>
 </template>
