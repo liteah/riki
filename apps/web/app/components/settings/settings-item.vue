@@ -23,7 +23,7 @@ const interactive = computed(() => Boolean(props.to || attrs.onClick))
 		raw
 		:to="to"
 		:as="interactive ? 'button' : 'div'"
-		class="flex h-16 items-center gap-2 rounded-sm bg-muted p-4 text-left first:rounded-t-lg last:rounded-b-lg dark:bg-muted/50"
+		class="flex h-15 items-center gap-2 rounded-md bg-muted p-4 text-left first:rounded-t-xl last:rounded-b-xl dark:bg-muted/50"
 		:class="interactive && 'cursor-pointer transition-colors hover:bg-elevated/50'"
 	>
 		<slot name="icon">

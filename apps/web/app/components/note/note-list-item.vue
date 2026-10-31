@@ -16,7 +16,7 @@ import type { NoteViewShortcutId } from '~/utils/shortcuts'
 
 const props = defineProps<{
 	note: NoteViewItem
-	giveActions?: boolean
+	showActions?: boolean
 	actionsMenu?: boolean
 	selected?: boolean
 	readonly?: boolean
@@ -28,11 +28,17 @@ const emit = defineEmits<{
 }>()
 
 const card = tv({
-	base: 'group/note-item-card flex w-full flex-col rounded-2xl p-1 outline-none select-text',
+	base: 'group/note-item-card flex w-full flex-col rounded-xl p-1 outline-none select-text',
 	variants: {
 		detail: {
 			true: '',
 			false: 'bg-muted dark:bg-muted/50',
+		},
+		interactive: {
+			true: 'cursor-pointer',
+		},
+		selected: {
+			true: 'ring-2 ring-accented',
 		},
 	},
 	defaultVariants: {
@@ -41,7 +47,7 @@ const card = tv({
 })
 
 const article = tv({
-	base: 'h-full rounded-xl p-2 py-1',
+	base: 'h-full rounded-lg p-2',
 	variants: {
 		detail: {
 			true: '',
@@ -53,7 +59,32 @@ const article = tv({
 	},
 })
 
-const { t } = useI18n()
+const contentWrapper = tv({
+	base: 'relative',
+	variants: {
+		collapsible: {
+			true: 'max-h-[500px] overflow-hidden',
+		},
+	},
+	defaultVariants: {
+		collapsible: false,
+	},
+})
+
+const actionBar = tv({
+	base: 'ms-auto flex shrink-0 items-center gap-1',
+	variants: {
+		selected: {
+			true: '',
+			false:
+				'pointer-events-none opacity-0 transition-opacity group-hover/note-item-card:pointer-events-auto group-hover/note-item-card:opacity-100 has-data-[state=open]:pointer-events-auto has-data-[state=open]:opacity-100',
+		},
+	},
+	defaultVariants: {
+		selected: false,
+	},
+})
+
 const toast = useToast()
 const overlay = useOverlay()
 const appConfig = useAppConfig()
@@ -93,7 +124,7 @@ const menuSearch = ref('')
 const pendingSpaceMenu = ref(false)
 
 const spaceSearchFilter = computed(() => ({
-	placeholder: t('space.searchPlaceholder'),
+	placeholder: $t('space.searchPlaceholder'),
 }))
 
 const spaceFilter = computed(() => (menuSpaceMode.value ? spaceSearchFilter.value : false))
@@ -143,7 +174,7 @@ async function attempt(action: string, run: () => Promise<unknown>) {
 		await run()
 	} catch (error) {
 		toast.add({
-			title: t('common.actionFailed', { action }),
+			title: $t('common.actionFailed', { action }),
 			description: error instanceof Error ? error.message : undefined,
 			color: 'error',
 		})
@@ -154,17 +185,17 @@ async function copyLink() {
 	const url = new URL(`/note/${encodeURIComponent(props.note.id)}`, window.location.origin).href
 	try {
 		await navigator.clipboard.writeText(url)
-		toast.add({ title: t('common.copied'), color: 'success' })
+		toast.add({ title: $t('common.copied'), color: 'success' })
 	} catch {
 		toast.add({
-			title: t('common.actionFailed', { action: t('note.copyLink') }),
+			title: $t('common.actionFailed', { action: $t('note.copyLink') }),
 			color: 'error',
 		})
 	}
 }
 
 function changeSpace(spaceId: string | null) {
-	return attempt(t('note.addToSpace'), () => noteStore.update(props.note.id, { spaceId }))
+	return attempt($t('note.addToSpace'), () => noteStore.update(props.note.id, { spaceId }))
 }
 
 const spaceMenu = useNoteSpaceOptions(() => props.note.spaceId, changeSpace, openNewSpace)
@@ -176,28 +207,28 @@ function toggleStatus(status: NoteStatus, action: string) {
 function toggleLater() {
 	void toggleStatus(
 		isLater.value ? noteStatus.normal : noteStatus.later,
-		isLater.value ? t('note.unlater') : t('note.later'),
+		isLater.value ? $t('note.unlater') : $t('note.later'),
 	)
 }
 
 function confirmDestructive(onConfirm: () => void) {
 	confirmDialog.open({
-		title: t('note.deleteTitle'),
-		description: t('note.deleteDescription'),
+		title: $t('note.deleteTitle'),
+		description: $t('note.deleteDescription'),
 		destructive: true,
 		onConfirm,
 	})
 }
 
 function handleDestroy() {
-	void attempt(t('common.delete'), async () => {
+	void attempt($t('common.delete'), async () => {
 		await noteStore.destroy(props.note.id)
 		draftStore.discard(draftStore.scopeFor(props.note.id))
 	})
 }
 
 function handleDelete() {
-	void attempt(t('common.delete'), async () => {
+	void attempt($t('common.delete'), async () => {
 		noteStore.remove(props.note.id)
 		draftStore.discard(draftStore.scopeFor(props.note.id))
 	})
@@ -214,21 +245,21 @@ type NoteAction = {
 function togglePin() {
 	void toggleStatus(
 		isPinned.value ? noteStatus.normal : noteStatus.pinned,
-		isPinned.value ? t('common.unpin') : t('common.pin'),
+		isPinned.value ? $t('common.unpin') : $t('common.pin'),
 	)
 }
 
 function toggleArchive() {
 	void toggleStatus(
 		isArchived.value ? noteStatus.normal : noteStatus.archived,
-		isArchived.value ? t('note.unarchive') : t('note.archive'),
+		isArchived.value ? $t('note.unarchive') : $t('note.archive'),
 	)
 }
 
 const spaceAction = computed<NoteAction>(() => ({
 	id: 'space',
 	shortcut: 'addToSpace',
-	label: t('note.addToSpace'),
+	label: $t('note.addToSpace'),
 	icon: appConfig.ui.icons.space,
 	onSelect: openSpaceMenu,
 }))
@@ -236,7 +267,7 @@ const spaceAction = computed<NoteAction>(() => ({
 const laterAction = computed<NoteAction>(() => ({
 	id: 'later',
 	shortcut: 'toggleLater',
-	label: isLater.value ? t('note.unlater') : t('note.later'),
+	label: isLater.value ? $t('note.unlater') : $t('note.later'),
 	icon: appConfig.ui.icons.later,
 	onSelect: toggleLater,
 }))
@@ -244,7 +275,7 @@ const laterAction = computed<NoteAction>(() => ({
 const archiveAction = computed<NoteAction>(() => ({
 	id: isArchived.value ? 'unarchive' : 'archive',
 	shortcut: 'archiveNote',
-	label: isArchived.value ? t('note.unarchive') : t('note.archive'),
+	label: isArchived.value ? $t('note.unarchive') : $t('note.archive'),
 	icon: appConfig.ui.icons.archive,
 	onSelect: toggleArchive,
 }))
@@ -252,7 +283,7 @@ const archiveAction = computed<NoteAction>(() => ({
 const destroyAction = computed<NoteAction>(() => ({
 	id: 'destroy',
 	shortcut: 'destroyNote',
-	label: t('common.delete'),
+	label: $t('common.delete'),
 	icon: appConfig.ui.icons.trash,
 	onSelect: () => confirmDestructive(handleDestroy),
 }))
@@ -262,7 +293,7 @@ const actions = computed<NoteAction[]>(() => {
 	return [laterAction.value, archiveAction.value]
 })
 
-const showInlineSpace = computed(() => props.giveActions && !props.actionsMenu)
+const showInlineSpace = computed(() => props.showActions && !props.actionsMenu)
 
 const shortcutActions = computed<NoteAction[]>(() =>
 	!props.readonly && isOwn.value
@@ -272,19 +303,14 @@ const shortcutActions = computed<NoteAction[]>(() =>
 
 const cardEl = useTemplateRef<HTMLElement>('card')
 
-const collapsedHeight = 500
 const contentEl = useTemplateRef<HTMLElement>('content')
 const { height: contentHeight } = useElementSize(contentEl)
-const isLongNote = computed(() => contentHeight.value > collapsedHeight)
+const isLongNote = computed(() => contentHeight.value > 500)
 const isCollapsible = computed(() => !props.readonly && isOwn.value)
 const showCollapse = computed(() => isCollapsible.value && isLongNote.value)
 
-const showActions = computed(() => !props.readonly && props.giveActions && actions.value.length > 0)
-
-const actionBarClass = computed(() =>
-	props.selected
-		? ''
-		: 'pointer-events-none opacity-0 transition-opacity group-hover/note-item-card:pointer-events-auto group-hover/note-item-card:opacity-100 has-data-[state=open]:pointer-events-auto has-data-[state=open]:opacity-100',
+const showActionBar = computed(
+	() => !props.readonly && props.showActions && actions.value.length > 0,
 )
 
 const shortcuts = computed(
@@ -318,42 +344,39 @@ watchEffect(() => {
 })
 
 const spaceSearchItem = computed<ContextMenuItem>(() => ({
-	label: t('note.addToSpace'),
+	label: $t('note.addToSpace'),
 	icon: appConfig.ui.icons.space,
 	kbds: shortcutStore.kbds('addToSpace'),
-	onSelect: openSpaceMenu,
-}))
-
-const contextSpaceItem = computed<ContextMenuItem>(() => ({
-	...spaceSearchItem.value,
-	onSelect: () => {
+	onSelect: (event?: Event) => {
+		if (menuOpen.value) event?.preventDefault()
 		prepareSpaceMenu()
+		if (menuOpen.value) return
 		pendingSpaceMenu.value = true
 	},
 }))
 
 const laterItem = computed<ContextMenuItem>(() => ({
-	label: isLater.value ? t('note.unlater') : t('note.later'),
+	label: isLater.value ? $t('note.unlater') : $t('note.later'),
 	icon: appConfig.ui.icons.later,
 	kbds: shortcutStore.kbds('toggleLater'),
 	onSelect: toggleLater,
 }))
 
 const pinItem = computed<ContextMenuItem>(() => ({
-	label: isPinned.value ? t('common.unpin') : t('common.pin'),
+	label: isPinned.value ? $t('common.unpin') : $t('common.pin'),
 	icon: appConfig.ui.icons.pin,
 	onSelect: togglePin,
 }))
 
 const archiveItem = computed<ContextMenuItem>(() => ({
-	label: isArchived.value ? t('note.unarchive') : t('note.archive'),
+	label: isArchived.value ? $t('note.unarchive') : $t('note.archive'),
 	icon: appConfig.ui.icons.archive,
 	kbds: shortcutStore.kbds('archiveNote'),
 	onSelect: toggleArchive,
 }))
 
 const deleteItem = computed<ContextMenuItem>(() => ({
-	label: t('common.delete'),
+	label: $t('common.delete'),
 	icon: appConfig.ui.icons.trash,
 	kbds: shortcutStore.kbds('destroyNote'),
 	color: 'error',
@@ -361,20 +384,10 @@ const deleteItem = computed<ContextMenuItem>(() => ({
 }))
 
 const copyLinkItem = computed<ContextMenuItem>(() => ({
-	label: t('note.copyLink'),
+	label: $t('note.copyLink'),
 	icon: appConfig.ui.icons.link,
 	onSelect: copyLink,
 }))
-
-const contextMenuItems = computed<ContextMenuItem[][]>(() => {
-	if (props.readonly || !isOwn.value) return []
-	const rows: ContextMenuItem[][] = [
-		[contextSpaceItem.value, laterItem.value, pinItem.value, archiveItem.value],
-	]
-	if (isPublic.value) rows.push([copyLinkItem.value])
-	rows.push([deleteItem.value])
-	return rows
-})
 
 const menuItems = computed<ContextMenuItem[][]>(() => {
 	if (props.readonly || !isOwn.value) return []
@@ -476,56 +489,49 @@ const noteTime = computed(() =>
 	),
 )
 
-const absoluteHint = computed(() => {
-	const timeZone = resolveTimeZone(settings.value.timeZone)
-	const createdAt = $t('common.createdAt', {
-		time: formatAbsoluteTime(props.note.createdAt, locale.value, timeZone),
-	})
-	const createdSecond = Math.floor(new Date(props.note.createdAt).getTime() / 1000)
-	const updatedSecond = Math.floor(new Date(props.note.updatedAt).getTime() / 1000)
-	if (updatedSecond === createdSecond) return createdAt
-	return `${createdAt}\n${$t('note.updatedAt', { time: formatAbsoluteTime(props.note.updatedAt, locale.value, timeZone) })}`
-})
+const timeZone = computed(() => resolveTimeZone(settings.value.timeZone))
+const createdAtText = computed(() =>
+	$t('common.createdAt', {
+		time: formatAbsoluteTime(props.note.createdAt, locale.value, timeZone.value),
+	}),
+)
+const updatedAtText = computed(() =>
+	$t('note.updatedAt', {
+		time: formatAbsoluteTime(props.note.updatedAt, locale.value, timeZone.value),
+	}),
+)
+const showUpdatedAt = computed(() => props.note.updatedAt !== props.note.createdAt)
 </script>
 
 <template>
 	<UContextMenu
-		:items="contextMenuItems"
+		:items="menuItems"
 		:content="{ onCloseAutoFocus: onContextCloseAutoFocus }"
 		@update:open="onContextOpen"
 	>
 		<div
 			ref="card"
 			tabindex="-1"
-			:class="[
-				card({ detail }),
-				!readonly && isOwn && 'cursor-pointer',
-				props.selected && 'ring-2 ring-accented',
-			]"
+			:class="card({ detail, interactive: !readonly && isOwn, selected: props.selected })"
 			@click="onSelect"
 		>
 			<article :class="article({ detail })">
-				<div class="relative">
-					<div
-						:class="isCollapsible && 'overflow-hidden'"
-						:style="isCollapsible ? { maxHeight: `${collapsedHeight}px` } : undefined"
-					>
-						<div ref="content" class="flow-root">
-							<Markdown
-								:value="props.note.content"
-								:components="markdownComponents"
-								:plugins="markdownPlugins"
-							/>
-						</div>
+				<div :class="contentWrapper({ collapsible: isCollapsible })">
+					<div ref="content" class="flow-root">
+						<Markdown
+							:value="props.note.content"
+							:components="markdownComponents"
+							:plugins="markdownPlugins"
+						/>
 					</div>
 					<div
 						v-if="showCollapse"
 						class="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-end justify-center bg-linear-to-t from-default to-transparent px-2 pt-8 pb-2"
 					>
-						<UTooltip :text="t('note.openNote')">
+						<UTooltip :text="$t('note.openNote')">
 							<UButton
 								:icon="appConfig.ui.icons.chevronDown"
-								:aria-label="t('note.openNote')"
+								:aria-label="$t('note.openNote')"
 								color="neutral"
 								variant="ghost"
 								size="sm"
@@ -553,7 +559,7 @@ const absoluteHint = computed(() => {
 			</div>
 			<div class="flex flex-wrap items-center gap-2 pl-2 text-xs text-muted sm:py-1 sm:text-sm">
 				<div class="flex items-center gap-1 truncate">
-					<UTooltip v-if="isPinned" :text="t('common.pinned')">
+					<UTooltip v-if="isPinned" :text="$t('common.pinned')">
 						<UIcon :name="appConfig.ui.icons.pin" class="size-3.5 shrink-0" />
 					</UTooltip>
 					<UTooltip v-if="hasDraft" :text="$t('note.draft')">
@@ -569,8 +575,12 @@ const absoluteHint = computed(() => {
 							@click.stop="onRetry"
 						/>
 					</UTooltip>
-					<UTooltip :text="absoluteHint" :ui="{ content: 'whitespace-pre-line' }">
+					<UTooltip>
 						<span>{{ noteTime }}</span>
+						<template #content>
+							<span>{{ createdAtText }}</span>
+							<span v-if="showUpdatedAt">{{ updatedAtText }}</span>
+						</template>
 					</UTooltip>
 				</div>
 				<div class="flex shrink-0 items-center gap-1">
@@ -583,11 +593,7 @@ const absoluteHint = computed(() => {
 						<span class="max-w-24 truncate">{{ noteSpaceName }}</span>
 					</div>
 				</div>
-				<div
-					v-if="showActions"
-					class="ms-auto flex shrink-0 items-center gap-1"
-					:class="actionBarClass"
-				>
+				<div v-if="showActionBar" :class="actionBar({ selected: props.selected })">
 					<template v-if="!actionsMenu">
 						<NoteSpacePicker
 							v-if="showInlineSpace"

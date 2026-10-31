@@ -11,10 +11,8 @@ const router = useRouter()
 const noteStore = useNoteStore()
 const { visibleNotes } = storeToRefs(noteStore)
 const appConfig = useAppConfig()
-const { t } = useI18n()
 
 const noteList = useTemplateRef<{ scrollToIndex: (index: number) => void }>('noteList')
-const listUi = { viewport: 'mx-auto max-w-2xl' }
 
 const { selectedId } = useNoteListShortcuts(
 	visibleNotes,
@@ -32,9 +30,9 @@ const inbox = ref<NoteInbox>(isInboxTab(route.query.tab) ? route.query.tab : not
 
 const tabs = computed<NavigationMenuItem[]>(() => {
 	const items: NavigationMenuItem[] = [
-		{ label: t('inbox.unassigned'), value: noteInbox.unassigned },
-		{ label: t('note.later'), value: noteInbox.later },
-		{ label: t('inbox.review'), value: 'review', disabled: true },
+		{ label: $t('inbox.unassigned'), value: noteInbox.unassigned },
+		{ label: $t('note.later'), value: noteInbox.later },
+		{ label: $t('inbox.review'), value: 'review', disabled: true },
 	]
 	return items.map((tab) => ({
 		...tab,
@@ -84,8 +82,8 @@ watch(
 			:notes="visibleNotes"
 			:selected-id="selectedId"
 			:loaded="noteStore.loaded"
-			:ui="listUi"
-			give-actions
+			columns="single"
+			show-actions
 			@select="openComposer"
 			@load-more="noteStore.loadMore()"
 		>

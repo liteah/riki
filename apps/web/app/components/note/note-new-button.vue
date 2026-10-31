@@ -34,7 +34,7 @@ withDefaults(
 			color="neutral"
 			variant="ghost"
 			block
-			class="group justify-start px-2 text-muted hover:bg-elevated/50 hover:text-highlighted"
+			class="group justify-start px-2 py-1.5 text-muted hover:bg-elevated/50 hover:text-highlighted"
 			:ui="{
 				leadingIcon: 'text-dimmed transition-colors group-hover:text-default',
 			}"

@@ -30,7 +30,7 @@ async function handleConfirm() {
 	<UModal v-model:open="open" :close="{ onClick: close }">
 		<template #header>
 			<div class="flex w-full flex-col items-start text-left">
-				<span v-if="title" class="font-semibold">{{ title }}</span>
+				<span v-if="title" class="font-medium">{{ title }}</span>
 				<span v-if="description" class="mt-1 text-sm text-pretty text-muted">
 					{{ description }}
 				</span>

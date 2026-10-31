@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import type { NoteViewItem } from '#shared/types/note'
+import type { NoteColumnMode } from '~/utils/note-columns'
+import { resolveNoteColumnLanes } from '~/utils/note-columns'
 
-const props = defineProps<{
-	notes: NoteViewItem[]
-	selectedId?: string | null
-	loaded?: boolean
-	giveActions?: boolean
-	actionsMenu?: boolean
-	lanes?: number
-	ui?: { viewport?: string }
-}>()
+const props = withDefaults(
+	defineProps<{
+		notes: NoteViewItem[]
+		selectedId?: string | null
+		loaded?: boolean
+		showActions?: boolean
+		actionsMenu?: boolean
+		columns?: NoteColumnMode
+	}>(),
+	{ columns: 'auto' },
+)
 
 const emit = defineEmits<{
 	select: [note: NoteViewItem]
@@ -21,16 +25,26 @@ const scrollArea = useTemplateRef<{
 	virtualizer?: { scrollToIndex: (index: number, options?: Record<string, unknown>) => void }
 }>('scrollArea')
 
+const { width: listWidth } = useElementSize(() => scrollArea.value?.$el)
+const lanes = computed(() =>
+	resolveNoteColumnLanes(props.columns, Math.max(0, listWidth.value - 16)),
+)
+
 const virtualize = computed(() =>
-	props.lanes
+	lanes.value > 1
 		? {
 				gap: 8,
 				estimateSize: 200,
-				lanes: props.lanes,
+				lanes: lanes.value,
 				laneAssignmentMode: 'measured' as const,
 			}
 		: { gap: 8, estimateSize: 200 },
 )
+
+const scrollAreaUi = computed(() => {
+	if (props.columns === 'single') return { viewport: 'mx-auto max-w-2xl' }
+	if (props.columns === 'double') return { viewport: 'mx-auto max-w-4xl' }
+})
 
 function scrollToTop() {
 	scrollArea.value?.virtualizer?.scrollToIndex(0, { align: 'start' })
@@ -38,10 +52,6 @@ function scrollToTop() {
 
 function scrollToIndex(index: number) {
 	scrollArea.value?.virtualizer?.scrollToIndex(index, { align: 'auto' })
-}
-
-function getElement() {
-	return scrollArea.value?.$el
 }
 
 onMounted(() => {
@@ -52,7 +62,7 @@ onMounted(() => {
 	)
 })
 
-defineExpose({ scrollToTop, scrollToIndex, getElement })
+defineExpose({ scrollToTop, scrollToIndex })
 </script>
 
 <template>
@@ -63,12 +73,12 @@ defineExpose({ scrollToTop, scrollToIndex, getElement })
 		:items="notes"
 		shadow
 		:virtualize="virtualize"
-		:ui="ui"
+		:ui="scrollAreaUi"
 		class="size-full p-2"
 	>
 		<NoteListItem
 			:note="item"
-			:give-actions="giveActions"
+			:show-actions="showActions"
 			:actions-menu="actionsMenu"
 			:selected="selectedId === item.id"
 			@select="emit('select', $event)"
