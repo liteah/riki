@@ -7,7 +7,7 @@ import type { UserProfile } from '#shared/types/user'
 const route = useRoute()
 const appConfig = useAppConfig()
 const { t, locale } = useI18n()
-const session = useAuth().useSession()
+const session = useAuthSession()
 
 const scrollArea = useTemplateRef<{ $el: HTMLElement }>('scrollArea')
 const profileCard = useTemplateRef<{ edit: () => void }>('profileCard')

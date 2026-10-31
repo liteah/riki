@@ -15,6 +15,8 @@ function createClient(headers?: Record<string, string | undefined>) {
 
 type AuthClient = ReturnType<typeof createClient>
 
+export type AuthSession = AuthClient['$Infer']['Session']
+
 // Client-side singleton so `useSession()` state is shared across components.
 // Server-side keeps a per-request instance to forward cookies correctly.
 let clientInstance: AuthClient | undefined
@@ -23,4 +25,17 @@ export function useAuth(): AuthClient {
 	if (import.meta.server) return createClient(useRequestHeaders(['cookie']))
 	if (!clientInstance) clientInstance = createClient()
 	return clientInstance
+}
+
+// The session atom is always pending on the server, so SSR renders would miss
+// the user. The auth-session plugin seeds this state from the request.
+export function useAuthSession() {
+	const session = useAuth().useSession()
+	const initial = useState<AuthSession | null>('auth-session', () => null)
+
+	return computed(() => {
+		const current = session.value
+		if (current.data || !current.isPending) return current
+		return { ...current, data: initial.value, isPending: false }
+	})
 }

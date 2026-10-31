@@ -37,19 +37,25 @@ const linkPreview = computed<LinkPreview | null>(() => {
 
 <template>
 	<span v-if="suppressedMode === 'text'"><slot /></span>
-	<UPopover
-		v-else-if="showPreview && linkPreview"
-		v-model:open="open"
-		mode="hover"
-		:content="{ side: 'top', align: 'start', sideOffset: 6 }"
-	>
-		<ProseA :href="href" target="_blank" rel="noopener noreferrer" @click.stop>
-			<slot />
-		</ProseA>
-		<template #content>
-			<NoteLinkPreview :preview="linkPreview" flush class="w-95" />
+	<ClientOnly v-else-if="showPreview && linkPreview">
+		<UPopover
+			v-model:open="open"
+			mode="hover"
+			:content="{ side: 'top', align: 'start', sideOffset: 6 }"
+		>
+			<ProseA :href="href" target="_blank" rel="noopener noreferrer" @click.stop>
+				<slot />
+			</ProseA>
+			<template #content>
+				<NoteLinkPreview :preview="linkPreview" flush class="w-95" />
+			</template>
+		</UPopover>
+		<template #fallback>
+			<ProseA :href="href" target="_blank" rel="noopener noreferrer" @click.stop>
+				<slot />
+			</ProseA>
 		</template>
-	</UPopover>
+	</ClientOnly>
 	<ProseA
 		v-else-if="suppressedMode !== 'hide'"
 		:href="href"

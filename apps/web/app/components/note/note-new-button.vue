@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const appConfig = useAppConfig()
-const session = useAuth().useSession()
+const session = useAuthSession()
 const shortcutStore = useShortcutStore()
 
 const signedIn = computed(() => Boolean(session.value.data?.user?.id))

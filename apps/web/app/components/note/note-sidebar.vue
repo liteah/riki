@@ -10,7 +10,7 @@ import type { PinnedTarget } from '~/stores/view'
 const { t } = useI18n()
 const appConfig = useAppConfig()
 const overlay = useOverlay()
-const session = useAuth().useSession()
+const session = useAuthSession()
 
 const spaceStore = useSpaceStore()
 const tagStore = useTagStore()

@@ -47,6 +47,21 @@ When a task touches a library below, consult its official documentation at the p
 - Drafts are per user and per note, written on a debounce, restored on reopen, and discarded on save. A discard must also cancel any debounced write still in flight, or unmounting resurrects the saved note as a stale draft.
 - Polling pulls ask for deltas (`?since=`) and only advance the sync point past a response they know is complete.
 
+## SSR and hydration
+
+- Treat server HTML and the first client render as one contract. Every value that affects markup must match: session, notes, filters, sort, columns, settings, `useId` branch, note count and component order. Defer browser storage, not markup.
+- Resolve auth once in `app/plugins/auth-session.ts` with `useRequestFetch()<AuthSession | null>('/api/auth/get-session')`; read it through `useAuthSession()`. Never call `useSession()` in a component. While the client atom is pending, `useAuthSession()` must keep the SSR session visible; otherwise the signed-out branch renders a different node count and `useId` sequence.
+- Do not gate the identity watcher on `session.isPending`. Watch the resolved user id; a refresh with the same id must not reset the list. Skip when `hydratedKey` equals that id, or an SSR page re-fetches page 1 and races hydration. On a real identity change, clear `foreignNotes`, purge foreign rows, reset the cursor, and force a reload.
+- Pinia serializes only refs returned from the store. `nextCursor`, `paginationDone`, `notesCache`, `outbox`, and `foreignNotes` are local; a page's `hydrate()` must set the cursor/done flags. Return a `hydratedKey` when the client must distinguish "SSR data already applied" from "must fetch".
+- A page that SSRs notes uses `await useAsyncData(..., async () => { ... })`, `useRequestFetch`, and skips on `import.meta.client`; Nuxt 4's `watch` option is `WatchSource[]`, never `{ watch: false }`. Skip local-only view targets and let their filter watcher fetch after the persisted view is available.
+- A note cursor is valid for one `(identity, filter, sort)` triple. Reset it on any change. Identity/filter watchers call `loadMore(true)`; increment a request version and ignore stale responses. The scroll path keeps the `pending` guard. An older request must never merge after a newer one.
+- Browser storage is mounted state: use `useLocalStorage(..., { initOnMounted: true })` and `skipHydrate`; hydrate persisted settings after `app:mounted`; the first render uses defaults. Share render-time clocks via `useState`, never `Date.now()` in a render.
+- The virtualizer needs deterministic SSR geometry: a fixed SSR width, `initialRect`, `overscan`, `estimateSize`, `getItemKey`, and an unconditional `virtualize` object; Nuxt UI ScrollArea captures that object once. Keep the estimator beside its only consumer; a one-function `utils/` module is not an abstraction.
+- Comark's `post` plugin sets the link plan after the parent render, so a carded note's card is absent from the first SSR paint and its inline link is suppressed. Both first renders stay card-free; the parent re-renders after the child setup. For a non-suppressed hover preview, use `ClientOnly` with a plain `ProseA` fallback; never let a client-only popover be the only SSR representation of a link.
+- Never rely on a browser-only component for text SSR needs. Wrap it in `ClientOnly` with an equivalent fallback; the default slot replaces it after mount.
+- Hydration errors are usually a branch or `useId` order mismatch, not bad data. Check signed-in and signed-out SSR HTML; the same session branch and note count must produce the same component order. `console.log` reports the first divergent node.
+- Verify with `pnpm --filter @riki/web typecheck`, `pnpm lint`, and `oxfmt` on changed files. Smoke-test signed-in `/` and `/inbox` and signed-out `/` over HTTP. Browser hydration warnings require a browser; never claim them fixed from SSR HTML alone.
+
 ## Cloudflare
 
 - D1 hard limits: **50 queries per Worker invocation** and **100 bound parameters per query** on the free plan (1,000 queries on paid). Free tier also caps 5M rows read and 100k rows written per day, and since 2026-09-01 exceeding the daily limits makes queries fail outright.
@@ -59,6 +74,7 @@ When a task touches a library below, consult its official documentation at the p
 - Before writing a helper, check whether the shape already exists. Identical logic in two places is a defect, not a coincidence.
 - `useToast`, `useOverlay` and `$fetch` are the primitives. Do not wrap a framework primitive in a single-purpose helper - a `notifyFailure` that can only report failures is a narrowing, not a reusable abstraction, and it cannot be called from a store because it needs `useI18n`. Call the primitive directly.
 - Extract to `shared/utils/` only when both client and server need it; `app/utils/` is client-only, `server/utils/` is server-only.
+- A helper with one caller and one function stays in that component. Extract only when a second caller or a real domain boundary appears; `app/utils/` is not a dumping ground.
 
 ## Performance
 

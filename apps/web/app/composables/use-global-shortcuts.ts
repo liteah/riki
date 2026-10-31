@@ -7,7 +7,7 @@ export function useGlobalShortcuts() {
 	const appConfig = useAppConfig()
 	const viewStore = useViewStore()
 	const shortcutStore = useShortcutStore()
-	const session = useAuth().useSession()
+	const session = useAuthSession()
 	const overlay = useOverlay()
 
 	function hasOpenOverlay() {

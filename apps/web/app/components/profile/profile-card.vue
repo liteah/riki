@@ -20,7 +20,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const session = useAuth().useSession()
+const session = useAuthSession()
 const overlay = useOverlay()
 
 const profileModal = overlay.create(LazyProfileModal)

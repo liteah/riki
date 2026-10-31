@@ -8,7 +8,7 @@ const toast = useToast()
 const appConfig = useAppConfig()
 const authClient = useAuth()
 
-const session = authClient.useSession()
+const session = useAuthSession()
 const user = computed(() => session.value.data?.user ?? null)
 
 const emailOpen = ref(false)

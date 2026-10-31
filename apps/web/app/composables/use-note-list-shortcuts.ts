@@ -8,7 +8,7 @@ export function useNoteListShortcuts(
 	open: (note: NoteListItem) => void,
 ) {
 	const shortcutStore = useShortcutStore()
-	const session = useAuth().useSession()
+	const session = useAuthSession()
 	const selectedId = ref<string | null>(null)
 
 	const viewerId = computed(() => session.value.data?.user?.id ?? null)

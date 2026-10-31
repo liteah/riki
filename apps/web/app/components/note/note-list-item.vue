@@ -91,7 +91,7 @@ const appConfig = useAppConfig()
 const noteStore = useNoteStore()
 const draftStore = useDraftStore()
 const shortcutStore = useShortcutStore()
-const session = useAuth().useSession()
+const session = useAuthSession()
 
 const confirmDialog = overlay.create(LazyDialogModal)
 
@@ -301,7 +301,7 @@ const shortcutActions = computed<NoteAction[]>(() =>
 		: [],
 )
 
-const cardEl = useTemplateRef<HTMLElement>('card')
+const cardEl = useTemplateRef<HTMLElement>('cardEl')
 
 const contentEl = useTemplateRef<HTMLElement>('content')
 const { height: contentHeight } = useElementSize(contentEl)
@@ -444,7 +444,7 @@ function previewFor(source: LinkPreviewSource): LinkPreview {
 }
 
 const cardSources = computed(() => {
-	if (settings.value.linkPreviewMode === 'never') return []
+	if (!settings.value.linkPreviewEnabled) return []
 	const explicit = linkSources.value.filter((source) => source.preview === true)
 	if (explicit.length > 0) return explicit
 	const auto = linkSources.value[0]
@@ -469,23 +469,14 @@ const suppressedLinks = computed(
 )
 provide(suppressedLinkPreviewsKey, suppressedLinks)
 
-const portraitPreview = computed<LinkPreview | null>(() => {
-	if (settings.value.linkPreviewMode !== 'portrait' || cardPreviews.value.length !== 1) {
-		return null
-	}
-	return cardPreviews.value[0]?.preview ?? null
-})
-
-const landscapePreviews = computed(() =>
-	portraitPreview.value ? [] : cardPreviews.value.map((item) => item.preview),
-)
-
+const now = useState('notes-now', () => Date.now())
 const noteTime = computed(() =>
 	formatTime(
 		props.note.createdAt,
 		settings.value.timeFormat,
 		locale.value,
 		resolveTimeZone(settings.value.timeZone),
+		now.value,
 	),
 )
 
@@ -510,7 +501,7 @@ const showUpdatedAt = computed(() => props.note.updatedAt !== props.note.created
 		@update:open="onContextOpen"
 	>
 		<div
-			ref="card"
+			ref="cardEl"
 			tabindex="-1"
 			:class="card({ detail, interactive: !readonly && isOwn, selected: props.selected })"
 			@click="onSelect"
@@ -543,17 +534,11 @@ const showUpdatedAt = computed(() => props.note.updatedAt !== props.note.created
 					</div>
 				</div>
 			</article>
-			<div v-if="portraitPreview || landscapePreviews.length" class="flex flex-col gap-2 py-1">
+			<div v-if="cardPreviews.length" class="flex flex-col gap-2 py-1">
 				<NoteLinkPreview
-					v-if="portraitPreview"
-					:preview="portraitPreview"
-					variant="portrait"
-					flush
-				/>
-				<NoteLinkPreview
-					v-for="preview in landscapePreviews"
-					:key="preview.url"
-					:preview="preview"
+					v-for="item in cardPreviews"
+					:key="item.preview.url"
+					:preview="item.preview"
 					flush
 				/>
 			</div>

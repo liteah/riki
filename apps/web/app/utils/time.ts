@@ -17,11 +17,12 @@ export function formatRelativeTime(
 	value: string | number | Date,
 	locale: string,
 	_timeZone?: string,
+	now = Date.now(),
 ): string {
 	const time = toEpoch(value)
 	if (Number.isNaN(time)) return ''
 	const formatter = new Intl.RelativeTimeFormat(resolveLocale(locale), { numeric: 'auto' })
-	let delta = Math.round((time - Date.now()) / 1000)
+	let delta = Math.round((time - now) / 1000)
 	for (const [unit, limit] of UNITS) {
 		if (Math.abs(delta) < limit) return formatter.format(delta, unit)
 		delta = Math.round(delta / limit)
@@ -60,11 +61,12 @@ export function formatCompactTime(
 	value: string | number | Date,
 	locale: string,
 	timeZone?: string,
+	now = Date.now(),
 ): string {
 	const time = new Date(value)
 	if (Number.isNaN(time.getTime())) return ''
 	const day = calendarDay(time, timeZone)
-	const today = calendarDay(new Date(), timeZone)
+	const today = calendarDay(new Date(now), timeZone)
 	const yearStart = Date.UTC(new Date(today).getUTCFullYear(), 0, 1)
 	const dayDelta = Math.round((day - today) / 86400000)
 	const options: Intl.DateTimeFormatOptions =
@@ -85,9 +87,10 @@ export function formatTime(
 	format: TimeFormat,
 	locale: string,
 	timeZone?: string,
+	now = Date.now(),
 ): string {
-	if (format === 'relative') return formatRelativeTime(value, locale, timeZone)
-	return formatCompactTime(value, locale, timeZone)
+	if (format === 'relative') return formatRelativeTime(value, locale, timeZone, now)
+	return formatCompactTime(value, locale, timeZone, now)
 }
 
 export function resolveTimeZone(timeZone: string | undefined): string | undefined {

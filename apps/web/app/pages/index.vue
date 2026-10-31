@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { builtinView, sidebarKind } from '#shared/types/view'
+import type { ListNotesResponse } from '#shared/types/note'
+import { noteQueryFromFilter } from '~/utils/note-query'
 
 definePageMeta({ layout: false })
 
@@ -9,6 +11,21 @@ const viewStore = useViewStore()
 const spaceStore = useSpaceStore()
 const tagStore = useTagStore()
 const { noteColumnMode } = storeToRefs(viewStore)
+const session = useAuthSession()
+const route = useRoute()
+const requestFetch = useRequestFetch()
+
+const { data: initialNotes } = await useAsyncData(`notes:${route.fullPath}`, async () => {
+	if (import.meta.client || !session.value.data?.user || route.query.view) return null
+	return requestFetch<ListNotesResponse>('/api/notes', {
+		query: {
+			limit: noteStore.pageSize,
+			sort: viewStore.noteSort,
+			...noteQueryFromFilter(noteStore.inboxScope),
+		},
+	}).catch(() => null)
+})
+if (initialNotes.value) noteStore.hydrate(initialNotes.value)
 
 const title = computed(() => {
 	const target = viewStore.target

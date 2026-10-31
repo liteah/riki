@@ -22,14 +22,24 @@ export const useViewStore = defineStore('view', () => {
 	const pinned = ref<SidebarEntry[]>([])
 	const loaded = ref(false)
 	const pending = ref(false)
-	const sidebarOpen = skipHydrate(useLocalStorage(localKeys.sidebarOpen, true))
-	const noteColumnMode = skipHydrate(useLocalStorage<NoteColumnMode>(localKeys.noteColumns, 'auto'))
+	const sidebarOpen = skipHydrate(
+		useLocalStorage(localKeys.sidebarOpen, true, { initOnMounted: true }),
+	)
+	const noteColumnMode = skipHydrate(
+		useLocalStorage<NoteColumnMode>(localKeys.noteColumns, 'auto', { initOnMounted: true }),
+	)
 	// Persisted column modes outlive the menu; reset retired values.
-	if (import.meta.client && !noteColumnModes.includes(noteColumnMode.value)) {
-		noteColumnMode.value = 'auto'
-	}
+	watch(
+		noteColumnMode,
+		(value) => {
+			if (!noteColumnModes.includes(value)) noteColumnMode.value = 'auto'
+		},
+		{ immediate: true },
+	)
 	const noteSort = skipHydrate(
-		useLocalStorage<NoteSort>(localKeys.noteSort, noteSortValues.createdDesc),
+		useLocalStorage<NoteSort>(localKeys.noteSort, noteSortValues.createdDesc, {
+			initOnMounted: true,
+		}),
 	)
 
 	const spaceStore = useSpaceStore()

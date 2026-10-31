@@ -23,7 +23,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const appConfig = useAppConfig()
 const overlay = useOverlay()
-const session = useAuth().useSession()
+const session = useAuthSession()
 const noteStore = useNoteStore()
 const { notes, explicitFilter } = storeToRefs(noteStore)
 

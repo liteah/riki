@@ -27,7 +27,9 @@ function unwrap(stored: string): string {
 }
 
 export const useDraftStore = defineStore('draft', () => {
-	const drafts = skipHydrate(useLocalStorage<Record<string, string>>(localKeys.drafts, {}))
+	const drafts = skipHydrate(
+		useLocalStorage<Record<string, string>>(localKeys.drafts, {}, { initOnMounted: true }),
+	)
 
 	const timers = new Map<string, ReturnType<typeof setTimeout>>()
 

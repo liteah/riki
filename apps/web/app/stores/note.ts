@@ -66,8 +66,7 @@ function backoffDelay(attempts: number) {
 }
 
 export const useNoteStore = defineStore('note', () => {
-	const authClient = useAuth()
-	const session = authClient.useSession()
+	const session = useAuthSession()
 	const spaceStore = useSpaceStore()
 	const tagStore = useTagStore()
 	const online = useOnline()
@@ -238,16 +237,34 @@ export const useNoteStore = defineStore('note', () => {
 		}
 	}
 
-	const notes = skipHydrate(useLocalStorage<NoteListItem[]>(localKeys.notes, []))
+	const notes = ref<NoteListItem[]>([])
 	const foreignNotes = ref<NoteListItem[]>([])
-	const outbox = skipHydrate(useLocalStorage<OutboxRow[]>(localKeys.outbox, []))
-	const nextCursor = skipHydrate(useLocalStorage<string | null>(localKeys.notesCursor, null))
+	const notesCache = skipHydrate(
+		useLocalStorage<NoteListItem[]>(localKeys.notes, [], { initOnMounted: true }),
+	)
+	const outbox = skipHydrate(
+		useLocalStorage<OutboxRow[]>(localKeys.outbox, [], { initOnMounted: true }),
+	)
+	const nextCursor = skipHydrate(
+		useLocalStorage<string | null>(localKeys.notesCursor, null, { initOnMounted: true }),
+	)
 	const pending = ref(false)
 	const syncing = ref(false)
 	const paginationDone = ref(false)
 	const loaded = ref(false)
 	const total = ref(0)
+	const hydratedKey = ref<string | null>(null)
 	let started = false
+	let cacheReady = false
+	let loadVersion = 0
+
+	watch(
+		notes,
+		(value) => {
+			if (cacheReady) notesCache.value = value
+		},
+		{ flush: 'post' },
+	)
 
 	const unsyncedIds = computed(() => {
 		if (!online.value) return new Set(outbox.value.map((row) => row.noteId))
@@ -372,7 +389,9 @@ export const useNoteStore = defineStore('note', () => {
 			const index = indexOf(winner.id)
 			const local = notes.value[index]
 			if (local && local.content === winner.content) {
-				notes.value[index] = { ...local, linkPreviews: winner.linkPreviews ?? {} }
+				notes.value = notes.value.map((note) =>
+					note.id === winner.id ? { ...note, linkPreviews: winner.linkPreviews ?? {} } : note,
+				)
 			}
 			return
 		}
@@ -456,19 +475,23 @@ export const useNoteStore = defineStore('note', () => {
 		return rejected
 	}
 
-	async function loadMore() {
-		if (pending.value || !online.value) return
-		if (paginationDone.value) return
+	async function loadMore(force = false) {
+		if (!online.value || paginationDone.value) return
+		if (pending.value && !force) return
+		const version = ++loadVersion
 		const filter = inboxScope.value
+		const cursor = nextCursor.value
+		const sort = viewStore.noteSort
 		pending.value = true
 		const data = await $fetch<ListNotesResponse>('/api/notes', {
 			query: {
 				limit: PAGE_SIZE,
-				sort: viewStore.noteSort,
-				...(nextCursor.value ? { cursor: nextCursor.value } : {}),
+				sort,
+				...(cursor ? { cursor } : {}),
 				...noteQueryFromFilter(filter),
 			},
 		}).catch(() => null)
+		if (version !== loadVersion) return
 		if (data) {
 			mergeIncoming(data.items)
 			nextCursor.value = data.nextCursor
@@ -480,19 +503,18 @@ export const useNoteStore = defineStore('note', () => {
 	}
 
 	watch(
-		() =>
-			[
-				session.value.isPending ? undefined : (session.value.data?.user?.id ?? 'anonymous'),
-			] as const,
+		() => session.value.data?.user?.id ?? 'anonymous',
 		(key, previous) => {
 			if (import.meta.server || key === previous) return
+			if (hydratedKey.value === key) return
+			hydratedKey.value = null
 			foreignNotes.value = []
 			if (typeof key === 'string' && key !== 'anonymous') {
 				notes.value = notes.value.filter((note) => !note.userId || note.userId === key)
 			}
 			nextCursor.value = null
 			paginationDone.value = false
-			void loadMore()
+			void loadMore(true)
 		},
 		{ immediate: true },
 	)
@@ -504,7 +526,7 @@ export const useNoteStore = defineStore('note', () => {
 			if (import.meta.server || key === previous) return
 			nextCursor.value = null
 			paginationDone.value = false
-			void loadMore()
+			void loadMore(true)
 		},
 	)
 
@@ -571,7 +593,7 @@ export const useNoteStore = defineStore('note', () => {
 			status: body.status ?? previous.status,
 			updatedAt: new Date(),
 		}
-		notes.value[index] = next
+		notes.value = notes.value.map((note) => (note.id === id ? next : note))
 
 		enqueueFor(next, 'update', body.tagNames)
 		const rejected = await flush()
@@ -587,7 +609,7 @@ export const useNoteStore = defineStore('note', () => {
 		const index = indexOf(id)
 		const previous = notes.value[index]
 		if (!previous) return
-		notes.value.splice(index, 1)
+		notes.value = notes.value.filter((note) => note.id !== id)
 		enqueueFor({ ...previous, status: noteStatus.archived, updatedAt: new Date() }, 'update')
 		void flush()
 	}
@@ -603,9 +625,22 @@ export const useNoteStore = defineStore('note', () => {
 		return unsyncedIds.value.has(id)
 	}
 
+	function hydrate(data: ListNotesResponse) {
+		mergeIncoming(data.items)
+		total.value = data.total
+		loaded.value = true
+		hydratedKey.value = session.value.data?.user?.id ?? 'anonymous'
+		nextCursor.value = data.nextCursor
+		paginationDone.value = data.nextCursor === null
+	}
+
 	function start() {
 		if (import.meta.server || started) return
 		started = true
+		onMounted(() => {
+			cacheReady = true
+			mergeIncoming(notesCache.value)
+		})
 		useEventListener(window, 'online', () => void flush())
 	}
 
@@ -614,13 +649,17 @@ export const useNoteStore = defineStore('note', () => {
 		visibleNotes,
 		explicitFilter,
 		activeFilter,
+		inboxScope,
 		inbox,
+		pageSize: PAGE_SIZE,
 		pending,
 		loaded,
 		total,
+		hydratedKey,
 		syncing,
 		resetFilter,
 		removeTagFromFilter,
+		hydrate,
 		loadMore,
 		start,
 		flush,

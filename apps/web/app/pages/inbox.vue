@@ -2,7 +2,8 @@
 import type { NavigationMenuItem } from '@nuxt/ui'
 import type { LocationQueryRaw } from 'vue-router'
 import { noteInbox } from '#shared/types/note'
-import type { NoteInbox } from '#shared/types/note'
+import type { ListNotesResponse, NoteInbox } from '#shared/types/note'
+import { noteQueryFromFilter } from '~/utils/note-query'
 
 definePageMeta({ layout: false })
 
@@ -10,6 +11,7 @@ const route = useRoute()
 const router = useRouter()
 const noteStore = useNoteStore()
 const { visibleNotes } = storeToRefs(noteStore)
+const viewStore = useViewStore()
 const appConfig = useAppConfig()
 
 const noteList = useTemplateRef<{ scrollToIndex: (index: number) => void }>('noteList')
@@ -64,6 +66,20 @@ watch(
 		if (isInboxTab(value) && value !== inbox.value) inbox.value = value
 	},
 )
+
+const session = useAuthSession()
+const requestFetch = useRequestFetch()
+const { data: initialNotes } = await useAsyncData(`inbox:${route.fullPath}`, async () => {
+	if (import.meta.client || !session.value.data?.user) return null
+	return requestFetch<ListNotesResponse>('/api/notes', {
+		query: {
+			limit: noteStore.pageSize,
+			sort: viewStore.noteSort,
+			...noteQueryFromFilter(noteStore.inboxScope),
+		},
+	}).catch(() => null)
+})
+if (initialNotes.value) noteStore.hydrate(initialNotes.value)
 </script>
 
 <template>

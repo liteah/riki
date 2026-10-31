@@ -11,7 +11,7 @@ const { t } = useI18n()
 const toast = useToast()
 const authClient = useAuth()
 
-const session = authClient.useSession()
+const session = useAuthSession()
 const user = computed(() => session.value.data?.user ?? null)
 
 const nameLabel = t('auth.name')
