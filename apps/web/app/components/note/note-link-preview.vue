@@ -10,10 +10,9 @@ import {
 const props = withDefaults(
 	defineProps<{
 		preview: LinkPreview
-		variant?: 'landscape' | 'portrait'
 		flush?: boolean
 	}>(),
-	{ variant: 'landscape', flush: false },
+	{ flush: false },
 )
 
 const appConfig = useAppConfig()
@@ -52,14 +51,6 @@ const favicon = computed(() => {
 	return undefined
 })
 
-const hasPortraitCover = computed(() => {
-	const { imageWidth, imageHeight } = props.preview
-	if (props.variant !== 'portrait' || !image.value || !imageWidth || !imageHeight) return false
-	return imageWidth >= 600 && imageHeight >= 300 && imageWidth / imageHeight >= 1.5
-})
-
-const effectiveVariant = computed(() => (hasPortraitCover.value ? 'portrait' : 'landscape'))
-
 const siteLabel = computed(
 	() =>
 		linkPreviewMetaLabel(props.preview.type, props.preview.meta) ??
@@ -68,21 +59,17 @@ const siteLabel = computed(
 )
 
 const card = tv({
-	base: 'overflow-hidden transition-colors',
+	base: 'flex h-24 overflow-hidden rounded-lg bg-default transition-colors',
 	variants: {
 		flush: {
 			true: '',
 			false: 'mt-2',
 		},
-		variant: {
-			landscape: 'flex h-24 rounded-lg bg-default',
-			portrait: 'flex flex-col rounded-xl bg-default',
-		},
 	},
-	defaultVariants: { flush: false, variant: 'landscape' },
+	defaultVariants: { flush: false },
 })
 
-const landscapeMedia = tv({
+const media = tv({
 	base: 'h-full shrink-0 overflow-hidden bg-muted',
 	variants: {
 		type: {
@@ -97,32 +84,6 @@ const landscapeMedia = tv({
 			github: 'aspect-2/1',
 		},
 	},
-})
-
-const portraitMedia = tv({
-	base: 'aspect-video w-full shrink-0 overflow-hidden bg-muted',
-})
-
-const title = tv({
-	base: 'leading-snug font-medium text-default',
-	variants: {
-		variant: {
-			landscape: 'line-clamp-2 text-sm',
-			portrait: 'line-clamp-3 text-base',
-		},
-	},
-	defaultVariants: { variant: 'landscape' },
-})
-
-const description = tv({
-	base: 'text-xs text-muted',
-	variants: {
-		variant: {
-			landscape: 'line-clamp-1',
-			portrait: 'line-clamp-2',
-		},
-	},
-	defaultVariants: { variant: 'landscape' },
 })
 
 watch(
@@ -140,21 +101,10 @@ watch(
 		target="_blank"
 		rel="noopener noreferrer"
 		:data-type="preview.type"
-		:data-variant="effectiveVariant"
-		:class="card({ flush, variant: effectiveVariant })"
+		:class="card({ flush })"
 		@click.stop
 	>
-		<div v-if="hasPortraitCover" :class="portraitMedia()">
-			<img
-				:src="image"
-				:alt="preview.imageAlt ?? ''"
-				class="size-full object-cover"
-				loading="lazy"
-				referrerpolicy="no-referrer"
-				@error="imageFailed = true"
-			/>
-		</div>
-		<div v-else-if="image" :class="landscapeMedia({ type: preview.type })">
+		<div v-if="image" :class="media({ type: preview.type })">
 			<img
 				:src="image"
 				:alt="preview.imageAlt ?? ''"
@@ -183,10 +133,10 @@ watch(
 					aria-hidden="true"
 				/>
 			</div>
-			<div :class="title({ variant: effectiveVariant })">
+			<div class="line-clamp-2 text-sm leading-snug font-medium text-default">
 				{{ preview.title }}
 			</div>
-			<div v-if="preview.description" :class="description({ variant: effectiveVariant })">
+			<div v-if="preview.description" class="line-clamp-1 text-xs text-muted">
 				{{ preview.description }}
 			</div>
 		</div>

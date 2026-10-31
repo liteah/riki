@@ -185,8 +185,6 @@
 			"noteBrowsingAndEditor": "笔记浏览与编辑器",
 			"linkPreview": "链接预览",
 			"linkPreviewDescription": "可用时将显示链接的标题、描述及封面",
-			"linkPreviewLandscape": "横向卡片",
-			"linkPreviewPortrait": "竖向卡片",
 			"linkPreviewHover": "悬停预览",
 			"linkPreviewHoverDescription": "当有链接或引用笔记时悬停将显示预览",
 			"format": "格式",

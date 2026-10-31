@@ -5,12 +5,6 @@ const settingsStore = useSettingsStore()
 const { state } = storeToRefs(settingsStore)
 
 const appConfig = useAppConfig()
-
-const linkPreviewModeItems = computed(() => [
-	{ code: 'never' as const, name: $t('common.never') },
-	{ code: 'landscape' as const, name: $t('settings.preferences.linkPreviewLandscape') },
-	{ code: 'portrait' as const, name: $t('settings.preferences.linkPreviewPortrait') },
-])
 </script>
 
 <template>
@@ -33,13 +27,7 @@ const linkPreviewModeItems = computed(() => [
 			:description="$t('settings.preferences.linkPreviewDescription')"
 			:icon="appConfig.ui.icons.link"
 		>
-			<USelectMenu
-				v-model="state.linkPreviewMode"
-				:items="linkPreviewModeItems"
-				label-key="name"
-				value-key="code"
-				:search-input="false"
-			/>
+			<USwitch v-model="state.linkPreviewEnabled" />
 		</SettingsItem>
 		<SettingsItem
 			:label="$t('settings.preferences.linkPreviewHover')"

@@ -185,8 +185,6 @@
 			"noteBrowsingAndEditor": "筆記瀏覽與編輯器",
 			"linkPreview": "連結預覽",
 			"linkPreviewDescription": "可用時將顯示連結的標題、描述及封面",
-			"linkPreviewLandscape": "橫向卡片",
-			"linkPreviewPortrait": "縱向卡片",
 			"linkPreviewHover": "懸停預覽",
 			"linkPreviewHoverDescription": "當有連結或引用筆記時懸停將顯示預覽",
 			"format": "格式",

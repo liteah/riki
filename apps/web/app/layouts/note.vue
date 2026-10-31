@@ -20,7 +20,9 @@ defineProps<{
 					<slot name="header-actions" />
 				</template>
 			</LayoutPageHeader>
-			<slot />
+			<div class="min-h-0 w-full flex-1">
+				<slot />
+			</div>
 			<div class="absolute bottom-4 left-1/2 z-50 -translate-x-1/2 sm:hidden">
 				<NoteNewButton />
 			</div>

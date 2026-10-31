@@ -26,7 +26,7 @@ const showPreview = computed(
 	() =>
 		!suppressedMode.value &&
 		settings.value.linkPreviewHover &&
-		settings.value.linkPreviewMode !== 'never' &&
+		settings.value.linkPreviewEnabled &&
 		canPreview.value,
 )
 const linkPreview = computed<LinkPreview | null>(() => {

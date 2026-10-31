@@ -12,8 +12,6 @@ export const linkPreviewTypes = [
 
 export type LinkPreviewType = (typeof linkPreviewTypes)[number]
 
-export type LinkPreviewMode = 'never' | 'landscape' | 'portrait'
-
 export interface LinkPreviewSource {
 	url: string
 	label?: string

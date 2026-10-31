@@ -185,8 +185,6 @@
 			"noteBrowsingAndEditor": "Note browsing and editor",
 			"linkPreview": "Link previews",
 			"linkPreviewDescription": "Shows the link's title, description, and cover when available.",
-			"linkPreviewLandscape": "Landscape",
-			"linkPreviewPortrait": "Portrait",
 			"linkPreviewHover": "Hover preview",
 			"linkPreviewHoverDescription": "Shows a preview when hovering links or referenced notes.",
 			"format": "Format",
