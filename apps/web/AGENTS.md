@@ -62,6 +62,14 @@ When a task touches a library below, consult its official documentation at the p
 - Hydration errors are usually a branch or `useId` order mismatch, not bad data. Check signed-in and signed-out SSR HTML; the same session branch and note count must produce the same component order. `console.log` reports the first divergent node.
 - Verify with `pnpm --filter @riki/web typecheck`, `pnpm lint`, and `oxfmt` on changed files. Smoke-test signed-in `/` and `/inbox` and signed-out `/` over HTTP. Browser hydration warnings require a browser; never claim them fixed from SSR HTML alone.
 
+## Loading states
+
+- `NoteList` is the only list renderer; `NoteListSkeleton` is its loading state. Pages wrap `NoteList` in `<Suspense>` and render `NoteListSkeleton` in the fallback; do not extract a feed/loader component around the list.
+- `NoteList` takes an optional `ready` promise and awaits it at the top of `script setup`, so the page's Suspense fallback owns the initial client load. Pages pass `useNoteListReady()`, which is undefined on the server or when the list is already loaded with no pending request, and otherwise resolves when `noteStore.pending` becomes false; it must not start a second request while one is pending.
+- The skeleton must reuse the note card shell: `rounded-xl bg-muted p-1 dark:bg-muted/50`, inner `rounded-lg bg-default p-2`, the same column widths, and the list's `size-full`/`p-2` geometry. Never replace the list with a bare block or drop its padding and scrolling.
+- `loaded` means a server/fetch page has succeeded, not that cached rows exist. Render the skeleton while `loaded` is false even when local cache already has rows; do not gate it on `notes.length`.
+- NuxtPage already owns a page Suspense. A page-level `await useAsyncData` blocks before the page template, so a layout-level Suspense around the slot cannot show its fallback; keep the boundary inside the page around `NoteList`. Suspense fallback is not SSR-rendered, so signed-out SSR still relies on `loaded` + `NoteListSkeleton`.
+
 ## Cloudflare
 
 - D1 hard limits: **50 queries per Worker invocation** and **100 bound parameters per query** on the free plan (1,000 queries on paid). Free tier also caps 5M rows read and 100k rows written per day, and since 2026-09-01 exceeding the daily limits makes queries fail outright.
@@ -103,6 +111,7 @@ When a task touches a library below, consult its official documentation at the p
 ## Link previews
 
 - Link URLs stay in the note content; preview metadata is a cache, never a second source of truth. Re-derive links from stored content on every write and never trust a client-supplied preview URL.
+- On update, compare the previous and next link sources. Reuse previews for unchanged links, fetch only newly added links and links whose URL or label changed, and drop removed links. Do not retry an unchanged link whose preview is missing.
 - Preserve the raw `og:type` namespace (`music.album`, `video.movie`) and derive the base presentation type separately. Do not add an exhaustive subtype map.
 - A link opts into a bottom card with the Comark `preview` attribute: `[label](url){preview}`; `{preview=false}` opts out of the automatic single-link card. Without it, cards appear only for a note with exactly one link and no title; multiple links require explicit `preview`.
 - A carded link is not also rendered as a link at its original position; labeled links keep plain text, bare URLs disappear.

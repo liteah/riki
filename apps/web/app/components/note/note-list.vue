@@ -11,6 +11,7 @@ const props = withDefaults(
 		showActions?: boolean
 		actionsMenu?: boolean
 		columns?: NoteColumnMode
+		ready?: Promise<unknown>
 	}>(),
 	{ columns: 'auto' },
 )
@@ -87,11 +88,15 @@ onMounted(() => {
 })
 
 defineExpose({ scrollToTop, scrollToIndex })
+
+// Makes the component suspend until the page's initial load settles.
+if (props.ready) await props.ready
 </script>
 
 <template>
+	<NoteListSkeleton v-if="!loaded" :columns="columns" />
 	<UScrollArea
-		v-if="notes.length"
+		v-else-if="notes.length"
 		ref="scrollArea"
 		v-slot="{ item }"
 		:items="notes"
@@ -108,7 +113,7 @@ defineExpose({ scrollToTop, scrollToIndex })
 			@select="emit('select', $event)"
 		/>
 	</UScrollArea>
-	<div v-else-if="loaded" class="flex min-h-0 flex-1 items-center justify-center p-6">
+	<div v-else class="flex min-h-0 flex-1 items-center justify-center p-6">
 		<slot name="empty" />
 	</div>
 </template>

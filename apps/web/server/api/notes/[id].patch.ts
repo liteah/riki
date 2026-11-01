@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
 
 	const linkPreviews =
 		body.content !== undefined && body.content !== current.content
-			? await resolveNoteLinkPreviews(body.content, current.linkPreviews ?? {})
+			? await resolveNoteLinkPreviews(body.content, current.linkPreviews ?? {}, current.content)
 			: undefined
 
 	const [updated] = await db

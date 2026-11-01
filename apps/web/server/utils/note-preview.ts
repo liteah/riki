@@ -9,16 +9,31 @@ const previewConcurrency = 4
 export async function resolveNoteLinkPreviews(
 	content: string,
 	existing: Record<string, LinkPreview> = {},
+	previousContent?: string,
 ): Promise<Record<string, LinkPreview>> {
-	const document = await parseMarkdown(content).catch(() => null)
+	const [document, previousDocument] = await Promise.all([
+		parseMarkdown(content).catch(() => null),
+		previousContent === undefined ? null : parseMarkdown(previousContent).catch(() => null),
+	])
 	if (!document) return {}
+	const previousSources =
+		previousDocument === null
+			? null
+			: new Map(planNoteContent(previousDocument).sources.map((source) => [source.url, source]))
 	const previews: Record<string, LinkPreview> = {}
 	const missing: string[] = []
 	for (const source of planNoteContent(document).sources) {
 		if (isLinkPreviewUrlBlocked(source.url)) continue
+		const previous = previousSources?.get(source.url)
+		const changed = previous !== undefined && previous.label !== source.label
+		const shouldFetch = previousSources === null || !previous || changed
 		const preview = existing[source.url]
-		if (preview) previews[source.url] = preview
-		else missing.push(source.url)
+		// Reuse unchanged metadata; only a new URL or changed link label needs a fetch.
+		if (preview && !changed) previews[source.url] = preview
+		else if (shouldFetch) {
+			if (preview) previews[source.url] = preview
+			missing.push(source.url)
+		}
 	}
 	let next = 0
 	async function worker() {

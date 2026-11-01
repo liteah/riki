@@ -23,6 +23,7 @@ const { selectedId } = useNoteListShortcuts(
 )
 
 noteStore.start()
+const notesReady = useNoteListReady()
 
 function isInboxTab(value: unknown): value is NoteInbox {
 	return typeof value === 'string' && (Object.values(noteInbox) as string[]).includes(value)
@@ -93,19 +94,25 @@ if (initialNotes.value) noteStore.hydrate(initialNotes.value)
 				:items="tabs"
 			/>
 		</template>
-		<NoteList
-			ref="noteList"
-			:notes="visibleNotes"
-			:selected-id="selectedId"
-			:loaded="noteStore.loaded"
-			columns="single"
-			show-actions
-			@select="openComposer"
-			@load-more="noteStore.loadMore()"
-		>
-			<template #empty>
-				<UEmpty variant="naked" :icon="appConfig.ui.icons.note" :title="$t('inbox.emptyTitle')" />
+		<Suspense>
+			<NoteList
+				ref="noteList"
+				:notes="visibleNotes"
+				:selected-id="selectedId"
+				:loaded="noteStore.loaded"
+				columns="single"
+				:ready="notesReady"
+				show-actions
+				@select="openComposer"
+				@load-more="noteStore.loadMore()"
+			>
+				<template #empty>
+					<UEmpty variant="naked" :icon="appConfig.ui.icons.note" :title="$t('inbox.emptyTitle')" />
+				</template>
+			</NoteList>
+			<template #fallback>
+				<NoteListSkeleton columns="single" />
 			</template>
-		</NoteList>
+		</Suspense>
 	</NuxtLayout>
 </template>

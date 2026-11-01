@@ -57,6 +57,7 @@ const { selectedId } = useNoteListShortcuts(
 )
 
 noteStore.start()
+const notesReady = useNoteListReady()
 
 watch(
 	() => visibleNotes.value[0]?.id,
@@ -69,20 +70,26 @@ watch(
 		<template #header-actions>
 			<NoteLibraryMenu />
 		</template>
-		<NoteList
-			ref="noteList"
-			:notes="visibleNotes"
-			:selected-id="selectedId"
-			:loaded="noteStore.loaded"
-			:columns="noteColumnMode"
-			show-actions
-			actions-menu
-			@select="openComposer"
-			@load-more="noteStore.loadMore()"
-		>
-			<template #empty>
-				<NoteEmptyState />
+		<Suspense>
+			<NoteList
+				ref="noteList"
+				:notes="visibleNotes"
+				:selected-id="selectedId"
+				:loaded="noteStore.loaded"
+				:columns="noteColumnMode"
+				:ready="notesReady"
+				show-actions
+				actions-menu
+				@select="openComposer"
+				@load-more="noteStore.loadMore()"
+			>
+				<template #empty>
+					<NoteEmptyState />
+				</template>
+			</NoteList>
+			<template #fallback>
+				<NoteListSkeleton :columns="noteColumnMode" />
 			</template>
-		</NoteList>
+		</Suspense>
 	</NuxtLayout>
 </template>
