@@ -14,15 +14,16 @@ const hidden = computed(() => Boolean(source.value && props.suppressed?.has(sour
 </script>
 
 <template>
-	<img
-		v-if="source && !hidden"
-		:src="source"
-		:alt="alt ?? ''"
-		:width="width"
-		:height="height"
-		class="max-w-full rounded-lg"
-		loading="lazy"
-		decoding="async"
-		referrerpolicy="no-referrer"
-	/>
+	<span v-if="source && !hidden" class="inline-block max-w-full" @click.stop>
+		<ProseImg
+			:src="source"
+			:alt="alt ?? ''"
+			:width="width"
+			:height="height"
+			class="w-auto max-w-full rounded-lg"
+			loading="lazy"
+			decoding="async"
+			referrerpolicy="no-referrer"
+		/>
+	</span>
 </template>

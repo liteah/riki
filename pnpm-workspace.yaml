@@ -49,6 +49,7 @@ catalogs:
     'markdown-exit': 1.1.0-beta.2
 
   util:
+    aws4fetch: ^1.0.20
     nanoid: ^6.0.1
     zod: ^4.6.5
 

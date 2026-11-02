@@ -22,6 +22,7 @@ When a task touches a library below, consult its official documentation at the p
 - Variant classes are computed with `tv` from `tailwind-variants`; never assemble variant class strings in a computed ref.
 - Use Tailwind `aspect-*` utilities for aspect ratios; never set `aspectRatio` inline.
 - Modals only via `useOverlay` (`overlay.create(LazyXxxModal)` + `.open(props)`); dialog components expose a `close` emit. Never mount modal tags statically.
+- A dropdown item that opens a popover must call `event.preventDefault()` in `onSelect`; otherwise the menu closes, restores focus, and immediately dismisses the popover.
 - Should follow optimistic UI principles.
 
 ## Client state and sync
@@ -125,4 +126,4 @@ When a task touches a library below, consult its official documentation at the p
 - Tiptap `UEditor` (single modal instance) is the only writer; Comark `<Markdown>` is the reader for lists. Never mount editors in lists - ProseMirror instances are heavy, static VNodes are cheap and SSR-friendly.
 - Stored note content is strict MDC. All editor/storage translation lives in `app/utils/tiptap-tag.ts` and nowhere else. Prefer one-time data migrations over permanent runtime compat shims.
 - Never hand-write MDC parsing. Register or use a Comark MDC plugin/component instead.
-- Markdown images are ordinary `img` nodes. When the thumbnail gallery is enabled, cards suppress inline images and render them at the card bottom; detail keeps inline images. There is no upload path yet.
+- Markdown images are ordinary `img` nodes. When the thumbnail gallery is enabled, cards suppress inline images and render them at the card bottom; detail keeps inline images. Uploads go directly to S3-compatible object storage (Cloudflare R2) through a server-signed PUT URL; never store image bytes locally or as data URLs. The bucket must allow PUT from the app origin.

@@ -22,18 +22,19 @@ function tileClass(index: number) {
 				:key="image.src"
 				class="relative overflow-hidden"
 				:class="tileClass(index)"
+				@click.stop
 			>
-				<img
+				<ProseImg
 					:src="image.src"
 					:alt="image.alt ?? ''"
-					class="size-full object-cover"
+					class="size-full rounded-none object-cover"
 					loading="lazy"
 					decoding="async"
 					referrerpolicy="no-referrer"
 				/>
 				<div
 					v-if="index === 3 && hiddenCount"
-					class="absolute inset-0 flex items-center justify-center bg-black/55 text-xl font-semibold text-white"
+					class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/55 text-xl font-semibold text-white"
 				>
 					+{{ hiddenCount }}
 				</div>

@@ -18,6 +18,16 @@ export default defineNuxtConfig({
 		'/settings/**': { appLayout: 'settings' },
 	},
 	ssr: true,
+	runtimeConfig: {
+		s3: {
+			endpoint: '',
+			region: 'auto',
+			bucket: '',
+			accessKeyId: '',
+			secretAccessKey: '',
+			publicUrl: '',
+		},
+	},
 	vite: {
 		clearScreen: false,
 		envPrefix: ['VITE_', 'TAURI_'],

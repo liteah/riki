@@ -58,6 +58,10 @@ const linkPopoverRef = useTemplateRef<{
 	openAt: (position?: number, href?: string) => void
 	openAtSelection: () => void
 }>('linkPopoverRef')
+const imagePopoverRef = useTemplateRef<{
+	openAt: (position?: number) => void
+	openAtSelection: () => void
+}>('imagePopoverRef')
 
 const isEmpty = computed(() => !content.value.trim())
 
@@ -69,10 +73,20 @@ const toolbarItems: EditorToolbarItem[] = [
 	{ kind: 'orderedList', icon: appConfig.ui.icons.orderedList },
 	{ kind: 'codeBlock', icon: appConfig.ui.icons.code },
 	{ kind: 'link', slot: 'link' },
+	{ kind: 'image', slot: 'image' },
 ]
 
 function openLinkPopover() {
 	linkPopoverRef.value?.openAtSelection()
+}
+
+function openImagePopover() {
+	imagePopoverRef.value?.openAtSelection()
+}
+
+function openImageFromMenu(event: Event) {
+	event.preventDefault()
+	openImagePopover()
 }
 
 const addItems = computed<DropdownMenuItem[][]>(() => [
@@ -80,6 +94,7 @@ const addItems = computed<DropdownMenuItem[][]>(() => [
 		{
 			label: t('note.attachImage'),
 			icon: appConfig.ui.icons.image,
+			onSelect: openImageFromMenu,
 		},
 		{
 			label: t('note.attachAudio'),
@@ -192,8 +207,25 @@ async function handleSend() {
 							/>
 						</UTooltip>
 					</template>
+					<template #image="{ item, isActive, isDisabled }">
+						<UTooltip :text="t('note.attachImage')" :disabled="isDisabled(item)">
+							<UButton
+								:icon="appConfig.ui.icons.image"
+								:aria-label="t('note.attachImage')"
+								color="neutral"
+								active-color="primary"
+								variant="ghost"
+								active-variant="soft"
+								size="sm"
+								:active="isActive(item)"
+								:disabled="isDisabled(item)"
+								@click="openImagePopover"
+							/>
+						</UTooltip>
+					</template>
 				</UEditorToolbar>
 				<NoteLinkPopover v-if="editor" ref="linkPopoverRef" :editor="editor" />
+				<NoteImagePopover v-if="editor" ref="imagePopoverRef" :editor="editor" />
 				<NoteTagMenu :editor="editor" />
 			</UEditor>
 		</template>
