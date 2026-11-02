@@ -5,6 +5,7 @@ Monorepo-wide rules. App-level rules live in `apps/web/AGENTS.md`.
 ## Package management
 
 - pnpm workspaces. Never npm/yarn.
+- Every dependency version lives in a `pnpm-workspace.yaml` catalog; `package.json` references `catalog:<name>` and never hardcodes a version. Add a new package to the matching catalog first.
 - Declare every directly-imported package in the importing package's `package.json`, even if it is hoisted through another dependency (pnpm is strict; transitive imports break on upgrade). Align the version range with the provider package so the store keeps a single copy.
 
 ## Checks

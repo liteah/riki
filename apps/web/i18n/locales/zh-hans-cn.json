@@ -187,6 +187,8 @@
 			"linkPreviewDescription": "可用时将显示链接的标题、描述及封面",
 			"linkPreviewHover": "悬停预览",
 			"linkPreviewHoverDescription": "当有链接或引用笔记时悬停将显示预览",
+			"thumbnailGallery": "缩略图集",
+			"thumbnailGalleryDescription": "在笔记卡片底部显示正文图片的缩略图",
 			"format": "格式",
 			"timeZone": "时区",
 			"timeZoneSearchPlaceholder": "搜索时区…",

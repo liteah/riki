@@ -5,22 +5,22 @@ import {
 	isLinkPreviewUrlBlocked,
 	parseHttpUrl,
 } from '#shared/utils/link-preview'
-import { noteLinkPreviewsKey } from '~/utils/link-preview-context'
-import { suppressedLinkPreviewsKey } from '~/utils/link-preview-suppression'
+import type { SuppressedLinkMode } from '~/utils/note-render-context'
+import { noteLinkPreviewsKey } from '~/utils/note-render-context'
 
 const props = defineProps<{
 	href?: string
 	preview?: boolean | string
+	suppressedLinks?: ReadonlyMap<string, SuppressedLinkMode>
 }>()
 
 const settingsStore = useSettingsStore()
 const { state: settings } = storeToRefs(settingsStore)
 const linkPreviews = inject(noteLinkPreviewsKey, null)
-const suppressedLinks = inject(suppressedLinkPreviewsKey, null)
 
 const open = ref(false)
 const linkKey = computed(() => (props.href ? (parseHttpUrl(props.href)?.href ?? props.href) : ''))
-const suppressedMode = computed(() => suppressedLinks?.value.get(linkKey.value))
+const suppressedMode = computed(() => props.suppressedLinks?.get(linkKey.value))
 const canPreview = computed(() => Boolean(props.href && !isLinkPreviewUrlBlocked(props.href)))
 const showPreview = computed(
 	() =>

@@ -1,12 +1,51 @@
 import { textContent, visit } from '@comark/nuxt/utils'
+import { MarkdownExit } from 'markdown-exit'
+import type { Token } from 'markdown-exit'
 import type { LinkPreviewSource } from '../types/link-preview'
 import { cleanText, parseHttpUrl } from './link-preview'
 
 type MarkdownDocument = Parameters<typeof visit>[0]
 
+export interface NoteImageSource {
+	src: string
+	alt?: string
+}
+
 export interface NoteContentPlan {
 	sources: LinkPreviewSource[]
 	hasTitle: boolean
+}
+
+// Comark's post plugin runs after the parent render; parse images eagerly so SSR gallery and inline suppression agree.
+const imageParser = new MarkdownExit()
+
+export function normalizeNoteImageSource(value: string): string | null {
+	const trimmed = value.trim()
+	if (!trimmed) return null
+	if (trimmed.startsWith('/') && !trimmed.startsWith('//')) return trimmed
+	if (trimmed.startsWith('./') || trimmed.startsWith('../')) return trimmed
+	const url = parseHttpUrl(trimmed.startsWith('//') ? `https:${trimmed}` : trimmed)
+	return url?.href ?? null
+}
+
+export function planNoteImages(markdown: string): NoteImageSource[] {
+	const images = new Map<string, NoteImageSource>()
+	const collect = (tokens: Token[]) => {
+		for (const token of tokens) {
+			if (token.type === 'image') {
+				const src = token.attrGet('src')
+				if (src) {
+					const source = normalizeNoteImageSource(src)
+					if (source && !images.has(source)) {
+						images.set(source, { src: source, alt: cleanText(token.content, 300) })
+					}
+				}
+			}
+			if (token.children?.length) collect(token.children)
+		}
+	}
+	collect(imageParser.parse(markdown))
+	return [...images.values()]
 }
 
 function previewAttribute(attributes: Record<string, unknown>): boolean | undefined {

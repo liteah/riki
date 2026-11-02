@@ -1,5 +1,32 @@
+import { nodeInputRule, nodePasteRule } from '@tiptap/core'
+import Image from '@tiptap/extension-image'
 import Mention from '@tiptap/extension-mention'
 import { tagChip } from '~/theme/ui'
+
+// Tiptap's image input rule rejects empty alt text, so `![](url)` never converts.
+const imageSyntax = String.raw`!\[([^\]]*)\]\((<[^>\n]+>|(?:[^\s()]|\([^\s()]*\))+)(?:\s+(?:"([^"]*)"|'([^']*)'))?\)`
+const imageInputPattern = new RegExp(`(?<!\\S)(${imageSyntax})$`)
+const imagePastePattern = new RegExp(`(?<!\\S)(${imageSyntax})`, 'g')
+
+function imageAttributes(match: RegExpMatchArray) {
+	const src = match[3]?.replace(/^<|>$/g, '')
+	if (!src) return {}
+	const title = match[4] !== undefined ? match[4] : (match[5] ?? null)
+	return { src, alt: match[2] || null, title }
+}
+
+export const markdownImage = Image.extend({
+	addInputRules() {
+		return [
+			nodeInputRule({ find: imageInputPattern, type: this.type, getAttributes: imageAttributes }),
+		]
+	},
+	addPasteRules() {
+		return [
+			nodePasteRule({ find: imagePastePattern, type: this.type, getAttributes: imageAttributes }),
+		]
+	},
+})
 
 const tagPattern = /^:tag\{label="((?:[^"\\]|\\.)*)"\}/
 const startPattern = /(?<!:):tag\{label="/

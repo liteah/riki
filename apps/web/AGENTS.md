@@ -125,3 +125,4 @@ When a task touches a library below, consult its official documentation at the p
 - Tiptap `UEditor` (single modal instance) is the only writer; Comark `<Markdown>` is the reader for lists. Never mount editors in lists - ProseMirror instances are heavy, static VNodes are cheap and SSR-friendly.
 - Stored note content is strict MDC. All editor/storage translation lives in `app/utils/tiptap-tag.ts` and nowhere else. Prefer one-time data migrations over permanent runtime compat shims.
 - Never hand-write MDC parsing. Register or use a Comark MDC plugin/component instead.
+- Markdown images are ordinary `img` nodes. When the thumbnail gallery is enabled, cards suppress inline images and render them at the card bottom; detail keeps inline images. There is no upload path yet.

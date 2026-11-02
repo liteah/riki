@@ -4,7 +4,7 @@ import { noteVisibility, noteVisibilityValues } from '#shared/types/note'
 import type { Note, NoteVisibility } from '#shared/types/note'
 import type { DropdownMenuItem, EditorToolbarItem } from '@nuxt/ui'
 import { noteVisibilityMeta } from '~/utils/note-visibility'
-import { tagMention } from '~/utils/tiptap-tag'
+import { markdownImage, tagMention } from '~/utils/tiptap-tag'
 
 const props = defineProps<{
 	note?: Note | null
@@ -164,8 +164,9 @@ async function handleSend() {
 				v-model="content"
 				content-type="markdown"
 				:placeholder="t('note.editorPlaceholder')"
+				:image="false"
 				:mention="false"
-				:extensions="[tagMention]"
+				:extensions="[markdownImage, tagMention]"
 				class="min-h-48 w-full"
 			>
 				<UEditorToolbar

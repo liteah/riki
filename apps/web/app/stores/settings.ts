@@ -13,6 +13,7 @@ export const useSettingsStore = defineStore(
 			timeFormat: 'relative' as TimeFormat,
 			linkPreviewEnabled: true,
 			linkPreviewHover: true,
+			thumbnailGalleryEnabled: true,
 		})
 
 		watch(
@@ -33,7 +34,7 @@ export const useSettingsStore = defineStore(
 	},
 	{
 		persist: {
-			pick: ['state.linkPreviewEnabled', 'state.linkPreviewHover'],
+			pick: ['state.linkPreviewEnabled', 'state.linkPreviewHover', 'state.thumbnailGalleryEnabled'],
 		},
 	},
 )

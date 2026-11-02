@@ -36,6 +36,13 @@ const appConfig = useAppConfig()
 		>
 			<USwitch v-model="state.linkPreviewHover" />
 		</SettingsItem>
+		<SettingsItem
+			:label="$t('settings.preferences.thumbnailGallery')"
+			:description="$t('settings.preferences.thumbnailGalleryDescription')"
+			:icon="appConfig.ui.icons.image"
+		>
+			<USwitch v-model="state.thumbnailGalleryEnabled" />
+		</SettingsItem>
 	</SettingsItemGroup>
 	<SettingsItemGroup :label="$t('settings.preferences.format')">
 		<SettingsItem :label="$t('settings.preferences.timeZone')" :icon="appConfig.ui.icons.timeZone">

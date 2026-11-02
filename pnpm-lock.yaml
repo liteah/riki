@@ -29,9 +29,18 @@ catalogs:
     '@comark/nuxt':
       specifier: 0.7.0
       version: 0.7.0
+    '@tiptap/core':
+      specifier: 3.31.3
+      version: 3.31.3
+    '@tiptap/extension-image':
+      specifier: 3.31.3
+      version: 3.31.3
     '@tiptap/extension-mention':
       specifier: 3.31.3
       version: 3.31.3
+    markdown-exit:
+      specifier: 1.1.0-beta.2
+      version: 1.1.0-beta.2
   nuxt:
     '@nuxt/ui':
       specifier: ^4.12.0
@@ -45,9 +54,6 @@ catalogs:
     nuxt:
       specifier: ^4.6.2
       version: 4.6.2
-    tailwind-variants:
-      specifier: ^3.3.1
-      version: 3.3.1
   tauri:
     '@tauri-apps/api':
       specifier: ^2.11.1
@@ -62,15 +68,19 @@ catalogs:
       specifier: ^5.0.2
       version: 5.0.2
   tooling:
-    '@iconify-json/ph':
-      specifier: ^1.2.2
-      version: 1.2.2
     typescript:
       specifier: ^6.0.0
       version: 6.0.3
     vue-tsc:
       specifier: ^3.1.0
       version: 3.3.13
+  ui:
+    '@iconify-json/ph':
+      specifier: ^1.2.2
+      version: 1.2.2
+    tailwind-variants:
+      specifier: ^3.3.1
+      version: 3.3.1
   util:
     nanoid:
       specifier: ^6.0.1
@@ -138,6 +148,12 @@ importers:
       '@tauri-store/pinia':
         specifier: catalog:tauri
         version: 5.0.2(@vue/devtools-api@8.2.1)(typescript@6.0.3)
+      '@tiptap/core':
+        specifier: catalog:editor
+        version: 3.31.3(@tiptap/pm@3.31.3)
+      '@tiptap/extension-image':
+        specifier: catalog:editor
+        version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))
       '@tiptap/extension-mention':
         specifier: catalog:editor
         version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3)(@tiptap/suggestion@3.29.2(@floating-ui/dom@1.8.0)(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3))
@@ -147,6 +163,9 @@ importers:
       drizzle-orm:
         specifier: catalog:db
         version: 1.0.0-rc.4(@libsql/client@0.18.0)(zod@4.6.5)
+      markdown-exit:
+        specifier: catalog:editor
+        version: 1.1.0-beta.2
       nanoid:
         specifier: catalog:util
         version: 6.0.1
@@ -157,7 +176,7 @@ importers:
         specifier: catalog:vue
         version: 4.7.1(@nuxt/kit@4.6.2(@nuxt/schema@4.6.2)(confbox@0.3.1)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.3)(mlly@1.8.2)(oxc-parser@0.141.0)(rolldown@1.2.15)(unplugin@3.4.0(esbuild@0.28.2)(rolldown@1.2.15)(rollup@4.63.5)(vite@8.3.5(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))))(@pinia/nuxt@1.0.3(@nuxt/schema@4.6.2)(confbox@0.3.1)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.3)(mlly@1.8.2)(oxc-parser@0.141.0)(pinia@4.1.0(@vue/devtools-api@8.2.1)(typescript@6.0.3)(vue@3.5.44(typescript@6.0.3)))(rolldown@1.2.15)(unplugin@3.4.0(esbuild@0.28.2)(rolldown@1.2.15)(rollup@4.63.5)(vite@8.3.5(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))))(pinia@4.1.0(@vue/devtools-api@8.2.1)(typescript@6.0.3)(vue@3.5.44(typescript@6.0.3)))
       tailwind-variants:
-        specifier: catalog:nuxt
+        specifier: catalog:ui
         version: 3.3.1(tailwind-merge@3.7.0)(tailwindcss@4.3.3)
       vue:
         specifier: catalog:vue
@@ -173,7 +192,7 @@ importers:
         specifier: catalog:editor
         version: 0.7.0(magicast@0.5.5)(nuxt@4.6.2(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7))(@libsql/client@0.18.0)(@oxc-project/types@0.155.0)(@types/node@26.6.2)(@vue/compiler-sfc@3.5.43)(acorn@8.18.0)(confbox@0.3.1)(db0@0.3.4(@libsql/client@0.18.0)(drizzle-orm@1.0.0-rc.4(@libsql/client@0.18.0)(zod@4.6.5)))(dotenv@17.4.2)(drizzle-orm@1.0.0-rc.4(@libsql/client@0.18.0)(zod@4.6.5))(esbuild@0.28.2)(eslint@10.11.0(jiti@2.7.0))(giget@3.3.1)(ioredis@5.11.1)(lightningcss@1.33.0)(mlly@1.8.2)(optionator@0.9.4)(oxc-parser@0.141.0)(oxlint@1.85.0)(pinia@4.1.0(@vue/devtools-api@8.2.1)(typescript@6.0.3)(vue@3.5.44(typescript@6.0.3)))(rolldown@1.2.15)(rollup-plugin-visualizer@7.1.1(rolldown@1.2.15)(rollup@4.63.5))(rollup@4.63.5)(srvx@1.0.7)(terser@5.51.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(vue-tsc@3.3.13(typescript@6.0.3))(yaml@2.9.1))(vue@3.5.44(typescript@6.0.3))
       '@iconify-json/ph':
-        specifier: catalog:tooling
+        specifier: catalog:ui
         version: 1.2.2
       '@nuxtjs/i18n':
         specifier: catalog:nuxt

@@ -187,6 +187,8 @@
 			"linkPreviewDescription": "可用時會顯示連結嘅標題、描述同封面",
 			"linkPreviewHover": "懸停預覽",
 			"linkPreviewHoverDescription": "有連結或引用筆記時，懸停會顯示預覽",
+			"thumbnailGallery": "縮略圖集",
+			"thumbnailGalleryDescription": "喺筆記卡片底部顯示正文圖片嘅縮圖",
 			"format": "格式",
 			"timeZone": "時區",
 			"timeZoneSearchPlaceholder": "搵時區…",

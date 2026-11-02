@@ -2,15 +2,16 @@
 import type { ContextMenuItem } from '@nuxt/ui'
 import { defineComarkPlugin } from '@comark/nuxt/parse'
 import { tv } from 'tailwind-variants'
-import { LazyDialogModal, LazyNoteSpaceFormModal, NoteLink, NoteTag } from '#components'
+import type { Slots } from 'vue'
+import { h } from 'vue'
+import { LazyDialogModal, LazyNoteSpaceFormModal, NoteImage, NoteLink, NoteTag } from '#components'
 import { noteStatus, noteVisibility } from '#shared/types/note'
 import type { LinkPreview, LinkPreviewSource } from '#shared/types/link-preview'
 import type { NoteStatus, NoteViewItem } from '#shared/types/note'
 import { createFallbackLinkPreview, isLinkPreviewUrlBlocked } from '#shared/utils/link-preview'
-import { planNoteContent } from '#shared/utils/note-content'
+import { planNoteContent, planNoteImages } from '#shared/utils/note-content'
 import type { NoteContentPlan } from '#shared/utils/note-content'
-import { noteLinkPreviewsKey } from '~/utils/link-preview-context'
-import { suppressedLinkPreviewsKey } from '~/utils/link-preview-suppression'
+import { noteLinkPreviewsKey } from '~/utils/note-render-context'
 import { eventToShortcut } from '~/utils/shortcuts'
 import type { NoteViewShortcutId } from '~/utils/shortcuts'
 
@@ -403,8 +404,6 @@ const dropdownItems = computed<ContextMenuItem[][]>(() =>
 	menuSpaceMode.value ? spaceMenu.items.value : menuItems.value,
 )
 
-const markdownComponents = { a: NoteLink, tag: NoteTag }
-
 const isUnsynced = computed(() => noteStore.isPending(props.note.id))
 const draftScope = computed(() => draftStore.scopeFor(props.note.id))
 const hasDraft = computed(
@@ -439,6 +438,11 @@ const linkSources = computed(() =>
 const linkPreviews = computed(() => props.note.linkPreviews ?? {})
 provide(noteLinkPreviewsKey, linkPreviews)
 
+const galleryImages = computed(() =>
+	settings.value.thumbnailGalleryEnabled && !props.detail ? planNoteImages(props.note.content) : [],
+)
+const suppressedImages = computed(() => new Set(galleryImages.value.map((image) => image.src)))
+
 function previewFor(source: LinkPreviewSource): LinkPreview {
 	return linkPreviews.value[source.url] ?? createFallbackLinkPreview(source.url, source.label)
 }
@@ -467,7 +471,14 @@ const suppressedLinks = computed(
 			]),
 		),
 )
-provide(suppressedLinkPreviewsKey, suppressedLinks)
+
+const markdownComponents = {
+	a: (props: Record<string, unknown>, { slots }: { slots: Slots }) =>
+		h(NoteLink, { ...props, suppressedLinks: suppressedLinks.value }, slots),
+	img: (props: Record<string, unknown>) =>
+		h(NoteImage, { ...props, suppressed: suppressedImages.value }),
+	tag: NoteTag,
+}
 
 const now = useState('notes-now', () => Date.now())
 const noteTime = computed(() =>
@@ -534,6 +545,9 @@ const showUpdatedAt = computed(() => props.note.updatedAt !== props.note.created
 					</div>
 				</div>
 			</article>
+			<div v-if="galleryImages.length" class="py-1">
+				<NoteImageGallery :images="galleryImages" />
+			</div>
 			<div v-if="cardPreviews.length" class="flex flex-col gap-2 py-1">
 				<NoteLinkPreview
 					v-for="item in cardPreviews"

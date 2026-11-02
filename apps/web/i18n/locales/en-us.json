@@ -187,6 +187,8 @@
 			"linkPreviewDescription": "Shows the link's title, description, and cover when available.",
 			"linkPreviewHover": "Hover preview",
 			"linkPreviewHoverDescription": "Shows a preview when hovering links or referenced notes.",
+			"thumbnailGallery": "Thumbnail gallery",
+			"thumbnailGalleryDescription": "Shows thumbnails of body images at the bottom of note cards.",
 			"format": "Format",
 			"timeZone": "Time zone",
 			"timeZoneSearchPlaceholder": "Search time zones...",
