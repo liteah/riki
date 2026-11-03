@@ -2,9 +2,14 @@
 import { LazyNoteSpaceFormModal } from '#components'
 import { noteVisibility, noteVisibilityValues } from '#shared/types/note'
 import type { Note, NoteVisibility } from '#shared/types/note'
-import type { DropdownMenuItem, EditorToolbarItem } from '@nuxt/ui'
+import type {
+	DropdownMenuItem,
+	EditorCustomHandlers,
+	EditorSuggestionMenuItem,
+	EditorToolbarItem,
+} from '@nuxt/ui'
 import { noteVisibilityMeta } from '~/utils/note-visibility'
-import { markdownImage, tagMention } from '~/utils/tiptap-tag'
+import { tagMention } from '~/utils/tiptap-tag'
 
 const props = defineProps<{
 	note?: Note | null
@@ -12,9 +17,15 @@ const props = defineProps<{
 
 const open = defineModel<boolean>('open', { default: false })
 
-const { t } = useI18n()
 const toast = useToast()
 const appConfig = useAppConfig()
+const appendToBody = () => document.body
+const headingLevels = [
+	{ level: 1, icon: appConfig.ui.icons.heading1, label: 'note.heading1' },
+	{ level: 2, icon: appConfig.ui.icons.heading2, label: 'note.heading2' },
+	{ level: 3, icon: appConfig.ui.icons.heading3, label: 'note.heading3' },
+	{ level: 4, icon: appConfig.ui.icons.heading4, label: 'note.heading4' },
+] as const
 const overlay = useOverlay()
 const noteStore = useNoteStore()
 const draftStore = useDraftStore()
@@ -65,8 +76,18 @@ const imagePopoverRef = useTemplateRef<{
 
 const isEmpty = computed(() => !content.value.trim())
 
-const toolbarItems: EditorToolbarItem[] = [
-	{ kind: 'heading', level: 1, icon: appConfig.ui.icons.heading },
+const toolbarItems = computed<EditorToolbarItem[]>(() => [
+	{
+		icon: appConfig.ui.icons.heading,
+		tooltip: { text: $t('note.headings') },
+		content: { align: 'start' },
+		items: headingLevels.map(({ level, icon, label }) => ({
+			kind: 'heading' as const,
+			level,
+			icon,
+			label: $t(label),
+		})),
+	},
 	{ kind: 'mark', mark: 'bold', icon: appConfig.ui.icons.bold },
 	{ kind: 'mark', mark: 'italic', icon: appConfig.ui.icons.italic },
 	{ kind: 'bulletList', icon: appConfig.ui.icons.bulletList },
@@ -74,7 +95,7 @@ const toolbarItems: EditorToolbarItem[] = [
 	{ kind: 'codeBlock', icon: appConfig.ui.icons.code },
 	{ kind: 'link', slot: 'link' },
 	{ kind: 'image', slot: 'image' },
-]
+])
 
 function openLinkPopover() {
 	linkPopoverRef.value?.openAtSelection()
@@ -89,19 +110,72 @@ function openImageFromMenu(event: Event) {
 	openImagePopover()
 }
 
+const editorHandlers = {
+	link: {
+		canExecute: () => true,
+		execute: (editor) => {
+			openLinkPopover()
+			return editor.chain()
+		},
+		isActive: (editor) => editor.isActive('link'),
+	},
+	image: {
+		canExecute: () => true,
+		execute: (editor) => {
+			openImagePopover()
+			return editor.chain()
+		},
+		isActive: (editor) => editor.isActive('image'),
+	},
+} satisfies EditorCustomHandlers
+
+const suggestionItems = computed<EditorSuggestionMenuItem[][]>(() => [
+	[
+		{ type: 'label', label: $t('note.text') },
+		{ kind: 'paragraph', label: $t('note.paragraph'), icon: appConfig.ui.icons.paragraph },
+		...headingLevels.map(({ level, icon, label }) => ({
+			kind: 'heading' as const,
+			level,
+			icon,
+			label: $t(label),
+		})),
+	],
+	[
+		{ type: 'label', label: $t('note.lists') },
+		{
+			kind: 'bulletList',
+			label: $t('note.bulletList'),
+			icon: appConfig.ui.icons.bulletList,
+		},
+		{
+			kind: 'orderedList',
+			label: $t('note.orderedList'),
+			icon: appConfig.ui.icons.orderedList,
+		},
+	],
+	[
+		{ type: 'label', label: $t('note.insert') },
+		{ kind: 'blockquote', label: $t('note.blockquote'), icon: appConfig.ui.icons.quote },
+		{ kind: 'codeBlock', label: $t('note.codeBlock'), icon: appConfig.ui.icons.code },
+		{ kind: 'horizontalRule', label: $t('note.divider'), icon: appConfig.ui.icons.minus },
+		{ kind: 'link', label: $t('note.link'), icon: appConfig.ui.icons.link },
+		{ kind: 'image', label: $t('note.attachImage'), icon: appConfig.ui.icons.image },
+	],
+])
+
 const addItems = computed<DropdownMenuItem[][]>(() => [
 	[
 		{
-			label: t('note.attachImage'),
+			label: $t('note.attachImage'),
 			icon: appConfig.ui.icons.image,
 			onSelect: openImageFromMenu,
 		},
 		{
-			label: t('note.attachAudio'),
+			label: $t('note.attachAudio'),
 			icon: appConfig.ui.icons.waveform,
 		},
 		{
-			label: t('note.attachLocation'),
+			label: $t('note.attachLocation'),
 			icon: appConfig.ui.icons.mapPin,
 		},
 	],
@@ -112,7 +186,7 @@ const visibilityItems = computed<DropdownMenuItem[][]>(() => [
 		const option = noteVisibilityMeta[value]
 		return {
 			type: 'checkbox' as const,
-			label: t(option.label),
+			label: $t(option.label),
 			icon: appConfig.ui.icons[option.icon],
 			checked: visibility.value === value,
 			onSelect: () => {
@@ -125,7 +199,7 @@ const visibilityItems = computed<DropdownMenuItem[][]>(() => [
 const currentVisibility = computed(() => noteVisibilityMeta[visibility.value])
 
 const currentSpace = computed(() => spaceStore.spaces.find((space) => space.id === spaceId.value))
-const spaceLabel = computed(() => currentSpace.value?.name ?? t('note.inbox'))
+const spaceLabel = computed(() => currentSpace.value?.name ?? $t('note.inbox'))
 const { forSpace } = useEntityIcon()
 const spaceIcon = computed(() =>
 	currentSpace.value ? forSpace(currentSpace.value) : appConfig.ui.icons.inbox,
@@ -137,10 +211,10 @@ function openNewSpace() {
 
 const submitLabel = computed(() => {
 	const publishing = visibility.value === noteVisibility.public
-	if (!props.note?.id) return publishing ? t('note.publish') : t('note.send')
+	if (!props.note?.id) return publishing ? $t('note.publish') : $t('note.send')
 	return publishing && props.note.visibility !== noteVisibility.public
-		? t('note.publish')
-		: t('note.save')
+		? $t('note.publish')
+		: $t('note.save')
 })
 
 async function handleSend() {
@@ -161,7 +235,7 @@ async function handleSend() {
 		open.value = false
 	} catch (error) {
 		toast.add({
-			title: t('common.actionFailed', { action: t('note.send') }),
+			title: $t('common.actionFailed', { action: $t('note.send') }),
 			description: error instanceof Error ? error.message : undefined,
 			color: 'error',
 		})
@@ -178,10 +252,10 @@ async function handleSend() {
 				ref="editorRef"
 				v-model="content"
 				content-type="markdown"
-				:placeholder="t('note.editorPlaceholder')"
-				:image="false"
+				:placeholder="$t('note.editorPlaceholder')"
 				:mention="false"
-				:extensions="[markdownImage, tagMention]"
+				:extensions="[tagMention]"
+				:handlers="editorHandlers"
 				class="min-h-48 w-full"
 			>
 				<UEditorToolbar
@@ -192,10 +266,10 @@ async function handleSend() {
 					:options="{ placement: 'top', offset: 8 }"
 				>
 					<template #link="{ item, isActive, isDisabled }">
-						<UTooltip :text="t('note.link')" :disabled="isDisabled(item)">
+						<UTooltip :text="$t('note.link')" :disabled="isDisabled(item)">
 							<UButton
 								:icon="appConfig.ui.icons.link"
-								:aria-label="t('note.link')"
+								:aria-label="$t('note.link')"
 								color="neutral"
 								active-color="primary"
 								variant="ghost"
@@ -208,10 +282,10 @@ async function handleSend() {
 						</UTooltip>
 					</template>
 					<template #image="{ item, isActive, isDisabled }">
-						<UTooltip :text="t('note.attachImage')" :disabled="isDisabled(item)">
+						<UTooltip :text="$t('note.attachImage')" :disabled="isDisabled(item)">
 							<UButton
 								:icon="appConfig.ui.icons.image"
-								:aria-label="t('note.attachImage')"
+								:aria-label="$t('note.attachImage')"
 								color="neutral"
 								active-color="primary"
 								variant="ghost"
@@ -224,6 +298,12 @@ async function handleSend() {
 						</UTooltip>
 					</template>
 				</UEditorToolbar>
+				<UEditorSuggestionMenu
+					v-if="editor"
+					:editor="editor"
+					:items="suggestionItems"
+					:append-to="appendToBody"
+				/>
 				<NoteLinkPopover v-if="editor" ref="linkPopoverRef" :editor="editor" />
 				<NoteImagePopover v-if="editor" ref="imagePopoverRef" :editor="editor" />
 				<NoteTagMenu :editor="editor" />
@@ -252,10 +332,10 @@ async function handleSend() {
 				<UFieldGroup class="ml-auto">
 					<UButton :label="submitLabel" variant="soft" :loading="sending" @click="handleSend" />
 					<UDropdownMenu :items="visibilityItems" :content="{ align: 'end', side: 'top' }">
-						<UTooltip :text="t(currentVisibility.label)">
+						<UTooltip :text="$t(currentVisibility.label)">
 							<UButton
 								:icon="appConfig.ui.icons.chevronDown"
-								:aria-label="t('note.visibilityLabel')"
+								:aria-label="$t('note.visibilityLabel')"
 								variant="soft"
 							/>
 						</UTooltip>

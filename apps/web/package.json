@@ -23,7 +23,6 @@
 		"@tauri-apps/plugin-opener": "catalog:tauri",
 		"@tauri-store/pinia": "catalog:tauri",
 		"@tiptap/core": "catalog:editor",
-		"@tiptap/extension-image": "catalog:editor",
 		"@tiptap/extension-mention": "catalog:editor",
 		"aws4fetch": "catalog:util",
 		"better-auth": "catalog:auth",

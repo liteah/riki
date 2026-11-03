@@ -47,10 +47,16 @@ export const iconsTheme = {
 
 	// editor
 	heading: 'ph:text-h',
+	heading1: 'ph:text-h-one',
+	heading2: 'ph:text-h-two',
+	heading3: 'ph:text-h-three',
+	heading4: 'ph:text-h-four',
+	paragraph: 'ph:paragraph',
 	bold: 'ph:text-b',
 	italic: 'ph:text-italic',
 	bulletList: 'ph:list-bullets',
 	orderedList: 'ph:list-numbers',
+	quote: 'ph:quotes',
 	code: 'ph:code',
 
 	// app extend
