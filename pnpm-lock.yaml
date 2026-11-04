@@ -32,7 +32,16 @@ catalogs:
     '@tiptap/core':
       specifier: 3.31.3
       version: 3.31.3
+    '@tiptap/extension-list':
+      specifier: 3.31.3
+      version: 3.31.3
     '@tiptap/extension-mention':
+      specifier: 3.31.3
+      version: 3.31.3
+    '@tiptap/markdown':
+      specifier: 3.31.3
+      version: 3.31.3
+    '@tiptap/starter-kit':
       specifier: 3.31.3
       version: 3.31.3
     markdown-exit:
@@ -151,9 +160,18 @@ importers:
       '@tiptap/core':
         specifier: catalog:editor
         version: 3.31.3(@tiptap/pm@3.31.3)
+      '@tiptap/extension-list':
+        specifier: catalog:editor
+        version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3)
       '@tiptap/extension-mention':
         specifier: catalog:editor
         version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3)(@tiptap/suggestion@3.29.2(@floating-ui/dom@1.8.0)(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3))
+      '@tiptap/markdown':
+        specifier: catalog:editor
+        version: 3.31.3(@tiptap/core@3.31.3(@tiptap/pm@3.31.3))(@tiptap/pm@3.31.3)
+      '@tiptap/starter-kit':
+        specifier: catalog:editor
+        version: 3.31.3
       aws4fetch:
         specifier: catalog:util
         version: 1.0.20

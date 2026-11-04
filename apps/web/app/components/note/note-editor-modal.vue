@@ -8,6 +8,7 @@ import type {
 	EditorSuggestionMenuItem,
 	EditorToolbarItem,
 } from '@nuxt/ui'
+import { TaskItem, TaskList } from '@tiptap/extension-list'
 import { noteVisibilityMeta } from '~/utils/note-visibility'
 import { tagMention } from '~/utils/tiptap-tag'
 
@@ -19,7 +20,6 @@ const open = defineModel<boolean>('open', { default: false })
 
 const toast = useToast()
 const appConfig = useAppConfig()
-const appendToBody = () => document.body
 const headingLevels = [
 	{ level: 1, icon: appConfig.ui.icons.heading1, label: 'note.heading1' },
 	{ level: 2, icon: appConfig.ui.icons.heading2, label: 'note.heading2' },
@@ -64,7 +64,6 @@ watch(content, (value) => {
 })
 
 const editorRef = useTemplateRef<any>('editorRef')
-const editor = computed(() => editorRef.value?.editor)
 const linkPopoverRef = useTemplateRef<{
 	openAt: (position?: number, href?: string) => void
 	openAtSelection: () => void
@@ -92,6 +91,7 @@ const toolbarItems = computed<EditorToolbarItem[]>(() => [
 	{ kind: 'mark', mark: 'italic', icon: appConfig.ui.icons.italic },
 	{ kind: 'bulletList', icon: appConfig.ui.icons.bulletList },
 	{ kind: 'orderedList', icon: appConfig.ui.icons.orderedList },
+	{ kind: 'taskList', icon: appConfig.ui.icons.taskList },
 	{ kind: 'codeBlock', icon: appConfig.ui.icons.code },
 	{ kind: 'link', slot: 'link' },
 	{ kind: 'image', slot: 'image' },
@@ -129,7 +129,7 @@ const editorHandlers = {
 	},
 } satisfies EditorCustomHandlers
 
-const suggestionItems = computed<EditorSuggestionMenuItem[][]>(() => [
+const suggestionItems = computed<EditorSuggestionMenuItem<typeof editorHandlers>[][]>(() => [
 	[
 		{ type: 'label', label: $t('note.text') },
 		{ kind: 'paragraph', label: $t('note.paragraph'), icon: appConfig.ui.icons.paragraph },
@@ -151,6 +151,11 @@ const suggestionItems = computed<EditorSuggestionMenuItem[][]>(() => [
 			kind: 'orderedList',
 			label: $t('note.orderedList'),
 			icon: appConfig.ui.icons.orderedList,
+		},
+		{
+			kind: 'taskList',
+			label: $t('note.taskList'),
+			icon: appConfig.ui.icons.taskList,
 		},
 	],
 	[
@@ -225,7 +230,7 @@ async function handleSend() {
 		const body = {
 			content: trimmed,
 			spaceId: spaceId.value,
-			tagNames: extractTagNames(editor.value),
+			tagNames: extractTagNames(editorRef.value?.editor),
 			visibility: visibility.value,
 		}
 		if (props.note?.id) await noteStore.update(props.note.id, body)
@@ -250,16 +255,16 @@ async function handleSend() {
 		<template #body>
 			<UEditor
 				ref="editorRef"
+				v-slot="{ editor }"
 				v-model="content"
 				content-type="markdown"
 				:placeholder="$t('note.editorPlaceholder')"
 				:mention="false"
-				:extensions="[tagMention]"
+				:extensions="[TaskList, TaskItem, tagMention]"
 				:handlers="editorHandlers"
 				class="min-h-48 w-full"
 			>
 				<UEditorToolbar
-					v-if="editor"
 					:editor="editor"
 					:items="toolbarItems"
 					layout="bubble"
@@ -298,14 +303,9 @@ async function handleSend() {
 						</UTooltip>
 					</template>
 				</UEditorToolbar>
-				<UEditorSuggestionMenu
-					v-if="editor"
-					:editor="editor"
-					:items="suggestionItems"
-					:append-to="appendToBody"
-				/>
-				<NoteLinkPopover v-if="editor" ref="linkPopoverRef" :editor="editor" />
-				<NoteImagePopover v-if="editor" ref="imagePopoverRef" :editor="editor" />
+				<UEditorSuggestionMenu :editor="editor" :items="suggestionItems" />
+				<NoteLinkPopover ref="linkPopoverRef" :editor="editor" />
+				<NoteImagePopover ref="imagePopoverRef" :editor="editor" />
 				<NoteTagMenu :editor="editor" />
 			</UEditor>
 		</template>

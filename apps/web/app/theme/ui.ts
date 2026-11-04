@@ -145,6 +145,13 @@ export const uiTheme = {
 				'[&_ul]:mt-0 [&_ul]:mb-1 [&_ul]:ps-4 [&_ul]:text-toned [&_ul]:last:mb-0',
 				'[&_ol]:mt-0 [&_ol]:mb-1 [&_ol]:ps-4 [&_ol]:text-toned [&_ol]:last:mb-0',
 				'[&_li]:mt-0 [&_li]:mb-0.5 [&_li]:text-sm/6 [&_li]:text-toned [&_li]:last:mb-0',
+				'[&_ul[data-type=taskList]]:list-none [&_ul[data-type=taskList]]:ps-1',
+				'[&_ul[data-type=taskList]_li]:flex [&_ul[data-type=taskList]_li]:items-center [&_ul[data-type=taskList]_li]:ps-0',
+				'[&_ul[data-type=taskList]_li_label]:inline-flex [&_ul[data-type=taskList]_li_label]:pr-2.5',
+				'[&_ul[data-type=taskList]_li_label_input]:appearance-none [&_ul[data-type=taskList]_li_label_input]:size-4 [&_ul[data-type=taskList]_li_label_input]:rounded-sm [&_ul[data-type=taskList]_li_label_input]:ring [&_ul[data-type=taskList]_li_label_input]:ring-inset [&_ul[data-type=taskList]_li_label_input]:ring-accented [&_ul[data-type=taskList]_li_label_input]:outline-primary/25 [&_ul[data-type=taskList]_li_label_input]:outline-offset-0 [&_ul[data-type=taskList]_li_label_input]:bg-center',
+				'[&_ul[data-type=taskList]_li_label_input]:focus-visible:outline-3 [&_ul[data-type=taskList]_li_label_input]:focus-visible:ring-primary',
+				'[&_ul[data-type=taskList]_li_label_input:checked]:bg-primary [&_ul[data-type=taskList]_li_label_input:checked]:ring-primary [&_ul[data-type=taskList]_li_label_input:checked]:bg-[url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIwIDZMOSAxN2wtNS01Ii8+PC9zdmc+)] dark:[&_ul[data-type=taskList]_li_label_input:checked]:bg-[url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIwIDZMOSAxN2wtNS01Ii8+PC9zdmc+)]',
+				'[&_ul[data-type=taskList]_li[data-checked=true]>div>p]:line-through [&_ul[data-type=taskList]_li[data-checked=true]>div>p]:opacity-50',
 				'[&_code]:text-xs',
 				'[&_table]:mt-0 [&_table]:mb-1 [&_table]:last:mb-0',
 				'[&_hr]:mt-0 [&_hr]:mb-1 [&_hr]:last:mb-0',
@@ -154,8 +161,12 @@ export const uiTheme = {
 	prose: {
 		p: { base: 'mt-0 mb-1 text-sm/6 text-toned last:mb-0' },
 		a: { base: 'text-default border-default/50 outline-default/25 hover:border-default/80' },
-		li: { base: 'mt-0 mb-0.5 text-sm/6 text-toned last:mb-0' },
-		ul: { base: 'mt-0 mb-1 text-toned  last:mb-0' },
+		li: {
+			base: 'mt-0 mb-0.5 text-sm/6 text-toned last:mb-0 [&.task-list-item]:flex [&.task-list-item]:items-center [&.task-list-item]:ps-0',
+		},
+		ul: {
+			base: 'mt-0 mb-1 text-toned last:mb-0 [&.contains-task-list]:list-none [&.contains-task-list]:ps-1',
+		},
 		ol: { base: 'mt-0 mb-1 text-toned last:mb-0' },
 		h1: { slots: { base: 'text-xl mt-0 mb-2 font-medium last:mb-0' } },
 		h2: { slots: { base: 'text-lg mt-0 mb-1.5 font-medium last:mb-0' } },

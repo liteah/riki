@@ -14,6 +14,7 @@ export const useSettingsStore = defineStore(
 			linkPreviewEnabled: true,
 			linkPreviewHover: true,
 			thumbnailGalleryEnabled: true,
+			interactiveTaskLists: true,
 		})
 
 		watch(
@@ -34,7 +35,12 @@ export const useSettingsStore = defineStore(
 	},
 	{
 		persist: {
-			pick: ['state.linkPreviewEnabled', 'state.linkPreviewHover', 'state.thumbnailGalleryEnabled'],
+			pick: [
+				'state.linkPreviewEnabled',
+				'state.linkPreviewHover',
+				'state.thumbnailGalleryEnabled',
+				'state.interactiveTaskLists',
+			],
 		},
 	},
 )

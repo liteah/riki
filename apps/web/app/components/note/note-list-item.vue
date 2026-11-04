@@ -4,10 +4,18 @@ import { defineComarkPlugin } from '@comark/nuxt/parse'
 import { tv } from 'tailwind-variants'
 import type { Slots } from 'vue'
 import { h } from 'vue'
-import { LazyDialogModal, LazyNoteSpaceFormModal, NoteImage, NoteLink, NoteTag } from '#components'
+import {
+	LazyDialogModal,
+	LazyNoteSpaceFormModal,
+	NoteImage,
+	NoteLink,
+	NoteTag,
+	NoteTaskCheckbox,
+} from '#components'
 import { noteStatus, noteVisibility } from '#shared/types/note'
 import type { LinkPreview, LinkPreviewSource } from '#shared/types/link-preview'
 import type { NoteStatus, NoteViewItem } from '#shared/types/note'
+import { toggleTaskItem } from '~/utils/note-tasks'
 import { createFallbackLinkPreview, isLinkPreviewUrlBlocked } from '#shared/utils/link-preview'
 import { planNoteContent, planNoteImages } from '#shared/utils/note-content'
 import type { NoteContentPlan } from '#shared/utils/note-content'
@@ -442,6 +450,9 @@ const galleryImages = computed(() =>
 	settings.value.thumbnailGalleryEnabled && !props.detail ? planNoteImages(props.note.content) : [],
 )
 const suppressedImages = computed(() => new Set(galleryImages.value.map((image) => image.src)))
+const interactiveTaskLists = computed(
+	() => !props.readonly && isOwn.value && settings.value.interactiveTaskLists,
+)
 
 function previewFor(source: LinkPreviewSource): LinkPreview {
 	return linkPreviews.value[source.url] ?? createFallbackLinkPreview(source.url, source.label)
@@ -472,11 +483,45 @@ const suppressedLinks = computed(
 		),
 )
 
+async function toggleTask(index: number) {
+	const result = await toggleTaskItem(props.note.content, index)
+	if (!result.changed) return
+
+	try {
+		await noteStore.update(props.note.id, { content: result.content })
+	} catch (error) {
+		toast.add({
+			title: $t('common.actionFailed', { action: $t('note.save') }),
+			description: error instanceof Error ? error.message : undefined,
+			color: 'error',
+		})
+	}
+}
+
+function onTaskCheckboxClick(event: MouseEvent) {
+	if (!interactiveTaskLists.value) return
+	const root = contentEl.value
+	const target = (event.target as HTMLElement | null)?.closest<HTMLElement>('[data-task-checkbox]')
+	if (!root || !target || !root.contains(target)) return
+
+	const checkboxes = [...root.querySelectorAll<HTMLElement>('[data-task-checkbox]')]
+	const index = checkboxes.indexOf(target)
+	if (index < 0) return
+
+	void toggleTask(index)
+}
+
 const markdownComponents = {
 	a: (props: Record<string, unknown>, { slots }: { slots: Slots }) =>
 		h(NoteLink, { ...props, suppressedLinks: suppressedLinks.value }, slots),
 	img: (props: Record<string, unknown>) =>
 		h(NoteImage, { ...props, suppressed: suppressedImages.value }),
+	input: (props: Record<string, unknown>) =>
+		h(NoteTaskCheckbox, {
+			...props,
+			disabled: !interactiveTaskLists.value,
+			onToggle: onTaskCheckboxClick,
+		}),
 	tag: NoteTag,
 }
 

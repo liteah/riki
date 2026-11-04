@@ -43,7 +43,10 @@ catalogs:
 
   editor:
     '@tiptap/core': 3.31.3
+    '@tiptap/extension-list': 3.31.3
     '@tiptap/extension-mention': 3.31.3
+    '@tiptap/markdown': 3.31.3
+    '@tiptap/starter-kit': 3.31.3
     '@comark/nuxt': 0.7.0
     'markdown-exit': 1.1.0-beta.2
 

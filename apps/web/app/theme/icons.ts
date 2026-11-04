@@ -56,6 +56,7 @@ export const iconsTheme = {
 	italic: 'ph:text-italic',
 	bulletList: 'ph:list-bullets',
 	orderedList: 'ph:list-numbers',
+	taskList: 'ph:list-checks',
 	quote: 'ph:quotes',
 	code: 'ph:code',
 

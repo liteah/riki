@@ -43,6 +43,13 @@ const appConfig = useAppConfig()
 		>
 			<USwitch v-model="state.thumbnailGalleryEnabled" />
 		</SettingsItem>
+		<SettingsItem
+			:label="$t('settings.preferences.interactiveTaskLists')"
+			:description="$t('settings.preferences.interactiveTaskListsDescription')"
+			:icon="appConfig.ui.icons.taskList"
+		>
+			<USwitch v-model="state.interactiveTaskLists" />
+		</SettingsItem>
 	</SettingsItemGroup>
 	<SettingsItemGroup :label="$t('settings.preferences.format')">
 		<SettingsItem :label="$t('settings.preferences.timeZone')" :icon="appConfig.ui.icons.timeZone">
