@@ -245,6 +245,13 @@ export const useNoteStore = defineStore('note', () => {
 	const outbox = skipHydrate(
 		useLocalStorage<OutboxRow[]>(localKeys.outbox, [], { initOnMounted: true }),
 	)
+	const review = skipHydrate(
+		useLocalStorage<{ date: string; ids: string[] }>(
+			localKeys.review,
+			{ date: '', ids: [] },
+			{ initOnMounted: true },
+		),
+	)
 	const nextCursor = skipHydrate(
 		useLocalStorage<string | null>(localKeys.notesCursor, null, { initOnMounted: true }),
 	)
@@ -327,6 +334,34 @@ export const useNoteStore = defineStore('note', () => {
 
 	function remember(note: NoteListItem) {
 		mergeIncoming([note])
+	}
+
+	const reviewNotes = computed(() =>
+		review.value.ids
+			.map((id) => notes.value.find((note) => note.id === id))
+			.filter((note): note is NoteListItem => Boolean(note)),
+	)
+
+	function reviewDateKey(date = new Date()) {
+		const year = date.getFullYear()
+		const month = `${date.getMonth() + 1}`.padStart(2, '0')
+		const day = `${date.getDate()}`.padStart(2, '0')
+		return `${year}-${month}-${day}`
+	}
+
+	async function loadReview(force = false) {
+		if (import.meta.server || !online.value) return
+
+		const date = reviewDateKey()
+		if (!force && review.value.date === date && review.value.ids.length) return
+
+		const data = await $fetch<ListNotesResponse>('/api/notes/review', {
+			query: { limit: 12 },
+		}).catch(() => null)
+		if (!data || data.items.length === 0) return
+
+		mergeIncoming(data.items)
+		review.value = { date, ids: data.items.map((item) => item.id) }
 	}
 
 	// A space rename never bumps the notes' updatedAt, so cached names would go
@@ -616,7 +651,8 @@ export const useNoteStore = defineStore('note', () => {
 
 	async function destroy(id: string) {
 		settle(id)
-		await $fetch(`/api/notes/${id}`, { method: 'DELETE' })
+		const url = `/api/notes/${id}`
+		await $fetch(url, { method: 'DELETE' })
 		notes.value = notes.value.filter((note) => note.id !== id)
 		foreignNotes.value = foreignNotes.value.filter((note) => note.id !== id)
 	}
@@ -666,6 +702,8 @@ export const useNoteStore = defineStore('note', () => {
 		retryNote,
 		isPending,
 		remember,
+		reviewNotes,
+		loadReview,
 		create,
 		update,
 		setStatus,

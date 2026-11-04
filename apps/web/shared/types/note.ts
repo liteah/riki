@@ -54,6 +54,7 @@ export const noteStatusValues = Object.values(noteStatus) as [NoteStatus, ...Not
 export const noteInbox = {
 	unassigned: 'unassigned',
 	later: 'later',
+	review: 'review',
 } as const
 export type NoteInbox = (typeof noteInbox)[keyof typeof noteInbox]
 

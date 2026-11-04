@@ -138,7 +138,8 @@
 	"inbox": {
 		"emptyTitle": "收件箱空空如也",
 		"unassigned": "未归类",
-		"review": "回顾"
+		"review": "回顾",
+		"shuffle": "换一批"
 	},
 	"profile": {
 		"label": "个人资料",

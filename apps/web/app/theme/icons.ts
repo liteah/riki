@@ -63,7 +63,7 @@ export const iconsTheme = {
 	// app extend
 	square: 'ph:square',
 	reset: 'ph:arrow-counter-clockwise',
-	refresh: 'ph:arrows-clockwise',
+	refresh: 'ph:arrow-clockwise',
 	rows: 'ph:rows',
 	grid: 'ph:grid-nine',
 	sort: 'ph:arrows-down-up',
