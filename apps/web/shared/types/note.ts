@@ -174,17 +174,9 @@ export const listNotesQuerySchema = z.object({
 
 export type ListNotesQuery = z.output<typeof listNotesQuerySchema>
 
-type NoteListItemExtras = {
-	spaceName: string | null
-	spaceIcon: EntityIcon | null
-	authorName: string | null
-	authorImage: string | null
-	tagIds: string[]
-}
+export type NoteListItem = Note & { tagIds: string[] }
 
-export type NoteListItem = Note & NoteListItemExtras
-
-export type NoteViewItem = Note & Partial<NoteListItemExtras>
+export type NoteViewItem = Note & { tagIds?: string[] }
 
 export type NoteWithTags = Note & { tagIds: string[] }
 

@@ -116,10 +116,7 @@ const spaceForm = overlay.create(LazyNoteSpaceFormModal)
 const { forNote } = useEntityIcon()
 
 const noteSpaceName = computed(
-	() =>
-		props.note.spaceName ??
-		spaceStore.spaces.find((space) => space.id === props.note.spaceId)?.name ??
-		null,
+	() => spaceStore.spaces.find((space) => space.id === props.note.spaceId)?.name ?? null,
 )
 const noteSpaceIcon = computed(() => forNote(props.note))
 
@@ -628,10 +625,6 @@ const showUpdatedAt = computed(() => props.note.updatedAt !== props.note.created
 					</UTooltip>
 				</div>
 				<div class="flex shrink-0 items-center gap-1">
-					<span v-if="!isOwn && props.note.authorName" class="flex min-w-0 items-center gap-1">
-						<UIcon :name="appConfig.ui.icons.user" class="size-3.5 shrink-0" />
-						<span class="max-w-24 truncate">{{ props.note.authorName }}</span>
-					</span>
 					<div v-if="noteSpaceName" class="flex shrink-0 items-center gap-1">
 						<UIcon :name="noteSpaceIcon" class="size-3.5 shrink-0" />
 						<span class="max-w-24 truncate">{{ noteSpaceName }}</span>

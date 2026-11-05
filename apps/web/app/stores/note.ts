@@ -67,7 +67,6 @@ function backoffDelay(attempts: number) {
 
 export const useNoteStore = defineStore('note', () => {
 	const session = useAuthSession()
-	const spaceStore = useSpaceStore()
 	const tagStore = useTagStore()
 	const online = useOnline()
 
@@ -286,16 +285,6 @@ export const useNoteStore = defineStore('note', () => {
 		return notes.value.findIndex((note) => note.id === id)
 	}
 
-	function spaceNameOf(spaceId: string | null) {
-		if (!spaceId) return null
-		return spaceStore.spaces.find((space) => space.id === spaceId)?.name ?? null
-	}
-
-	function spaceIconOf(spaceId: string | null) {
-		if (!spaceId) return null
-		return spaceStore.spaces.find((space) => space.id === spaceId)?.icon ?? null
-	}
-
 	function resolvedTagIds(tagNames?: string[]): string[] {
 		if (!tagNames?.length) return []
 		const byName = new Map(tagStore.tags.map((tag) => [tag.name.toLowerCase(), tag.id]))
@@ -364,23 +353,6 @@ export const useNoteStore = defineStore('note', () => {
 		review.value = { date, ids: data.items.map((item) => item.id) }
 	}
 
-	// A space rename never bumps the notes' updatedAt, so cached names would go
-	// stale. Skipped while spaces are empty so offline use keeps them.
-	watch(
-		() => spaceStore.spaces,
-		() => {
-			if (!spaceStore.spaces.length) return
-			notes.value = notes.value.map((note) => {
-				const spaceName = spaceNameOf(note.spaceId)
-				const spaceIcon = spaceIconOf(note.spaceId)
-				return spaceName === note.spaceName && spaceIcon === note.spaceIcon
-					? note
-					: { ...note, spaceName, spaceIcon }
-			})
-		},
-		{ immediate: true },
-	)
-
 	function enqueue(row: OutboxRow) {
 		outbox.value = [...outbox.value.filter((item) => item.noteId !== row.noteId), row]
 	}
@@ -431,16 +403,7 @@ export const useNoteStore = defineStore('note', () => {
 			return
 		}
 		const winner = await $fetch<NoteWithTags>(`/api/notes/${row.noteId}`, { method: 'PATCH', body })
-		const author = session.value.data?.user
-		mergeIncoming([
-			{
-				...winner,
-				spaceName: spaceNameOf(winner.spaceId),
-				spaceIcon: spaceIconOf(winner.spaceId),
-				authorName: author?.name ?? null,
-				authorImage: author?.image ?? null,
-			},
-		])
+		mergeIncoming([winner])
 	}
 
 	async function flush() {
@@ -595,10 +558,6 @@ export const useNoteStore = defineStore('note', () => {
 			content: input.content,
 			linkPreviews: {},
 			spaceId,
-			spaceName: spaceNameOf(spaceId),
-			spaceIcon: spaceIconOf(spaceId),
-			authorName: author?.name ?? null,
-			authorImage: author?.image ?? null,
 			tagIds: resolvedTagIds(input.tagNames),
 			visibility: input.visibility ?? noteVisibility.private,
 			status: input.status ?? noteStatus.normal,
@@ -621,8 +580,6 @@ export const useNoteStore = defineStore('note', () => {
 			...previous,
 			content: body.content ?? previous.content,
 			spaceId: body.spaceId === undefined ? previous.spaceId : body.spaceId,
-			spaceName: body.spaceId === undefined ? previous.spaceName : spaceNameOf(body.spaceId),
-			spaceIcon: body.spaceId === undefined ? previous.spaceIcon : spaceIconOf(body.spaceId),
 			tagIds: body.tagNames ? resolvedTagIds(body.tagNames) : previous.tagIds,
 			visibility: body.visibility ?? previous.visibility,
 			status: body.status ?? previous.status,

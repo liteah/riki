@@ -21,9 +21,9 @@ export function useEntityIcon() {
 		return resolve(view?.icon, defaultViewIcon)
 	}
 
-	function forNote(note: Pick<NoteViewItem, 'spaceId' | 'spaceIcon'>) {
+	function forNote(note: Pick<NoteViewItem, 'spaceId'>) {
 		const space = spaceStore.spaces.find((item) => item.id === note.spaceId)
-		return resolve(space?.icon ?? note.spaceIcon, defaultSpaceIcon)
+		return resolve(space?.icon, defaultSpaceIcon)
 	}
 
 	return { resolve, forSpace, forView, forNote }

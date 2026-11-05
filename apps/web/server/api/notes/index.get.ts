@@ -1,5 +1,5 @@
 import { db } from '#server/utils/db'
-import { noteTags, notes, spaces, user, views } from '#server/db/schemas'
+import { noteTags, notes, user, views } from '#server/db/schemas'
 import { listNotesQuerySchema, noteSort, noteStatus, noteVisibility } from '#shared/types/note'
 import type { NoteSort } from '#shared/types/note'
 import type { ViewFilter } from '#shared/types/view'
@@ -240,13 +240,8 @@ export default defineEventHandler(async (event) => {
 		db
 			.select({
 				...getColumns(notes),
-				spaceName: spaces.name,
-				spaceIcon: spaces.icon,
-				authorName: user.name,
-				authorImage: user.image,
 			})
 			.from(notes)
-			.leftJoin(spaces, eq(spaces.id, notes.spaceId))
 			.innerJoin(user, eq(user.id, notes.userId))
 			.where(and(cursorFilter, where))
 			.orderBy(
@@ -282,8 +277,6 @@ export default defineEventHandler(async (event) => {
 	}
 	const items = page.map((row) => ({
 		...row,
-		spaceName: row.userId === viewerId ? row.spaceName : null,
-		spaceIcon: row.userId === viewerId ? row.spaceIcon : null,
 		tagIds: tagIdsByNote.get(row.id) ?? [],
 	}))
 	const last = items[items.length - 1]

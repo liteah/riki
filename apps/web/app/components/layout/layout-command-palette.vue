@@ -25,6 +25,7 @@ const appConfig = useAppConfig()
 const overlay = useOverlay()
 const session = useAuthSession()
 const noteStore = useNoteStore()
+const spaceStore = useSpaceStore()
 const { notes, explicitFilter } = storeToRefs(noteStore)
 
 const viewerId = computed(() => session.value.data?.user?.id)
@@ -97,7 +98,7 @@ function openNote(note: NoteListItem) {
 function noteItem(note: NoteListItem): CommandPaletteItem {
 	return {
 		label: noteLabel(note),
-		suffix: note.spaceName ?? undefined,
+		suffix: spaceStore.spaces.find((space) => space.id === note.spaceId)?.name,
 		icon: appConfig.ui.icons.note,
 		onSelect: () => openNote(note),
 	}

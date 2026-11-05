@@ -1,5 +1,5 @@
 import { db } from '#server/utils/db'
-import { noteTags, notes, spaces, user } from '#server/db/schemas'
+import { noteTags, notes, user } from '#server/db/schemas'
 import { noteStatus } from '#shared/types/note'
 import { requireUser } from '#server/utils/session'
 import { readQueryZod } from '#server/utils/validation'
@@ -24,13 +24,8 @@ export default defineEventHandler(async (event) => {
 	const rows = await db
 		.select({
 			...getColumns(notes),
-			spaceName: spaces.name,
-			spaceIcon: spaces.icon,
-			authorName: user.name,
-			authorImage: user.image,
 		})
 		.from(notes)
-		.leftJoin(spaces, eq(spaces.id, notes.spaceId))
 		.innerJoin(user, eq(user.id, notes.userId))
 		.where(where)
 		.orderBy(sql`random()`)
@@ -57,8 +52,6 @@ export default defineEventHandler(async (event) => {
 
 	const items = rows.map((row) => ({
 		...row,
-		spaceName: row.spaceName,
-		spaceIcon: row.spaceIcon,
 		tagIds: tagIdsByNote.get(row.id) ?? [],
 	}))
 
