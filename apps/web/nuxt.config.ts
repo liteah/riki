@@ -28,6 +28,23 @@ export default defineNuxtConfig({
 			publicUrl: '',
 		},
 	},
+	nitro: {
+		experimental: {
+			openAPI: true,
+		},
+		openAPI: {
+			meta: {
+				title: 'Riki API',
+				description: 'HTTP API for Riki notes.',
+				version: '0.3.0',
+			},
+			ui: {
+				scalar: {
+					theme: 'blue',
+				},
+			},
+		},
+	},
 	vite: {
 		clearScreen: false,
 		envPrefix: ['VITE_', 'TAURI_'],

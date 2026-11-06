@@ -6,6 +6,38 @@ import { readQueryZod } from '#server/utils/validation'
 import { and, eq, getColumns, inArray, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
+defineRouteMeta({
+	openAPI: {
+		tags: ['Notes'],
+		description:
+			'Returns a random sample of your own non-archived notes (normal, later, pinned), suitable for a daily review.',
+		parameters: [
+			{
+				name: 'limit',
+				in: 'query',
+				schema: { type: 'integer', minimum: 1, maximum: 24, default: 12 },
+				description: 'Number of notes to return.',
+			},
+		],
+		responses: {
+			200: {
+				description: 'Random notes for review.',
+				content: {
+					'application/json': { schema: { $ref: '#/components/schemas/ListNotesResponse' } },
+				},
+			},
+			400: {
+				description: 'The query failed validation.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+			401: {
+				description: 'Sign-in is required.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+		},
+	},
+})
+
 export default defineEventHandler(async (event) => {
 	const currentUser = await requireUser(event)
 	const query = await readQueryZod(

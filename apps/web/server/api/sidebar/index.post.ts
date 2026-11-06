@@ -5,6 +5,40 @@ import { requireUser } from '#server/utils/session'
 import { readBodyZod } from '#server/utils/validation'
 import { asc, eq, sql } from 'drizzle-orm'
 
+defineRouteMeta({
+	openAPI: {
+		tags: ['Sidebar'],
+		description:
+			'Pins a view, space, or tag to the bottom of your sidebar. Duplicate pins are ignored.',
+		requestBody: {
+			required: true,
+			content: {
+				'application/json': {
+					schema: { $ref: '#/components/schemas/SidebarPinRequest' },
+				},
+			},
+		},
+		responses: {
+			200: {
+				description: 'The full sidebar after the pin is added.',
+				content: {
+					'application/json': {
+						schema: { type: 'array', items: { $ref: '#/components/schemas/SidebarEntry' } },
+					},
+				},
+			},
+			400: {
+				description: 'The body failed validation.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+			401: {
+				description: 'Sign-in is required.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+		},
+	},
+})
+
 export default defineEventHandler(async (event) => {
 	const user = await requireUser(event)
 	const body = await readBodyZod(event, pinSidebarBodySchema)

@@ -4,6 +4,28 @@ import { noteStatus } from '#shared/types/note'
 import { requireUser } from '#server/utils/session'
 import { asc, and, eq, inArray, sql } from 'drizzle-orm'
 
+defineRouteMeta({
+	openAPI: {
+		tags: ['Spaces'],
+		description:
+			'Lists your spaces ordered by name. noteCount counts normal and pinned notes only.',
+		responses: {
+			200: {
+				description: 'Your spaces.',
+				content: {
+					'application/json': {
+						schema: { type: 'array', items: { $ref: '#/components/schemas/SpaceListItem' } },
+					},
+				},
+			},
+			401: {
+				description: 'Sign-in is required.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+		},
+	},
+})
+
 export default defineEventHandler(async (event) => {
 	const user = await requireUser(event)
 

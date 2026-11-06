@@ -5,6 +5,48 @@ import { requireUser } from '#server/utils/session'
 import { readBodyZod } from '#server/utils/validation'
 import { and, eq } from 'drizzle-orm'
 
+defineRouteMeta({
+	openAPI: {
+		tags: ['Spaces'],
+		description: 'Renames a space and optionally updates its icon.',
+		parameters: [
+			{
+				name: 'id',
+				in: 'path',
+				required: true,
+				schema: { type: 'string' },
+				description: 'Space id.',
+			},
+		],
+		requestBody: {
+			required: true,
+			content: {
+				'application/json': {
+					schema: { $ref: '#/components/schemas/SpaceUpdateRequest' },
+				},
+			},
+		},
+		responses: {
+			200: {
+				description: 'The updated space.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Space' } } },
+			},
+			400: {
+				description: 'The id or body failed validation.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+			401: {
+				description: 'Sign-in is required.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+			404: {
+				description: 'The space is missing or not yours.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+		},
+	},
+})
+
 export default defineEventHandler(async (event) => {
 	const user = await requireUser(event)
 	const id = getRouterParam(event, 'id')

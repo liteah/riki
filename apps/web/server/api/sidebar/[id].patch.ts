@@ -6,6 +6,49 @@ import { reorderSidebar } from '#server/utils/sidebar'
 import { readBodyZod } from '#server/utils/validation'
 import { and, eq } from 'drizzle-orm'
 
+defineRouteMeta({
+	openAPI: {
+		tags: ['Sidebar'],
+		description:
+			'Moves a sidebar entry to a target index, shifting the other entries to fill the gap.',
+		parameters: [
+			{
+				name: 'id',
+				in: 'path',
+				required: true,
+				schema: { type: 'string' },
+				description: 'Sidebar entry id.',
+			},
+		],
+		requestBody: {
+			required: true,
+			content: {
+				'application/json': {
+					schema: { $ref: '#/components/schemas/SidebarReorderRequest' },
+				},
+			},
+		},
+		responses: {
+			200: {
+				description: 'The moved sidebar entry.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/SidebarEntry' } } },
+			},
+			400: {
+				description: 'The id or body failed validation.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+			401: {
+				description: 'Sign-in is required.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+			404: {
+				description: 'The sidebar entry is missing or not yours.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+		},
+	},
+})
+
 export default defineEventHandler(async (event) => {
 	const user = await requireUser(event)
 

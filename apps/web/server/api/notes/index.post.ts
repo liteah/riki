@@ -8,6 +8,44 @@ import { readBodyZod } from '#server/utils/validation'
 import { newId } from '#shared/utils/id'
 import { and, eq } from 'drizzle-orm'
 
+defineRouteMeta({
+	openAPI: {
+		tags: ['Notes'],
+		description:
+			'Creates a note and resolves link previews from its content. Pass a client-minted id to make retries safe: re-posting the same id that you own returns 200 with the existing note instead of creating a duplicate.',
+		requestBody: {
+			required: true,
+			content: {
+				'application/json': {
+					schema: { $ref: '#/components/schemas/CreateNoteRequest' },
+				},
+			},
+		},
+		responses: {
+			200: {
+				description: 'A note with the same client-minted id already existed.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/NoteListItem' } } },
+			},
+			201: {
+				description: 'Note created. A Location header points to the new note.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/NoteListItem' } } },
+			},
+			400: {
+				description: 'The body failed validation.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+			401: {
+				description: 'Sign-in is required.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+			404: {
+				description: 'The minted id or space is not visible to you.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+		},
+	},
+})
+
 export default defineEventHandler(async (event) => {
 	const user = await requireUser(event)
 	const body = await readBodyZod(event, createNoteBodySchema)

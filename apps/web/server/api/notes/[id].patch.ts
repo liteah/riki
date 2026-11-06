@@ -7,6 +7,50 @@ import { requireUser } from '#server/utils/session'
 import { readBodyZod } from '#server/utils/validation'
 import { and, eq } from 'drizzle-orm'
 
+defineRouteMeta({
+	openAPI: {
+		tags: ['Notes'],
+		description:
+			'Partially updates a note you own. If updatedAt is supplied it is clamped to server time; when the client stamp is not newer than the stored note, the current note is returned unchanged (last-write-wins for sync clients).',
+		parameters: [
+			{
+				name: 'id',
+				in: 'path',
+				required: true,
+				schema: { type: 'string' },
+				description: 'Note id.',
+			},
+		],
+		requestBody: {
+			required: true,
+			content: {
+				'application/json': {
+					schema: { $ref: '#/components/schemas/UpdateNoteRequest' },
+				},
+			},
+		},
+		responses: {
+			200: {
+				description:
+					'The updated note, or the unchanged current note when your updatedAt is not newer.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/NoteListItem' } } },
+			},
+			400: {
+				description: 'The id or body failed validation.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+			401: {
+				description: 'Sign-in is required.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+			404: {
+				description: 'The note is missing or not yours, or the space is not yours.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+		},
+	},
+})
+
 export default defineEventHandler(async (event) => {
 	const user = await requireUser(event)
 

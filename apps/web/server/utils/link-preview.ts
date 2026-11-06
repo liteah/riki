@@ -60,7 +60,7 @@ async function fetchHtml(url: URL, depth = 0): Promise<{ html: string; url: URL 
 		headers: {
 			accept: 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.1',
 			'accept-language': 'en-US,en;q=0.8',
-			'user-agent': 'RikkiLinkPreview/1.0',
+			'user-agent': 'RikiLinkPreview/1.0',
 		},
 	})
 	if (response.status >= 300 && response.status < 400) {

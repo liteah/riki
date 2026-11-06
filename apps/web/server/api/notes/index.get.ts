@@ -28,6 +28,462 @@ import {
 } from 'drizzle-orm'
 import type { SQL } from 'drizzle-orm'
 
+defineRouteMeta({
+	openAPI: {
+		tags: ['Notes'],
+		description:
+			'Lists notes visible to the caller. Anonymous callers only see public notes from non-banned users; signed-in callers see their own notes, unless a visibility filter widens the result to non-private notes from other users. Archived notes are never served.',
+		parameters: [
+			{
+				name: 'sort',
+				in: 'query',
+				schema: {
+					type: 'string',
+					enum: ['created-desc', 'created-asc', 'updated-desc', 'updated-asc'],
+					default: 'created-desc',
+				},
+				description: 'Sort order. Cursors are only valid for the same sort.',
+			},
+			{
+				name: 'limit',
+				in: 'query',
+				schema: { type: 'integer', minimum: 1, maximum: 50, default: 20 },
+				description: 'Page size.',
+			},
+			{
+				name: 'cursor',
+				in: 'query',
+				schema: { type: 'string' },
+				description:
+					'Opaque pagination cursor from a previous response. Pattern: sort:value:id:pinned (created-desc omits the sort prefix).',
+			},
+			{
+				name: 'status',
+				in: 'query',
+				explode: true,
+				style: 'form',
+				schema: {
+					type: 'array',
+					items: { type: 'string', enum: ['normal', 'later', 'pinned', 'archived'] },
+				},
+				description: 'Limit to these statuses. Repeat for multiple values.',
+			},
+			{
+				name: 'notStatus',
+				in: 'query',
+				explode: true,
+				style: 'form',
+				schema: {
+					type: 'array',
+					items: { type: 'string', enum: ['normal', 'later', 'pinned', 'archived'] },
+				},
+				description: 'Exclude these statuses.',
+			},
+			{
+				name: 'spaceId',
+				in: 'query',
+				schema: { type: 'string' },
+				description: 'Only this space, which must be owned by the signed-in user.',
+			},
+			{
+				name: 'spaceIds',
+				in: 'query',
+				explode: true,
+				style: 'form',
+				schema: { type: 'array', items: { type: 'string' } },
+				description: 'Limit to these spaces (owned by the signed-in user).',
+			},
+			{
+				name: 'notSpaceIds',
+				in: 'query',
+				explode: true,
+				style: 'form',
+				schema: { type: 'array', items: { type: 'string' } },
+				description: 'Exclude these spaces.',
+			},
+			{
+				name: 'noSpace',
+				in: 'query',
+				schema: { type: 'boolean' },
+				description: 'Only unassigned notes.',
+			},
+			{
+				name: 'tagIds',
+				in: 'query',
+				explode: true,
+				style: 'form',
+				schema: { type: 'array', items: { type: 'string' } },
+				description: 'Require all of these tag IDs.',
+			},
+			{
+				name: 'notTagIds',
+				in: 'query',
+				explode: true,
+				style: 'form',
+				schema: { type: 'array', items: { type: 'string' } },
+				description: 'Exclude notes having any of these tag IDs.',
+			},
+			{
+				name: 'noTags',
+				in: 'query',
+				schema: { type: 'boolean' },
+				description: 'Only notes without tags. Excludes deferred notes.',
+			},
+			{
+				name: 'viewIds',
+				in: 'query',
+				explode: true,
+				style: 'form',
+				schema: { type: 'array', items: { type: 'string' } },
+				description:
+					"Combine the viewer's views (OR). Nested view filters are resolved to depth 3.",
+			},
+			{
+				name: 'notViewIds',
+				in: 'query',
+				explode: true,
+				style: 'form',
+				schema: { type: 'array', items: { type: 'string' } },
+				description: 'Exclude notes matching any of these views.',
+			},
+			{
+				name: 'visibility',
+				in: 'query',
+				explode: true,
+				style: 'form',
+				schema: {
+					type: 'array',
+					items: { type: 'string', enum: ['private', 'protected', 'public'] },
+				},
+				description:
+					"Limit to these visibilities. Signed-in callers may also include others' public/protected notes.",
+			},
+			{
+				name: 'notVisibility',
+				in: 'query',
+				explode: true,
+				style: 'form',
+				schema: {
+					type: 'array',
+					items: { type: 'string', enum: ['private', 'protected', 'public'] },
+				},
+				description: 'Exclude these visibilities.',
+			},
+			{
+				name: 'username',
+				in: 'query',
+				schema: { type: 'string' },
+				description: 'Only notes by this username (case-insensitive).',
+			},
+			{
+				name: 'q',
+				in: 'query',
+				schema: { type: 'string' },
+				description: 'Substring match against note content.',
+			},
+		],
+		responses: {
+			200: {
+				description: 'A page of notes.',
+				content: {
+					'application/json': {
+						schema: { $ref: '#/components/schemas/ListNotesResponse' },
+					},
+				},
+			},
+			400: {
+				description: 'The query failed validation.',
+				content: {
+					'application/json': {
+						schema: { $ref: '#/components/schemas/Error' },
+					},
+				},
+			},
+		},
+		$global: {
+			components: {
+				schemas: {
+					NoteVisibility: { type: 'string', enum: ['private', 'protected', 'public'] },
+					NoteStatus: { type: 'string', enum: ['normal', 'later', 'pinned', 'archived'] },
+					LinkPreview: {
+						type: 'object',
+						required: ['url', 'type', 'title'],
+						properties: {
+							url: { type: 'string' },
+							type: {
+								type: 'string',
+								enum: [
+									'website',
+									'article',
+									'book',
+									'video',
+									'audio',
+									'music',
+									'podcast',
+									'tweet',
+									'github',
+								],
+							},
+							ogType: { type: 'string' },
+							title: { type: 'string' },
+							description: { type: 'string' },
+							image: { type: 'string' },
+							imageWidth: { type: 'integer' },
+							imageHeight: { type: 'integer' },
+							imageAlt: { type: 'string' },
+							icon: { type: 'string' },
+							siteName: { type: 'string' },
+							author: { type: 'string' },
+							publishedAt: { type: 'string' },
+							meta: { type: 'object', additionalProperties: true },
+						},
+					},
+					Note: {
+						type: 'object',
+						required: [
+							'id',
+							'content',
+							'linkPreviews',
+							'userId',
+							'spaceId',
+							'visibility',
+							'status',
+							'createdAt',
+							'updatedAt',
+						],
+						properties: {
+							id: { type: 'string' },
+							content: { type: 'string' },
+							linkPreviews: {
+								type: 'object',
+								additionalProperties: { $ref: '#/components/schemas/LinkPreview' },
+							},
+							userId: { type: 'string' },
+							spaceId: { type: ['string', 'null'] },
+							visibility: { $ref: '#/components/schemas/NoteVisibility' },
+							status: { $ref: '#/components/schemas/NoteStatus' },
+							createdAt: { type: 'string', format: 'date-time' },
+							updatedAt: { type: 'string', format: 'date-time' },
+						},
+					},
+					NoteListItem: {
+						type: 'object',
+						allOf: [
+							{ $ref: '#/components/schemas/Note' },
+							{
+								type: 'object',
+								required: ['tagIds'],
+								properties: { tagIds: { type: 'array', items: { type: 'string' } } },
+							},
+						],
+					},
+					ListNotesResponse: {
+						type: 'object',
+						required: ['items', 'nextCursor', 'total'],
+						properties: {
+							items: { type: 'array', items: { $ref: '#/components/schemas/NoteListItem' } },
+							nextCursor: { type: ['string', 'null'] },
+							total: { type: 'integer', minimum: 0 },
+						},
+					},
+					CreateNoteRequest: {
+						type: 'object',
+						required: ['content'],
+						properties: {
+							id: { type: 'string', description: 'Client-minted id for idempotent creates.' },
+							content: { type: 'string' },
+							spaceId: {
+								type: ['string', 'null'],
+								description: 'Space to assign to the note, or null for unassigned.',
+							},
+							tagNames: { type: 'array', items: { type: 'string' } },
+							visibility: { $ref: '#/components/schemas/NoteVisibility', default: 'private' },
+							status: { $ref: '#/components/schemas/NoteStatus', default: 'normal' },
+						},
+					},
+					UpdateNoteRequest: {
+						type: 'object',
+						description:
+							'At least one of content, spaceId, tagNames, status, or visibility must be present. updatedAt alone is not enough.',
+						properties: {
+							content: { type: 'string' },
+							spaceId: { type: ['string', 'null'] },
+							tagNames: { type: 'array', items: { type: 'string' } },
+							visibility: { $ref: '#/components/schemas/NoteVisibility' },
+							status: { $ref: '#/components/schemas/NoteStatus' },
+							updatedAt: {
+								type: 'integer',
+								minimum: 1,
+								description: 'Client-side ms timestamp used for last-write-wins.',
+							},
+						},
+					},
+					Space: {
+						type: 'object',
+						required: ['id', 'name', 'icon', 'userId', 'createdAt', 'updatedAt'],
+						properties: {
+							id: { type: 'string' },
+							name: { type: 'string' },
+							icon: { type: 'string', description: 'Entity icon name.' },
+							userId: { type: 'string' },
+							createdAt: { type: 'string', format: 'date-time' },
+							updatedAt: { type: 'string', format: 'date-time' },
+						},
+					},
+					SpaceListItem: {
+						type: 'object',
+						required: ['id', 'name', 'icon', 'noteCount'],
+						properties: {
+							id: { type: 'string' },
+							name: { type: 'string' },
+							icon: { type: 'string' },
+							noteCount: { type: 'integer', minimum: 0 },
+						},
+					},
+					SpaceCreateRequest: {
+						type: 'object',
+						required: ['name'],
+						properties: {
+							name: { type: 'string' },
+							icon: { type: 'string', default: 'space' },
+						},
+					},
+					SpaceUpdateRequest: {
+						type: 'object',
+						required: ['name'],
+						properties: {
+							name: { type: 'string' },
+							icon: { type: 'string' },
+						},
+					},
+					TagListItem: {
+						type: 'object',
+						required: ['id', 'name', 'usageCount'],
+						properties: {
+							id: { type: 'string' },
+							name: { type: 'string' },
+							usageCount: { type: 'integer', minimum: 0 },
+						},
+					},
+					ViewFilter: {
+						type: 'object',
+						additionalProperties: true,
+						description: 'View filter AST. See shared/types/view.ts for the exact shape.',
+					},
+					View: {
+						type: 'object',
+						required: [
+							'id',
+							'name',
+							'icon',
+							'filter',
+							'position',
+							'userId',
+							'createdAt',
+							'updatedAt',
+						],
+						properties: {
+							id: { type: 'string' },
+							name: { type: 'string' },
+							icon: { type: 'string' },
+							filter: { $ref: '#/components/schemas/ViewFilter' },
+							position: { type: 'integer', minimum: 0 },
+							userId: { type: 'string' },
+							createdAt: { type: 'string', format: 'date-time' },
+							updatedAt: { type: 'string', format: 'date-time' },
+						},
+					},
+					ViewCreateRequest: {
+						type: 'object',
+						required: ['name'],
+						properties: {
+							name: { type: 'string' },
+							icon: { type: 'string', default: 'view' },
+							filter: { $ref: '#/components/schemas/ViewFilter', default: {} },
+						},
+					},
+					ViewUpdateRequest: {
+						type: 'object',
+						description:
+							'All fields are optional. An empty object is accepted and leaves the view unchanged.',
+						properties: {
+							name: { type: 'string' },
+							icon: { type: 'string' },
+							filter: { $ref: '#/components/schemas/ViewFilter' },
+						},
+					},
+					SidebarEntry: {
+						type: 'object',
+						required: ['id', 'kind', 'targetId', 'position', 'userId', 'createdAt', 'updatedAt'],
+						properties: {
+							id: { type: 'string' },
+							kind: { type: 'string', enum: ['view', 'space', 'tag'] },
+							targetId: { type: 'string' },
+							position: { type: 'integer', minimum: 0 },
+							userId: { type: 'string' },
+							createdAt: { type: 'string', format: 'date-time' },
+							updatedAt: { type: 'string', format: 'date-time' },
+						},
+					},
+					SidebarPinRequest: {
+						type: 'object',
+						required: ['kind', 'targetId'],
+						properties: {
+							kind: { type: 'string', enum: ['view', 'space', 'tag'] },
+							targetId: { type: 'string' },
+						},
+					},
+					SidebarReorderRequest: {
+						type: 'object',
+						required: ['position'],
+						properties: {
+							position: { type: 'integer', minimum: 0 },
+						},
+					},
+					UploadRequest: {
+						type: 'object',
+						required: ['contentType'],
+						properties: {
+							contentType: { type: 'string' },
+							filename: { type: 'string' },
+						},
+					},
+					UploadTarget: {
+						type: 'object',
+						required: ['uploadUrl', 'url'],
+						properties: {
+							uploadUrl: { type: 'string', format: 'uri' },
+							url: { type: 'string', format: 'uri' },
+						},
+					},
+					PublicUser: {
+						type: 'object',
+						required: ['id', 'name', 'createdAt'],
+						properties: {
+							id: { type: 'string' },
+							name: { type: 'string' },
+							username: { type: ['string', 'null'] },
+							displayUsername: { type: ['string', 'null'] },
+							image: { type: ['string', 'null'] },
+							createdAt: { type: 'string', format: 'date-time' },
+						},
+					},
+					Error: {
+						type: 'object',
+						required: ['statusCode', 'statusMessage'],
+						properties: {
+							statusCode: { type: 'integer' },
+							statusMessage: { type: 'string' },
+							message: { type: 'string' },
+							data: { type: 'object', additionalProperties: true },
+						},
+					},
+				},
+			},
+		},
+	},
+})
+
 export function encodeNoteCursor(sort: NoteSort, value: Date, id: string, pinned: boolean): string {
 	const position = `${value.getTime()}:${id}:${pinned ? 1 : 0}`
 	return sort === noteSort.createdDesc ? position : `${sort}:${position}`

@@ -10,6 +10,40 @@ const bodySchema = z.object({
 		.regex(/^[\w.+-]+\/[\w.+-]+$/),
 })
 
+defineRouteMeta({
+	openAPI: {
+		tags: ['Uploads'],
+		description:
+			'Signs a direct S3 PUT upload for an image. The client uploads bytes itself with the presigned uploadUrl; no object exists server-side until the client stores the returned public url in a note.',
+		requestBody: {
+			required: true,
+			content: {
+				'application/json': {
+					schema: { $ref: '#/components/schemas/UploadRequest' },
+				},
+			},
+		},
+		responses: {
+			201: {
+				description: 'Presigned upload target.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/UploadTarget' } } },
+			},
+			400: {
+				description: 'The body failed validation.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+			401: {
+				description: 'Sign-in is required.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+			500: {
+				description: 'Object storage is not configured on the server.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+		},
+	},
+})
+
 export default defineEventHandler(async (event) => {
 	const user = await requireUser(event)
 	const body = await readBodyZod(event, bodySchema)

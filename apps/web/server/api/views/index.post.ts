@@ -5,6 +5,35 @@ import { requireUser } from '#server/utils/session'
 import { readBodyZod } from '#server/utils/validation'
 import { eq, sql } from 'drizzle-orm'
 
+defineRouteMeta({
+	openAPI: {
+		tags: ['Views'],
+		description: 'Creates a saved view. The new view is appended after your existing views.',
+		requestBody: {
+			required: true,
+			content: {
+				'application/json': {
+					schema: { $ref: '#/components/schemas/ViewCreateRequest' },
+				},
+			},
+		},
+		responses: {
+			201: {
+				description: 'View created. A Location header points to the new view.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/View' } } },
+			},
+			400: {
+				description: 'The body failed validation.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+			401: {
+				description: 'Sign-in is required.',
+				content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+			},
+		},
+	},
+})
+
 export default defineEventHandler(async (event) => {
 	const user = await requireUser(event)
 	const body = await readBodyZod(event, createViewBodySchema)
